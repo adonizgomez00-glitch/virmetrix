@@ -1,0 +1,18 @@
+{
+  "exercise_id": "word-format-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+  "instructions": "En el documento, localiza la frase \"Informe de resultados\" y aplícale negrita y tamaño de fuente de 16 pt. No cambies el texto del párrafo.",
+  "target_phrase": "Informe de resultados",
+  "expected_text": "El presente Informe de resultados resume los hallazgos del ejercicio.",
+  "criteria": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5"
+  ],
+  "rules_version": "1.0.0",
+  "reference_sha256": "3af44fa5a3835a76a58cef911b925073bc415d0f750faafe6fc6604acaf5d83b"
+}

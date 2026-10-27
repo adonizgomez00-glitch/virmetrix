@@ -1,0 +1,6 @@
+[run]
+omit =
+    src/virmetrix/ui/*
+    src/virmetrix/infrastructure/evaluators/word_com.py
+[report]
+fail_under = 80
