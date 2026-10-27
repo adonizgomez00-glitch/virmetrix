@@ -28,6 +28,18 @@ No se han registrado defectos de implementación porque aún no existe implement
 - UI smoke: pass.
 - Defectos abiertos: 0.
 
+## ITER-002 — Validación Windows (2026-10-27)
+
+- Entorno: Windows (VM), Python 3.x, Word v16.0, PySide6 6.11.2, pytest 9.1.1.
+- Comando: `pytest -q` → **33 passed, 0 failed**.
+- COM: disponible (v16.0); sin proceso residual tras corrección `DispatchEx` + `Quit`.
+- Referencia (sin formato): 3/5 — C1 pass, C2 fail, C3 fail, C4 pass, C5 pass.
+- Documento correcto: 5/5 — todos pass.
+- Documento incorrecto: 3/5 — C2 fail, C3 fail, resto pass.
+- UI: sin bloqueo; historial persistente (4 intentos tras reabrir).
+- Defecto corregido: `is_available()` dejaba proceso Word residual; corregido con `DispatchEx` + `Quit` + `CoInitialize`/`CoUninitialize`.
+- App en ejecución: PID 5108, ventana “VirMetrix - word-format-001”.
+
 ## Protocolo de actualización
 
 Para cada iteración incluir:

@@ -159,7 +159,7 @@ Se consultó el PDF oficial de MO-100 y se añadieron los dominios, pesos y subo
 ## Actualización — 2026-10-27 (ITER-002 Build parcial)
 
 - Implementado: persistencia SQLite (`AttemptStore`), evaluación en hilo (QThread + `EvaluationWorker`), adaptador Word COM con evaluación real por COM (Windows), metadatos tipados (`target_phrase`, `expected_text`), seguridad ZIP multiplataforma.
-- Pruebas: 33 pass, 0 fail (Linux). Word COM no ejecutado (Linux).
+- Pruebas: 33 pass, 0 fail (Linux). Word COM validado en Windows (5/5 documento correcto; 3/5 referencia; 3/5 incorrecto).
 - Pendiente: validar COM en Windows; catálogo amplio; empaquetado; temporizador.
 
 ## Contexto para Próxima Sesión (Checkpoint final ITER-001)
