@@ -24,13 +24,18 @@ class WordComAdapter:
             import win32com.client  # noqa: F401
         except Exception as e:
             return False, f"pywin32 no disponible: {type(e).__name__}"
-        # Try to connect to Word
+        # Try to connect to Word (use DispatchEx to avoid attaching to a user instance)
         try:
             import win32com.client
 
-            word = win32com.client.Dispatch("Word.Application")
-            _ = word.Version
-            return True, f"Word disponible (v{word.Version})."
+            word = win32com.client.DispatchEx("Word.Application")
+            version = word.Version
+            try:
+                word.Quit()
+            except Exception:
+                pass
+            word = None
+            return True, f"Word disponible (v{version})."
         except Exception as e:
             return False, f"Microsoft Word no accesible: {type(e).__name__}: {e}"
 

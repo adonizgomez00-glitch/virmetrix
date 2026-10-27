@@ -170,3 +170,16 @@ Se consultÃ³ el PDF oficial de MO-100 y se aÃ±adieron los dominios, pesos y subo
 - PrÃ³xima acciÃ³n: definir alcance de ITER-002 con el usuario y ejecutar Fase 1 (Plan).
 - Tests: 27+ pass; cobertura 92.36%; defectos 0.
 - Skills: saqi-* v1.0.0 activas globalmente.
+
+## Actualización — 2026-10-27 (Validación Windows + Word COM, ITER-002)
+
+- Gate COM aprobado en Windows 10 Pro (Word v16.0).
+- Pruebas: 33 passed, 0 failed (`pytest -q`).
+- COM: disponible; sin proceso residual tras corrección de `is_available()` (`DispatchEx` + `Quit`).
+- Referencia (sin formato): 3/5 (C1 pass, C2 fail, C3 fail, C4 pass, C5 pass).
+- Documento correcto: 5/5.
+- Documento incorrecto: 3/5 (C2 fail, C3 fail, resto pass).
+- UI: sin bloqueo; historial persistente (4 intentos tras reabrir).
+- Defecto corregido: `is_available()` dejaba proceso Word residual.
+- App en ejecución: PID 5108, ventana “VirMetrix - word-format-001”.
+- Próxima acción: definir ITER-003 (catálogo de ejercicios / temporizador / empaquetado) y añadir prueba de regresión para residual de proceso.
