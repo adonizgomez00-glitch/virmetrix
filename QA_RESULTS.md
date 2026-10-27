@@ -40,6 +40,15 @@ No se han registrado defectos de implementaciÃ³n porque aÃºn no existe implement
 - Defecto corregido: `is_available()` dejaba proceso Word residual; corregido con `DispatchEx` + `Quit` + `CoInitialize`/`CoUninitialize`.
 - App en ejecuciÃ³n: PID 5108, ventana â€œVirMetrix - word-format-001â€.
 
+## ITER-003 â€” Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1.
+- Comando: `pytest -q` â†’ **38 passed, 0 failed**.
+- CatÃ¡logo: 4 ejercicios (`word-format-001..004`).
+- Criterios declarativos: soportados en portable y COM.
+- Pruebas parametrizadas: 4 ejercicios correctos â†’ puntuaciÃ³n completa.
+- COM de nuevos ejercicios: no ejecutado (Linux); pendiente validaciÃ³n Windows.
+
 ## Protocolo de actualizaciÃ³n
 
 Para cada iteraciÃ³n incluir:
@@ -81,47 +90,47 @@ Nunca reemplazar â€œno ejecutadoâ€ por â€œaprobadoâ€ por inferencia.
 - Defectos abiertos: 0.
 - Word COM: no ejecutado (Linux) â€” registrado como no ejecutado.
 
-## ITER-002 — Validación Windows + Word COM (2026-10-27)
+## ITER-002 ï¿½ Validaciï¿½n Windows + Word COM (2026-10-27)
 
 - Entorno: Windows 10 Pro 10.0.19045, Python 3.12.10, PySide6 6.11.2, python-docx 1.2.0, lxml 5.2.1, pywin32 312, pytest 9.1.1.
 - Microsoft Word: v16.0 (COM disponible).
 
-### 1. Pruebas automáticas
-- Comando: `$env:PYTHONPATH="src"; pytest -q` (ejecutado desde raíz del proyecto)
-- Resultado: **33 passed, 0 failed** (duración 6.18 s).
+### 1. Pruebas automï¿½ticas
+- Comando: `$env:PYTHONPATH="src"; pytest -q` (ejecutado desde raï¿½z del proyecto)
+- Resultado: **33 passed, 0 failed** (duraciï¿½n 6.18 s).
 
 ### 2. Disponibilidad de Word COM
 - Comando: `python -c "from virmetrix.infrastructure.evaluators.word_com import WordComAdapter; print(WordComAdapter().is_available())"`
 - Resultado: `(True, 'Word disponible (v16.0).')`.
-- Proceso residual: ninguno (tras corrección de `is_available` con `DispatchEx` + `Quit`).
+- Proceso residual: ninguno (tras correcciï¿½n de `is_available` con `DispatchEx` + `Quit`).
 
-### 3. Evaluación COM sobre documento sin formato (referencia)
+### 3. Evaluaciï¿½n COM sobre documento sin formato (referencia)
 - Documento: `exercises/word-format-001/reference.docx` (copia de trabajo).
 - Resultado: `word_com 3 / 5`
-  - C1: pass — Ocurrencias de 'Informe de resultados': 1 (esperado 1).
-  - C2: fail — Negrita efectiva en objetivo: False.
-  - C3: fail — Tamaño (pt) en objetivo: 11.0.
-  - C4: pass — Texto vecino conserva formato de referencia.
-  - C5: pass — Texto del documento coincide con el esperado.
-- Excepción: ninguna. Proceso Word residual: ninguno.
+  - C1: pass ï¿½ Ocurrencias de 'Informe de resultados': 1 (esperado 1).
+  - C2: fail ï¿½ Negrita efectiva en objetivo: False.
+  - C3: fail ï¿½ Tamaï¿½o (pt) en objetivo: 11.0.
+  - C4: pass ï¿½ Texto vecino conserva formato de referencia.
+  - C5: pass ï¿½ Texto del documento coincide con el esperado.
+- Excepciï¿½n: ninguna. Proceso Word residual: ninguno.
 
-### 4. Evaluación COM sobre documento correcto
+### 4. Evaluaciï¿½n COM sobre documento correcto
 - Documento: `~/.virmetrix/work/correct.docx` (frase en negrita, 16 pt).
 - Resultado: `word_com 5 / 5`
   - C1..C5: pass.
 
-### 5. Evaluación COM sobre documento incorrecto
+### 5. Evaluaciï¿½n COM sobre documento incorrecto
 - Documento: `~/.virmetrix/work/incorrect.docx` (sin negrita, 12 pt).
 - Resultado: `word_com 3 / 5`
   - C1: pass, C2: fail, C3: fail, C4: pass, C5: pass.
 
 ### 6. UI (no bloqueo + historial)
 - Comando: `python -m virmetrix.ui.main_window`.
-- Modo `word_com`: evaluación completada sin congelar la ventana; resultado mostrado.
-- Historial: "Historial guardado. Intentos totales: N" aparece tras la evaluación.
+- Modo `word_com`: evaluaciï¿½n completada sin congelar la ventana; resultado mostrado.
+- Historial: "Historial guardado. Intentos totales: N" aparece tras la evaluaciï¿½n.
 - Persistencia SQLite verificada: el conteo se mantiene tras cerrar y reabrir (4 intentos registrados).
-- Proceso Word residual tras evaluación UI: ninguno.
+- Proceso Word residual tras evaluaciï¿½n UI: ninguno.
 
 ### Defectos
 - Defecto corregido: `WordComAdapter.is_available()` usaba `Dispatch` y no llamaba `Quit`, dejando un proceso WINWORD residual. Corregido usando `DispatchEx` + `Quit`. Estado: cerrado.
-- Sin defectos abiertos tras la validación.
+- Sin defectos abiertos tras la validaciï¿½n.

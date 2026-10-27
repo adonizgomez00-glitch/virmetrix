@@ -156,6 +156,14 @@ Se consultÃ³ el PDF oficial de MO-100 y se aÃ±adieron los dominios, pesos y subo
 - Fase 14 Improve Skills: propuestas en `SKILL_CHANGELOG.md` (P1-P3) pendientes de gobernanza.
 - Release candidate aprobado por el usuario.
 
+## ActualizaciÃ³n â€” 2026-10-27 (ITER-003 Build)
+
+- CatÃ¡logo de 4 ejercicios con criterios declarativos (JSON).
+- Evaluador portable y COM generalizados (`_evaluate_specs`, `_evaluate_specs_com`).
+- UI con selector de ejercicio.
+- Pruebas: 38 pass, 0 fail.
+- Pendiente: validaciÃ³n COM de nuevos ejercicios en Windows.
+
 ## ActualizaciÃ³n â€” 2026-10-27 (ITER-002 Build parcial)
 
 - Implementado: persistencia SQLite (`AttemptStore`), evaluaciÃ³n en hilo (QThread + `EvaluationWorker`), adaptador Word COM con evaluaciÃ³n real por COM (Windows), metadatos tipados (`target_phrase`, `expected_text`), seguridad ZIP multiplataforma.
@@ -171,15 +179,15 @@ Se consultÃ³ el PDF oficial de MO-100 y se aÃ±adieron los dominios, pesos y subo
 - Tests: 27+ pass; cobertura 92.36%; defectos 0.
 - Skills: saqi-* v1.0.0 activas globalmente.
 
-## Actualización — 2026-10-27 (Validación Windows + Word COM, ITER-002)
+## Actualizaciï¿½n ï¿½ 2026-10-27 (Validaciï¿½n Windows + Word COM, ITER-002)
 
 - Gate COM aprobado en Windows 10 Pro (Word v16.0).
 - Pruebas: 33 passed, 0 failed (`pytest -q`).
-- COM: disponible; sin proceso residual tras corrección de `is_available()` (`DispatchEx` + `Quit`).
+- COM: disponible; sin proceso residual tras correcciï¿½n de `is_available()` (`DispatchEx` + `Quit`).
 - Referencia (sin formato): 3/5 (C1 pass, C2 fail, C3 fail, C4 pass, C5 pass).
 - Documento correcto: 5/5.
 - Documento incorrecto: 3/5 (C2 fail, C3 fail, resto pass).
 - UI: sin bloqueo; historial persistente (4 intentos tras reabrir).
 - Defecto corregido: `is_available()` dejaba proceso Word residual.
-- App en ejecución: PID 5108, ventana “VirMetrix - word-format-001”.
-- Próxima acción: definir ITER-003 (catálogo de ejercicios / temporizador / empaquetado) y añadir prueba de regresión para residual de proceso.
+- App en ejecuciï¿½n: PID 5108, ventana ï¿½VirMetrix - word-format-001ï¿½.
+- Prï¿½xima acciï¿½n: definir ITER-003 (catï¿½logo de ejercicios / temporizador / empaquetado) y aï¿½adir prueba de regresiï¿½n para residual de proceso.

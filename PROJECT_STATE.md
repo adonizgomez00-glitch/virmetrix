@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-002 Fase 4 Build parcial)  
-**Estado global:** ITER-001 cerrado; ITER-002 en progreso (persistencia, threading, COM, deuda técnica).
+**Última actualización:** 2026-10-27 (ITER-003 Build)  
+**Estado global:** ITER-001/002 cerrados; ITER-003 en progreso (catálogo + criterios declarativos).
 
 ## Resumen
 

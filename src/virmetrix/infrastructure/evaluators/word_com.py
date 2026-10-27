@@ -184,24 +184,28 @@ class WordComAdapter:
                 c5 = CriterionStatus.PASS if full_text == expected_text else CriterionStatus.FAIL
                 c5_ev = "Texto del documento coincide con el esperado." if c5 == CriterionStatus.PASS else "El texto del documento difiere del esperado."
 
-            status_map = {"C1": c1, "C2": c2, "C3": c3, "C4": c4, "C5": c5}
+            specs = getattr(exercise, "criteria_specs", None) or []
+            if specs:
+                criteria = self._evaluate_specs_com(specs, doc, full_text, target_phrase, expected_text, occurrences)
+            else:
+                status_map = {"C1": c1, "C2": c2, "C3": c3, "C4": c4, "C5": c5}
 
-            criteria = []
-            for cid in exercise.criteria:
-                st = status_map.get(cid, CriterionStatus.ERROR)
-                if cid == "C1":
-                    ev = f"Ocurrencias de '{target_phrase}': {len(occurrences)} (esperado 1)."
-                elif cid == "C2":
-                    ev = f"Negrita efectiva en objetivo: {bold_uniform}."
-                elif cid == "C3":
-                    ev = f"Tamaño (pt) en objetivo: {size_uniform}."
-                elif cid == "C4":
-                    ev = "Texto vecino conserva formato de referencia." if c4 == CriterionStatus.PASS else "Texto vecino presenta fuga de formato."
-                elif cid == "C5":
-                    ev = c5_ev
-                else:
-                    ev = "Evaluado por Word COM."
-                criteria.append(CriterionResult(cid, st, ev))
+                criteria = []
+                for cid in exercise.criteria:
+                    st = status_map.get(cid, CriterionStatus.ERROR)
+                    if cid == "C1":
+                        ev = f"Ocurrencias de '{target_phrase}': {len(occurrences)} (esperado 1)."
+                    elif cid == "C2":
+                        ev = f"Negrita efectiva en objetivo: {bold_uniform}."
+                    elif cid == "C3":
+                        ev = f"Tamaño (pt) en objetivo: {size_uniform}."
+                    elif cid == "C4":
+                        ev = "Texto vecino conserva formato de referencia." if c4 == CriterionStatus.PASS else "Texto vecino presenta fuga de formato."
+                    elif cid == "C5":
+                        ev = c5_ev
+                    else:
+                        ev = "Evaluado por Word COM."
+                    criteria.append(CriterionResult(cid, st, ev))
 
             earned = sum(1 for c in criteria if c.status == CriterionStatus.PASS)
             return EvaluationResult(
@@ -243,6 +247,113 @@ class WordComAdapter:
                 pythoncom.CoUninitialize()
             except Exception:
                 pass
+
+    @staticmethod
+    def _occurrences(text: str, target: str) -> list[int]:
+        res = []
+        search_from = 0
+        while True:
+            i = text.find(target, search_from)
+            if i == -1:
+                break
+            res.append(i)
+            search_from = i + 1
+        return res
+
+    @staticmethod
+    def _com_range_prop(rng, prop: str):
+        try:
+            if prop == "bold":
+                b = rng.Font.Bold
+                if b in (-1, True):
+                    return True
+                if b in (0, False):
+                    return False
+                return None
+            if prop == "italic":
+                it = rng.Font.Italic
+                if it in (-1, True):
+                    return True
+                if it in (0, False):
+                    return False
+                return None
+            if prop == "size_pt":
+                s = rng.Font.Size
+                if s == 999999:
+                    return None
+                return float(s)
+            if prop == "font_name":
+                return rng.Font.Name
+            if prop == "color":
+                return rng.Font.Color
+        except Exception:
+            return None
+        return None
+
+    def _evaluate_specs_com(self, specs, doc, full_text, target_phrase, expected_text, occurrences):
+        criteria = []
+        for spec in specs:
+            cid = spec["id"]
+            typ = spec.get("type")
+            target = spec.get("target", target_phrase)
+            occs = self._occurrences(full_text, target) if target else []
+            if typ == "target_occurrences":
+                expected = spec.get("expected", 1)
+                status = CriterionStatus.PASS if len(occs) == expected else CriterionStatus.FAIL
+                ev = f"Ocurrencias de '{target}': {len(occs)} (esperado {expected})."
+            elif typ == "run_property":
+                prop = spec["property"]
+                expected = spec["expected"]
+                if not occs:
+                    status = CriterionStatus.FAIL
+                    ev = f"No se encontró el texto objetivo '{target}'."
+                else:
+                    start = occs[0]
+                    end = start + len(target)
+                    rng = doc.Range(start, end)
+                    val = self._com_range_prop(rng, prop)
+                    if val is None:
+                        status = CriterionStatus.FAIL
+                    elif val == expected:
+                        status = CriterionStatus.PASS
+                    else:
+                        status = CriterionStatus.FAIL
+                    ev = f"Propiedad '{prop}' en objetivo: {val}."
+            elif typ == "neighbor_not_formatted":
+                forbidden = spec.get("forbidden", {})
+                if not occs:
+                    status = CriterionStatus.FAIL
+                    ev = f"No se encontró el texto objetivo '{target}'."
+                else:
+                    start = occs[0]
+                    end = start + len(target)
+                    leak = False
+                    try:
+                        if start > 0:
+                            prev_rng = doc.Range(start - 1, start)
+                            if all(self._com_range_prop(prev_rng, p) == v for p, v in forbidden.items()):
+                                leak = True
+                        if end < len(full_text):
+                            next_rng = doc.Range(end, end + 1)
+                            if all(self._com_range_prop(next_rng, p) == v for p, v in forbidden.items()):
+                                leak = True
+                    except Exception:
+                        pass
+                    status = CriterionStatus.FAIL if leak else CriterionStatus.PASS
+                    ev = "Texto vecino conserva formato de referencia." if status == CriterionStatus.PASS else "Texto vecino presenta fuga de formato."
+            elif typ == "document_text_equals":
+                expected = spec.get("expected", expected_text)
+                if expected is None:
+                    status = CriterionStatus.NOT_VERIFIABLE
+                    ev = "Texto esperado no definido; no se puede verificar."
+                else:
+                    status = CriterionStatus.PASS if full_text == expected else CriterionStatus.FAIL
+                    ev = "Texto del documento coincide con el esperado." if status == CriterionStatus.PASS else "El texto del documento difiere del esperado."
+            else:
+                status = CriterionStatus.ERROR
+                ev = f"Tipo de criterio desconocido: {typ}."
+            criteria.append(CriterionResult(cid, status, ev))
+        return criteria
 
     @staticmethod
     def _com_bool(val: Any) -> bool | None:

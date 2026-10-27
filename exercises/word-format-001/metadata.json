@@ -13,6 +13,13 @@
     "C4",
     "C5"
   ],
+  "criteria_specs": [
+    {"id":"C1","type":"target_occurrences","target":"Informe de resultados","expected":1},
+    {"id":"C2","type":"run_property","target":"Informe de resultados","property":"bold","expected":true},
+    {"id":"C3","type":"run_property","target":"Informe de resultados","property":"size_pt","expected":16},
+    {"id":"C4","type":"neighbor_not_formatted","target":"Informe de resultados","forbidden":{"bold":true,"size_pt":16}},
+    {"id":"C5","type":"document_text_equals","expected":"El presente Informe de resultados resume los hallazgos del ejercicio."}
+  ],
   "rules_version": "1.0.0",
   "reference_sha256": "3af44fa5a3835a76a58cef911b925073bc415d0f750faafe6fc6604acaf5d83b"
 }

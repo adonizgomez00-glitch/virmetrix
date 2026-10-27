@@ -10,6 +10,12 @@ from virmetrix.domain.ports import ExerciseMetadata
 ROOT = Path(__file__).resolve().parents[4]
 
 
+def list_exercises() -> list[dict]:
+    catalog_path = ROOT / "exercises" / "catalog.json"
+    data = json.loads(catalog_path.read_text(encoding="utf-8"))
+    return data.get("exercises", [])
+
+
 def load_exercise(exercise_id: str) -> ExerciseMetadata:
     meta_path = ROOT / "exercises" / exercise_id / "metadata.json"
     data = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -23,4 +29,5 @@ def load_exercise(exercise_id: str) -> ExerciseMetadata:
         rules_version=data["rules_version"],
         target_phrase=data.get("target_phrase"),
         expected_text=data.get("expected_text"),
+        criteria_specs=data.get("criteria_specs", []),
     )

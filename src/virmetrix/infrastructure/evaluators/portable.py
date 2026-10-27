@@ -116,50 +116,48 @@ class PortableDocxEvaluator:
             idx.append((r, pos, pos + len(t)))
             pos += len(t)
 
-        # C1: target appears exactly once in full text
-        occurrences = []
-        search_from = 0
-        while True:
-            i = full_text.find(target_phrase, search_from)
-            if i == -1:
-                break
-            occurrences.append(i)
-            search_from = i + 1
-        c1_status = CriterionStatus.PASS if len(occurrences) == 1 else CriterionStatus.FAIL
-        c1_evidence = f"Ocurrencias de '{target_phrase}': {len(occurrences)} (esperado 1)."
-
-        # Determine target run ranges for the (first) occurrence if any
-        target_runs: list[dict[str, Any]] = []
-        if occurrences:
-            start = occurrences[0]
-            end = start + len(target_phrase)
-            for r, s, e in idx:
-                if s < end and e > start:
-                    target_runs.append(r)
-
-        # C2: bold effective on all target runs
-        c2_status = self._check_prop(target_runs, "bold", True, can_resolve_inherit=False)
-        # C3: size 16pt
-        c3_status = self._check_size(target_runs, 16.0)
-
-        # C4: neighbors not carrying target formatting
-        c4_status = self._check_neighbors(idx, occurrences, target_phrase)
-
-        # C5: text unchanged (full text == expected_text)
-        if expected_text is None:
-            c5_status = CriterionStatus.NOT_VERIFIABLE
-            c5_evidence = "Texto esperado no definido; no se puede verificar C5."
+        specs = getattr(exercise, "criteria_specs", None) or []
+        if specs:
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text)
         else:
-            c5_status = CriterionStatus.PASS if full_text == expected_text else CriterionStatus.FAIL
-            c5_evidence = "Texto del documento coincide con el esperado." if c5_status == CriterionStatus.PASS else "El texto del documento difiere del esperado."
+            # Legacy hardcoded criteria (backward compatibility)
+            occurrences = []
+            search_from = 0
+            while True:
+                i = full_text.find(target_phrase, search_from)
+                if i == -1:
+                    break
+                occurrences.append(i)
+                search_from = i + 1
+            c1_status = CriterionStatus.PASS if len(occurrences) == 1 else CriterionStatus.FAIL
+            c1_evidence = f"Ocurrencias de '{target_phrase}': {len(occurrences)} (esperado 1)."
 
-        criteria = [
-            CriterionResult("C1", c1_status, c1_evidence),
-            CriterionResult("C2", c2_status, self._evidence_prop(target_runs, "bold")),
-            CriterionResult("C3", c3_status, self._evidence_size(target_runs)),
-            CriterionResult("C4", c4_status, "Texto vecino conserva formato de referencia."),
-            CriterionResult("C5", c5_status, c5_evidence),
-        ]
+            target_runs: list[dict[str, Any]] = []
+            if occurrences:
+                start = occurrences[0]
+                end = start + len(target_phrase)
+                for r, s, e in idx:
+                    if s < end and e > start:
+                        target_runs.append(r)
+
+            c2_status = self._check_prop(target_runs, "bold", True, can_resolve_inherit=False)
+            c3_status = self._check_size(target_runs, 16.0)
+            c4_status = self._check_neighbors(idx, occurrences, target_phrase)
+
+            if expected_text is None:
+                c5_status = CriterionStatus.NOT_VERIFIABLE
+                c5_evidence = "Texto esperado no definido; no se puede verificar C5."
+            else:
+                c5_status = CriterionStatus.PASS if full_text == expected_text else CriterionStatus.FAIL
+                c5_evidence = "Texto del documento coincide con el esperado." if c5_status == CriterionStatus.PASS else "El texto del documento difiere del esperado."
+
+            criteria = [
+                CriterionResult("C1", c1_status, c1_evidence),
+                CriterionResult("C2", c2_status, self._evidence_prop(target_runs, "bold")),
+                CriterionResult("C3", c3_status, self._evidence_size(target_runs)),
+                CriterionResult("C4", c4_status, "Texto vecino conserva formato de referencia."),
+                CriterionResult("C5", c5_status, c5_evidence),
+            ]
 
         # Scoring: sum pass
         earned = sum(1 for c in criteria if c.status == CriterionStatus.PASS)
@@ -200,21 +198,35 @@ class PortableDocxEvaluator:
                 text = "".join(texts)
                 rpr = r.find(f"{{{W_NS}}}rPr")
                 bold = None
+                italic = None
                 sz = None
+                font = None
+                color = None
                 if rpr is not None:
                     b_el = rpr.find(f"{{{W_NS}}}b")
                     if b_el is not None:
-                        bold = _bool_attr(b_el.get(f"{{{W_NS}}}val")) 
+                        bold = _bool_attr(b_el.get(f"{{{W_NS}}}val"))
                         if bold is None:
                             bold = True
+                    i_el = rpr.find(f"{{{W_NS}}}i")
+                    if i_el is not None:
+                        italic = _bool_attr(i_el.get(f"{{{W_NS}}}val"))
+                        if italic is None:
+                            italic = True
                     sz_el = rpr.find(f"{{{W_NS}}}sz")
                     if sz_el is not None:
                         sz = _half_points_to_pt(sz_el.get(f"{{{W_NS}}}val"))
-                runs.append({"text": text, "bold": bold, "sz": sz, "rpr": rpr})
+                    rfonts = rpr.find(f"{{{W_NS}}}rFonts")
+                    if rfonts is not None:
+                        font = rfonts.get(f"{{{W_NS}}}ascii") or rfonts.get(f"{{{W_NS}}}hAnsi") or rfonts.get(f"{{{W_NS}}}cs")
+                    color_el = rpr.find(f"{{{W_NS}}}color")
+                    if color_el is not None:
+                        color = color_el.get(f"{{{W_NS}}}val")
+                runs.append({"text": text, "bold": bold, "italic": italic, "sz": sz, "font": font, "color": color, "rpr": rpr})
         # If no runs found via paragraphs, fallback: collect all w:t
         if not runs:
             for t in root.iter(f"{{{W_NS}}}t"):
-                runs.append({"text": t.text or "", "bold": None, "sz": None, "rpr": None})
+                runs.append({"text": t.text or "", "bold": None, "italic": None, "sz": None, "font": None, "color": None, "rpr": None})
         return runs
 
     def _check_prop(self, target_runs, prop, expected, can_resolve_inherit=False):
@@ -274,6 +286,98 @@ class PortableDocxEvaluator:
             if nr.get("bold") is True and nr.get("sz") == 16.0:
                 return CriterionStatus.FAIL
         return CriterionStatus.PASS
+
+    _PROP_KEY = {"bold": "bold", "italic": "italic", "size_pt": "sz", "font_name": "font", "color": "color"}
+
+    def _run_prop(self, run: dict, prop: str):
+        key = self._PROP_KEY.get(prop, prop)
+        return run.get(key)
+
+    @staticmethod
+    def _occurrences(text: str, target: str) -> list[int]:
+        res = []
+        search_from = 0
+        while True:
+            i = text.find(target, search_from)
+            if i == -1:
+                break
+            res.append(i)
+            search_from = i + 1
+        return res
+
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text):
+        criteria = []
+        for spec in specs:
+            cid = spec["id"]
+            typ = spec.get("type")
+            target = spec.get("target", target_phrase)
+            if typ == "target_occurrences":
+                expected = spec.get("expected", 1)
+                occs = self._occurrences(full_text, target) if target else []
+                status = CriterionStatus.PASS if len(occs) == expected else CriterionStatus.FAIL
+                ev = f"Ocurrencias de '{target}': {len(occs)} (esperado {expected})."
+            elif typ == "run_property":
+                prop = spec["property"]
+                expected = spec["expected"]
+                occs = self._occurrences(full_text, target) if target else []
+                target_runs = []
+                if occs:
+                    start = occs[0]
+                    end = start + len(target)
+                    for r, s, e in idx:
+                        if s < end and e > start:
+                            target_runs.append(r)
+                if not target_runs:
+                    status = CriterionStatus.FAIL
+                    ev = f"No se encontró el texto objetivo '{target}'."
+                else:
+                    vals = [self._run_prop(r, prop) for r in target_runs]
+                    if any(v is None for v in vals):
+                        status = CriterionStatus.NOT_VERIFIABLE
+                    elif all(v == expected for v in vals):
+                        status = CriterionStatus.PASS
+                    else:
+                        status = CriterionStatus.FAIL
+                    ev = f"Propiedad '{prop}' en objetivo: {vals}."
+            elif typ == "neighbor_not_formatted":
+                forbidden = spec.get("forbidden", {})
+                occs = self._occurrences(full_text, target) if target else []
+                if not occs:
+                    status = CriterionStatus.FAIL
+                    ev = f"No se encontró el texto objetivo '{target}'."
+                else:
+                    start = occs[0]
+                    end = start + len(target)
+                    before_run = None
+                    after_run = None
+                    for r, s, e in idx:
+                        if e <= start:
+                            before_run = r
+                        if s >= end and after_run is None:
+                            after_run = r
+                            break
+                    leak = False
+                    for nr in (before_run, after_run):
+                        if nr is None:
+                            continue
+                        if all(self._run_prop(nr, p) == v for p, v in forbidden.items()):
+                            leak = True
+                            break
+                    status = CriterionStatus.FAIL if leak else CriterionStatus.PASS
+                    ev = "Texto vecino conserva formato de referencia." if status == CriterionStatus.PASS else "Texto vecino presenta fuga de formato."
+            elif typ == "document_text_equals":
+                expected = spec.get("expected", expected_text)
+                if expected is None:
+                    status = CriterionStatus.NOT_VERIFIABLE
+                    ev = "Texto esperado no definido; no se puede verificar."
+                else:
+                    status = CriterionStatus.PASS if full_text == expected else CriterionStatus.FAIL
+                    ev = "Texto del documento coincide con el esperado." if status == CriterionStatus.PASS else "El texto del documento difiere del esperado."
+            else:
+                status = CriterionStatus.ERROR
+                ev = f"Tipo de criterio desconocido: {typ}."
+            criteria.append(CriterionResult(cid, status, ev))
+        return criteria
 
     def _error(self, exercise, msg):
         criteria = [CriterionResult(cid, CriterionStatus.ERROR, msg) for cid in exercise.criteria]

@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0",
+  "exercises": [
+    {
+      "exercise_id": "word-format-001",
+      "title": "Negrita y tamaño 16 pt",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": ["docx_portable", "word_com"]
+    },
+    {
+      "exercise_id": "word-format-002",
+      "title": "Cursiva y tamaño 14 pt",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": ["docx_portable", "word_com"]
+    },
+    {
+      "exercise_id": "word-format-003",
+      "title": "Negrita y tamaño 18 pt",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": ["docx_portable", "word_com"]
+    },
+    {
+      "exercise_id": "word-format-004",
+      "title": "Cursiva y tamaño 11 pt",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": ["docx_portable", "word_com"]
+    }
+  ]
+}

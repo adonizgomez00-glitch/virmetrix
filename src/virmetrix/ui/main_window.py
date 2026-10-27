@@ -11,7 +11,6 @@ from PySide6.QtCore import QThread, Qt
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
-    QFileDialog,
     QLabel,
     QMainWindow,
     QMessageBox,
@@ -22,34 +21,46 @@ from PySide6.QtWidgets import (
 )
 
 from virmetrix.application.orchestrator import EvaluationOrchestrator
-from virmetrix.infrastructure.catalog.loader import load_exercise
+from virmetrix.infrastructure.catalog.loader import list_exercises, load_exercise
 from virmetrix.infrastructure.persistence.sqlite import AttemptStore
 from virmetrix.ui.worker import EvaluationWorker
 
-EXERCISE_ID = "word-format-001"
 ROOT = Path(__file__).resolve().parents[3]
-REFERENCE = ROOT / "exercises" / EXERCISE_ID / "reference.docx"
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("VirMetrix — word-format-001")
+        self.setWindowTitle("VirMetrix")
         self.orch = EvaluationOrchestrator()
-        self.exercise = load_exercise(EXERCISE_ID)
-        self.work_copy: str | None = None
         self.store = AttemptStore(Path.home() / ".virmetrix" / "history.sqlite")
 
         self._thread: QThread | None = None
         self._worker: EvaluationWorker | None = None
         self._started_at: str | None = None
         self._start_perf: float | None = None
+        self.work_copy: str | None = None
+
+        self.exercises = list_exercises()
+        if not self.exercises:
+            raise RuntimeError("Catálogo vacío.")
+        self.current_exercise_id = self.exercises[0]["exercise_id"]
+        self.exercise = load_exercise(self.current_exercise_id)
 
         central = QWidget()
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
 
+        layout.addWidget(QLabel("Ejercicio:"))
+        self.exercise_combo = QComboBox()
+        for ex in self.exercises:
+            self.exercise_combo.addItem(ex["title"], ex["exercise_id"])
+        self.exercise_combo.currentIndexChanged.connect(self._on_exercise_changed)
+        layout.addWidget(self.exercise_combo)
+
         layout.addWidget(QLabel(self.exercise.instructions))
+
+        self.instructions_label = layout.itemAt(layout.count() - 1).widget()
 
         self.mode_combo = QComboBox()
         for mode, (avail, reason) in self.orch.available_modes().items():
@@ -69,12 +80,23 @@ class MainWindow(QMainWindow):
         self.result_view.setReadOnly(True)
         layout.addWidget(self.result_view)
 
+    def _reference_path(self) -> Path:
+        return ROOT / "exercises" / self.current_exercise_id / "reference.docx"
+
+    def _on_exercise_changed(self, _index):
+        self.current_exercise_id = self.exercise_combo.currentData()
+        self.exercise = load_exercise(self.current_exercise_id)
+        self.work_copy = None
+        self.instructions_label.setText(self.exercise.instructions)
+        self.result_view.append(f"Ejercicio seleccionado: {self.current_exercise_id}")
+
     def create_copy(self):
-        if not REFERENCE.is_file():
+        ref = self._reference_path()
+        if not ref.is_file():
             QMessageBox.critical(self, "Error", "Falta el documento de referencia.")
             return
         work_dir = Path.home() / ".virmetrix" / "work"
-        self.work_copy = self.orch.create_work_copy(str(REFERENCE), str(work_dir))
+        self.work_copy = self.orch.create_work_copy(str(ref), str(work_dir))
         self.result_view.append(f"Copia de trabajo creada: {self.work_copy}")
 
     def evaluate(self):
