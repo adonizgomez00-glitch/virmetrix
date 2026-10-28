@@ -176,6 +176,13 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Funcionalidad: mantener VirMetrix encima de Word (topmost).
 - COM: pendiente validación en Windows.
 
+## ITER-020 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1, PySide6 6.11.2.
+- Comando: `pytest -q` → **65 passed, 0 failed**.
+- UI: estilo moderno (QSS), bordes redondeados, colores de acento.
+- COM: pendiente validación en Windows.
+
 ## Protocolo de actualización::::::
 
 Para cada iteración incluir:

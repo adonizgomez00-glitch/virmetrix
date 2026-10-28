@@ -60,10 +60,23 @@ class MainWindow(QMainWindow):
         )
 
         central = QWidget()
+        central.setStyleSheet("""
+            QWidget { background: #f7f9fc; color: #1f2937; font-family: 'Segoe UI', 'Ubuntu', sans-serif; font-size: 12px; }
+            QLabel { color: #1f2937; }
+            QComboBox { background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 8px; }
+            QComboBox:hover { border-color: #2563eb; }
+            QPushButton { background: #2563eb; color: #ffffff; border: none; border-radius: 6px; padding: 6px 10px; font-weight: 600; }
+            QPushButton:hover { background: #1d4ed8; }
+            QPushButton:disabled { background: #9ca3af; }
+            QTextEdit { background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px; }
+            QProgressBar { border: 1px solid #d1d5db; border-radius: 6px; text-align: center; }
+            QProgressBar::chunk { background: #2563eb; border-radius: 6px; }
+            QCheckBox { spacing: 6px; }
+        """)
         self.setCentralWidget(central)
         layout = QVBoxLayout(central)
-        layout.setContentsMargins(8, 8, 8, 8)
-        layout.setSpacing(6)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(8)
 
         # Modo de uso
         layout.addWidget(QLabel("Modo:"))
@@ -93,7 +106,7 @@ class MainWindow(QMainWindow):
         self.instructions_label = QLabel("")
         self.instructions_label.setAccessibleName("Instrucciones del ejercicio")
         self.instructions_label.setWordWrap(True)
-        self.instructions_label.setStyleSheet("padding: 6px; background: #f5f5f5; border: 1px solid #ccc;")
+        self.instructions_label.setStyleSheet("padding: 8px; background: #ffffff; border: 1px solid #d1d5db; border-radius: 6px;")
         layout.addWidget(self.instructions_label)
 
         # Temporizador
