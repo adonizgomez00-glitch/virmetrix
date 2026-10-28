@@ -1,3 +1,13 @@
+
+## Checkpoint — 2026-10-27 (fin de sesión)
+
+- Repositorio sincronizado con origin/main (commit 8dd48e4).
+- UI compacta estilo gmetrix, topmost, estilo moderno.
+- COM en proceso separado (com_eval_cli.py) con ruta corregida.
+- 65 tests pass, cobertura 80.52%.
+- Pendiente: validación en Windows (topmost, COM sin bloqueo, evaluación completa).
+- Próxima acción: validar en VM Windows y reportar resultados.
+
 # SESSION — Checkpoint
 
 **Fecha:** 2026-10-27  
