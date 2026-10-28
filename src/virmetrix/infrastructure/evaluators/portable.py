@@ -66,6 +66,11 @@ class PortableDocxEvaluator:
             target_phrase = sidecar.get("target_phrase", target_phrase)
             expected_text = sidecar.get("expected_text", expected_text)
 
+        footnotes_text = ""
+        endnotes_text = ""
+        has_toc = False
+        footnote_ref_count = 0
+
         # Security / validation
         if not path.is_file():
             return self._error(exercise, "Archivo no encontrado.")
@@ -101,6 +106,21 @@ class PortableDocxEvaluator:
                     return self._error(exercise, "Falta word/document.xml.")
                 doc_xml = zf.read("word/document.xml")
                 root = _parse_xml(doc_xml)
+                footnote_ref_count = doc_xml.decode("utf-8", errors="ignore").count("footnoteReference")
+                if "word/footnotes.xml" in zf.namelist():
+                    try:
+                        footnotes_text = zf.read("word/footnotes.xml").decode("utf-8", errors="ignore")
+                    except Exception:
+                        pass
+                if "word/endnotes.xml" in zf.namelist():
+                    try:
+                        endnotes_text = zf.read("word/endnotes.xml").decode("utf-8", errors="ignore")
+                    except Exception:
+                        pass
+                try:
+                    has_toc = "TOC" in doc_xml.decode("utf-8", errors="ignore")
+                except Exception:
+                    has_toc = False
         except (zipfile.BadZipFile, etree.XMLSyntaxError, Exception) as e:
             return self._error(exercise, f"Error al leer el DOCX: {type(e).__name__}")
 
@@ -120,7 +140,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -309,7 +329,7 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0):
         tables = tables or []
         criteria = []
         for spec in specs:
@@ -423,6 +443,22 @@ class PortableDocxEvaluator:
                 expected = spec.get("expected", 1)
                 status = CriterionStatus.PASS if list_items == expected else CriterionStatus.FAIL
                 ev = f"Elementos de lista: {list_items} (esperado {expected})."
+            elif typ == "footnote_count":
+                expected = spec.get("expected", 1)
+                count = footnote_ref_count
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Referencias de nota al pie: {count} (esperado >= {expected})."
+            elif typ == "footnote_contains":
+                expected = spec.get("expected", "")
+                status = CriterionStatus.PASS if expected and expected in (footnotes_text or "") else CriterionStatus.FAIL
+                ev = "La nota al pie contiene el texto esperado." if status == CriterionStatus.PASS else "La nota al pie no contiene el texto esperado."
+            elif typ == "endnote_contains":
+                expected = spec.get("expected", "")
+                status = CriterionStatus.PASS if expected and expected in (endnotes_text or "") else CriterionStatus.FAIL
+                ev = "La nota final contiene el texto esperado." if status == CriterionStatus.PASS else "La nota final no contiene el texto esperado."
+            elif typ == "toc_present":
+                status = CriterionStatus.PASS if has_toc else CriterionStatus.FAIL
+                ev = "Se detectó tabla de contenido." if status == CriterionStatus.PASS else "No se detectó tabla de contenido."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

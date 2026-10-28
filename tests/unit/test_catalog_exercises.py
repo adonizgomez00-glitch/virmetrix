@@ -79,5 +79,75 @@ def test_list_001_correct(tmp_path):
     assert res.score_earned == res.score_possible
 
 
+def test_refs_001_footnote(tmp_path):
+    import io, zipfile
+    ex = load_exercise("refs-001")
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    content_types = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/footnotes.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footnotes+xml"/>
+</Types>'''
+    rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>'''
+    doc_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footnotes" Target="footnotes.xml"/>
+</Relationships>'''
+    document = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="{W}">
+  <w:body><w:p><w:r><w:t>Texto principal</w:t></w:r><w:r><w:footnoteReference w:id="1"/></w:r></w:p></w:body>
+</w:document>'''
+    footnotes = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:footnotes xmlns:w="{W}">
+  <w:footnote w:type="separator" w:id="-1"><w:p><w:r><w:separator/></w:r></w:p></w:footnote>
+  <w:footnote w:id="1"><w:p><w:r><w:t>Nota al pie de ejemplo.</w:t></w:r></w:p></w:footnote>
+</w:footnotes>'''
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("[Content_Types].xml", content_types)
+        zf.writestr("_rels/.rels", rels)
+        zf.writestr("word/_rels/document.xml.rels", doc_rels)
+        zf.writestr("word/document.xml", document)
+        zf.writestr("word/footnotes.xml", footnotes)
+    path = tmp_path / "fn.docx"
+    path.write_bytes(buf.getvalue())
+    res = ev.evaluate(str(path), ex)
+    assert res.score_earned == res.score_possible
+
+
+def test_refs_002_toc(tmp_path):
+    import io, zipfile
+    ex = load_exercise("refs-002")
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    content_types = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>'''
+    rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>'''
+    document = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="{W}">
+  <w:body><w:p><w:fldSimple w:instr="TOC \\\\o \\\\h \\\\z \\\\u"><w:r><w:t>TOC</w:t></w:r></w:fldSimple></w:p></w:body>
+</w:document>'''
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("[Content_Types].xml", content_types)
+        zf.writestr("_rels/.rels", rels)
+        zf.writestr("word/document.xml", document)
+    path = tmp_path / "toc.docx"
+    path.write_bytes(buf.getvalue())
+    res = ev.evaluate(str(path), ex)
+    assert res.score_earned == res.score_possible
+
+
 def test_list_exercises_not_empty():
     assert len(list_exercises()) >= 4

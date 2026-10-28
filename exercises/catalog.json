@@ -60,6 +60,26 @@
         "docx_portable",
         "word_com"
       ]
+    },
+    {
+      "exercise_id": "refs-001",
+      "title": "Nota al pie",
+      "competency": "Crear y administrar referencias (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "refs-002",
+      "title": "Tabla de contenido",
+      "competency": "Crear y administrar referencias (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
     }
   ]
 }

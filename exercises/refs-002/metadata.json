@@ -1,0 +1,17 @@
+{
+  "exercise_id": "refs-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Crear y administrar referencias (MO-100)",
+  "instructions": "Inserta una tabla de contenido al inicio del documento.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "toc_present"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

@@ -408,6 +408,49 @@ class WordComAdapter:
                     pass
                 status = CriterionStatus.PASS if count == expected else CriterionStatus.FAIL
                 ev = f"Elementos de lista: {count} (esperado {expected})."
+            elif typ == "footnote_count":
+                expected = spec.get("expected", 1)
+                try:
+                    count = doc.Footnotes.Count
+                except Exception:
+                    count = 0
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Notas al pie: {count} (esperado >= {expected})."
+            elif typ == "footnote_contains":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    for fn in doc.Footnotes:
+                        if expected in (fn.Range.Text or ""):
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "La nota al pie contiene el texto esperado." if status == CriterionStatus.PASS else "La nota al pie no contiene el texto esperado."
+            elif typ == "endnote_contains":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    for en in doc.Endnotes:
+                        if expected in (en.Range.Text or ""):
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "La nota final contiene el texto esperado." if status == CriterionStatus.PASS else "La nota final no contiene el texto esperado."
+            elif typ == "toc_present":
+                ok = False
+                try:
+                    ok = doc.TablesOfContents.Count > 0
+                except Exception:
+                    try:
+                        ok = "TOC" in (doc.Content.Text or "")
+                    except Exception:
+                        ok = False
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Se detectó tabla de contenido." if status == CriterionStatus.PASS else "No se detectó tabla de contenido."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."
