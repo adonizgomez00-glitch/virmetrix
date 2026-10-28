@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-018 Build)  
-**Estado global:** UI compacta estilo gmetrix. 41 ejercicios. 65 tests pass. Cobertura 80.52%. Pendiente: validación Windows.
+**Última actualización:** 2026-10-27 (ITER-019 Build)  
+**Estado global:** UI compacta + topmost. 41 ejercicios. 65 tests pass. Cobertura 80.52%. Pendiente: validación Windows.
 
 ## Resumen
 

@@ -238,6 +238,7 @@ class MainWindow(QMainWindow):
         work_dir = Path.home() / ".virmetrix" / "work"
         self.work_copy = self.orch.create_work_copy(str(ref), str(work_dir))
         self.result_view.append(f"Copia de trabajo creada: {self.work_copy}")
+        self._bring_to_front()
 
     def open_document(self):
         if not self.work_copy:
@@ -248,6 +249,19 @@ class MainWindow(QMainWindow):
             self.result_view.append(f"Abriendo: {self.work_copy}")
         except Exception as e:  # noqa: BLE001
             QMessageBox.critical(self, "Error", f"No se pudo abrir el documento: {e}")
+        self._bring_to_front()
+
+    def _bring_to_front(self):
+        self.raise_()
+        self.activateWindow()
+        try:
+            import sys
+            if sys.platform == "win32":
+                import ctypes
+                hwnd = int(self.winId())
+                ctypes.windll.user32.SetWindowPos(hwnd, -1, 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0040)
+        except Exception:
+            pass
 
     def start_session(self):
         if self.session.status == SessionStatus.FINISHED:
