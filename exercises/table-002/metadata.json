@@ -1,0 +1,26 @@
+{
+  "exercise_id": "table-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar tablas y listas (MO-100)",
+  "instructions": "Inserta una tabla de 2 filas y 3 columnas.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "table_dimensions",
+      "table_index": 0,
+      "rows": 2,
+      "cols": 3
+    }
+  ],
+  "rules_version": "1.0.0"
+}

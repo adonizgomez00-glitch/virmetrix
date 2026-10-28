@@ -115,6 +115,14 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Cobertura: los seis dominios de MO-100 tienen al menos un ejercicio (16 ejercicios en total).
 - COM: pendiente validación en Windows.
 
+## ITER-012 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1.
+- Comando: `pytest -q` → **53 passed, 0 failed**.
+- Nuevos ejercicios: 12 (2 por dominio).
+- Total catálogo: 28 ejercicios.
+- COM: pendiente validación en Windows.
+
 ## Protocolo de actualización
 
 Para cada iteración incluir:

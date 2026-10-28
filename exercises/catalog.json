@@ -170,6 +170,126 @@
         "docx_portable",
         "word_com"
       ]
+    },
+    {
+      "exercise_id": "doc-manage-004",
+      "title": "Pie de página principal",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-005",
+      "title": "Propiedad Subject",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-001",
+      "title": "Fuente Calibri",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-002",
+      "title": "Color rojo",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "table-002",
+      "title": "Tabla de 2x3",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "list-002",
+      "title": "Lista de 5 elementos",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "refs-003",
+      "title": "Nota final",
+      "competency": "Crear y administrar referencias (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "refs-004",
+      "title": "Dos notas al pie",
+      "competency": "Crear y administrar referencias (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "graphics-003",
+      "title": "Dos imágenes",
+      "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "graphics-004",
+      "title": "Texto alternativo 'Gráfico principal'",
+      "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-003",
+      "title": "Dos comentarios",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-004",
+      "title": "Comentario de aprobación",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
     }
   ]
 }

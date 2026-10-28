@@ -374,4 +374,4 @@ def test_refs_002_toc(tmp_path):
 
 
 def test_list_exercises_not_empty():
-    assert len(list_exercises()) >= 4
+    assert len(list_exercises()) >= 29

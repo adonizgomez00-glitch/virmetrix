@@ -156,6 +156,13 @@ Se consultó el PDF oficial de MO-100 y se añadieron los dominios, pesos y subo
 - Fase 14 Improve Skills: propuestas en `SKILL_CHANGELOG.md` (P1-P3) pendientes de gobernanza.
 - Release candidate aprobado por el usuario.
 
+## Actualización — 2026-10-27 (ITER-012 Build)
+
+- 12 ejercicios adicionales (2 por dominio).
+- Total catálogo: 28.
+- Pruebas: 53 pass.
+- Pendiente: validación COM en Windows, más ejercicios si se desea.
+
 ## Actualización — 2026-10-27 (ITER-011 Build)
 
 - Ejercicios de colaboración (collab-001, collab-002).

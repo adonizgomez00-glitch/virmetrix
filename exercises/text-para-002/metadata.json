@@ -1,0 +1,29 @@
+{
+  "exercise_id": "text-para-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+  "instructions": "Aplica color rojo (#FF0000) a la frase 'Informe de resultados'.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "run_property",
+      "target": "Informe de resultados",
+      "property": "color",
+      "expected": "FF0000"
+    },
+    {
+      "id": "C2",
+      "type": "target_occurrences",
+      "target": "Informe de resultados",
+      "expected": 1
+    }
+  ],
+  "rules_version": "1.0.0",
+  "target_phrase": "Informe de resultados",
+  "expected_text": "El presente Informe de resultados resume los hallazgos del ejercicio."
+}

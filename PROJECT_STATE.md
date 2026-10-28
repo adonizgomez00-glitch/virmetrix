@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-011 Build)  
-**Estado global:** ITER-001..010 cerrados; ITER-011 en progreso (colaboración). Cobertura de los seis dominios MO-100.
+**Última actualización:** 2026-10-27 (ITER-012 Build)  
+**Estado global:** ITER-001..011 cerrados; ITER-012 en progreso (ampliación de cobertura). 28 ejercicios.
 
 ## Resumen
 

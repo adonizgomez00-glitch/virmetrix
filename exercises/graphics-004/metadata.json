@@ -1,0 +1,24 @@
+{
+  "exercise_id": "graphics-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+  "instructions": "Inserta una imagen con texto alternativo 'Gráfico principal'.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "drawing_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "alt_text_contains",
+      "expected": "Gráfico principal"
+    }
+  ],
+  "rules_version": "1.0.0"
+}
