@@ -135,12 +135,12 @@ Nunca reemplazar â€œno ejecutadoâ€ por â€œaprobadoâ€ por inferencia.
 - Defecto corregido: `WordComAdapter.is_available()` usaba `Dispatch` y no llamaba `Quit`, dejando un proceso WINWORD residual. Corregido usando `DispatchEx` + `Quit`. Estado: cerrado.
 - Sin defectos abiertos tras la validaciï¿½n.
 
-## ITER-003 — Validación Windows + Word COM (2026-10-27)
+## ITER-003 ï¿½ Validaciï¿½n Windows + Word COM (2026-10-27)
 
 - Entorno: Windows 10 Pro 10.0.19045, Python 3.12.10, Word v16.0, PySide6 6.11.2, pytest 9.1.1.
-- Pruebas automáticas: 38 passed, 0 failed.
+- Pruebas automï¿½ticas: 38 passed, 0 failed.
 
-### Validación COM por ejercicio
+### Validaciï¿½n COM por ejercicio
 
 Referencia (sin formato):
 - word-format-001: 3/5 (C1 pass, C2 fail, C3 fail, C4 pass, C5 pass)
@@ -161,5 +161,6 @@ Documento incorrecto (sin formato, 12 pt):
 - word-format-004: 3/5 (C2 fail, C3 fail)
 
 ### Defectos
-- Ninguno nuevo. La detección de cursiva (run_property italic) funciona correctamente en COM.
+- Ninguno nuevo. La detecciï¿½n de cursiva (run_property italic) funciona correctamente en COM.
 - Sin procesos Word residuales tras las evaluaciones.
+- Ajuste post-validaciÃ³n: `word-format-004` tamaÃ±o esperado 11â†’12 pt para evitar falso positivo por fuente por defecto de Word (la validaciÃ³n original se realizÃ³ con 11 pt).
