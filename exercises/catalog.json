@@ -40,6 +40,26 @@
         "docx_portable",
         "word_com"
       ]
+    },
+    {
+      "exercise_id": "table-001",
+      "title": "Tabla de 3x2 con datos",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "list-001",
+      "title": "Lista con viñetas (3 elementos)",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
     }
   ]
 }

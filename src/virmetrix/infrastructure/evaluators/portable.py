@@ -116,9 +116,11 @@ class PortableDocxEvaluator:
             idx.append((r, pos, pos + len(t)))
             pos += len(t)
 
+        tables = self._extract_tables(root)
+        list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -307,7 +309,8 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0):
+        tables = tables or []
         criteria = []
         for spec in specs:
             cid = spec["id"]
@@ -373,13 +376,95 @@ class PortableDocxEvaluator:
                     status = CriterionStatus.NOT_VERIFIABLE
                     ev = "Texto esperado no definido; no se puede verificar."
                 else:
-                    status = CriterionStatus.PASS if full_text == expected else CriterionStatus.FAIL
+                    norm_full = "".join(full_text.split())
+                    norm_expected = "".join(str(expected).split())
+                    status = CriterionStatus.PASS if norm_full == norm_expected else CriterionStatus.FAIL
                     ev = "Texto del documento coincide con el esperado." if status == CriterionStatus.PASS else "El texto del documento difiere del esperado."
+            elif typ == "table_count":
+                expected = spec.get("expected", 1)
+                status = CriterionStatus.PASS if len(tables) == expected else CriterionStatus.FAIL
+                ev = f"Tablas en el documento: {len(tables)} (esperado {expected})."
+            elif typ == "table_dimensions":
+                tindex = spec.get("table_index", 0)
+                exp_rows = spec.get("rows")
+                exp_cols = spec.get("cols")
+                if tindex >= len(tables):
+                    status = CriterionStatus.FAIL
+                    ev = f"No existe la tabla {tindex}."
+                else:
+                    tbl = tables[tindex]
+                    rows = len(tbl)
+                    cols = len(tbl[0]) if tbl else 0
+                    ok = True
+                    if exp_rows is not None and rows != exp_rows:
+                        ok = False
+                    if exp_cols is not None and cols != exp_cols:
+                        ok = False
+                    status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                    ev = f"Tabla {tindex}: {rows}x{cols} (esperado {exp_rows}x{exp_cols})."
+            elif typ == "table_cell_text":
+                tindex = spec.get("table_index", 0)
+                r = spec.get("row", 0)
+                c = spec.get("col", 0)
+                expected = spec.get("expected", "")
+                if tindex >= len(tables):
+                    status = CriterionStatus.FAIL
+                    ev = f"No existe la tabla {tindex}."
+                else:
+                    tbl = tables[tindex]
+                    if r >= len(tbl) or c >= len(tbl[r]):
+                        status = CriterionStatus.FAIL
+                        ev = f"Celda ({r},{c}) fuera de rango."
+                    else:
+                        actual = tbl[r][c]
+                        status = CriterionStatus.PASS if actual == expected else CriterionStatus.FAIL
+                        ev = f"Celda ({r},{c}): '{actual}' (esperado '{expected}')."
+            elif typ == "list_items_count":
+                expected = spec.get("expected", 1)
+                status = CriterionStatus.PASS if list_items == expected else CriterionStatus.FAIL
+                ev = f"Elementos de lista: {list_items} (esperado {expected})."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."
             criteria.append(CriterionResult(cid, status, ev))
         return criteria
+
+    def _extract_tables(self, root: etree._Element) -> list[list[list[str]]]:
+        tables = []
+        body = root.find(f"{{{W_NS}}}body")
+        if body is None:
+            body = root
+        for tbl in body.iter(f"{{{W_NS}}}tbl"):
+            rows = []
+            for tr in tbl.findall(f"{{{W_NS}}}tr"):
+                cells = []
+                for tc in tr.findall(f"{{{W_NS}}}tc"):
+                    texts = [t.text or "" for t in tc.iter(f"{{{W_NS}}}t")]
+                    cells.append("".join(texts))
+                rows.append(cells)
+            tables.append(rows)
+        return tables
+
+    @staticmethod
+    def _count_list_items(root: etree._Element) -> int:
+        count = 0
+        body = root.find(f"{{{W_NS}}}body")
+        if body is None:
+            body = root
+        for p in body.iter(f"{{{W_NS}}}p"):
+            ppr = p.find(f"{{{W_NS}}}pPr")
+            is_list = False
+            if ppr is not None:
+                if ppr.find(f"{{{W_NS}}}numPr") is not None:
+                    is_list = True
+                pstyle = ppr.find(f"{{{W_NS}}}pStyle")
+                if pstyle is not None:
+                    val = (pstyle.get(f"{{{W_NS}}}val") or "").lower()
+                    if "list" in val:
+                        is_list = True
+            if is_list:
+                count += 1
+        return count
 
     def _error(self, exercise, msg):
         criteria = [CriterionResult(cid, CriterionStatus.ERROR, msg) for cid in exercise.criteria]

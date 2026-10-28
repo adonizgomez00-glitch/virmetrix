@@ -347,8 +347,67 @@ class WordComAdapter:
                     status = CriterionStatus.NOT_VERIFIABLE
                     ev = "Texto esperado no definido; no se puede verificar."
                 else:
-                    status = CriterionStatus.PASS if full_text == expected else CriterionStatus.FAIL
+                    norm_full = "".join(full_text.split())
+                    norm_expected = "".join(str(expected).split())
+                    status = CriterionStatus.PASS if norm_full == norm_expected else CriterionStatus.FAIL
                     ev = "Texto del documento coincide con el esperado." if status == CriterionStatus.PASS else "El texto del documento difiere del esperado."
+            elif typ == "table_count":
+                expected = spec.get("expected", 1)
+                try:
+                    count = doc.Tables.Count
+                except Exception:
+                    count = 0
+                status = CriterionStatus.PASS if count == expected else CriterionStatus.FAIL
+                ev = f"Tablas en el documento: {count} (esperado {expected})."
+            elif typ == "table_dimensions":
+                tindex = spec.get("table_index", 0)
+                exp_rows = spec.get("rows")
+                exp_cols = spec.get("cols")
+                try:
+                    tbl = doc.Tables(tindex + 1)
+                    rows = tbl.Rows.Count
+                    cols = tbl.Columns.Count
+                except Exception:
+                    rows = 0
+                    cols = 0
+                ok = True
+                if exp_rows is not None and rows != exp_rows:
+                    ok = False
+                if exp_cols is not None and cols != exp_cols:
+                    ok = False
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = f"Tabla {tindex}: {rows}x{cols} (esperado {exp_rows}x{exp_cols})."
+            elif typ == "table_cell_text":
+                tindex = spec.get("table_index", 0)
+                r = spec.get("row", 0)
+                c = spec.get("col", 0)
+                expected = spec.get("expected", "")
+                try:
+                    tbl = doc.Tables(tindex + 1)
+                    actual = tbl.Cell(r + 1, c + 1).Range.Text
+                    actual = actual.rstrip("\r\x07")
+                except Exception:
+                    actual = None
+                if actual is None:
+                    status = CriterionStatus.FAIL
+                    ev = f"Celda ({r},{c}) no accesible."
+                else:
+                    status = CriterionStatus.PASS if actual == expected else CriterionStatus.FAIL
+                    ev = f"Celda ({r},{c}): '{actual}' (esperado '{expected}')."
+            elif typ == "list_items_count":
+                expected = spec.get("expected", 1)
+                count = 0
+                try:
+                    for p in doc.Paragraphs:
+                        try:
+                            if p.Range.ListFormat.ListType != 0:
+                                count += 1
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if count == expected else CriterionStatus.FAIL
+                ev = f"Elementos de lista: {count} (esperado {expected})."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

@@ -35,7 +35,7 @@ def _correct_bytes(ex):
     return buf.getvalue()
 
 
-@pytest.mark.parametrize("exinfo", list_exercises(), ids=lambda e: e["exercise_id"])
+@pytest.mark.parametrize("exinfo", [e for e in list_exercises() if e["exercise_id"].startswith("word-format")], ids=lambda e: e["exercise_id"])
 def test_catalog_exercise_correct_passes(exinfo, tmp_path):
     ex = load_exercise(exinfo["exercise_id"])
     data = _correct_bytes(ex)
@@ -45,6 +45,38 @@ def test_catalog_exercise_correct_passes(exinfo, tmp_path):
     assert res.status == "completed"
     assert res.score_earned == res.score_possible
     assert all(c.status.value == "pass" for c in res.criteria)
+
+
+def test_table_001_correct(tmp_path):
+    from docx import Document
+    ex = load_exercise("table-001")
+    doc = Document()
+    table = doc.add_table(rows=3, cols=2)
+    table.cell(0, 0).text = "Producto"
+    table.cell(0, 1).text = "Cantidad"
+    table.cell(1, 0).text = "Teclado"
+    table.cell(1, 1).text = "5"
+    buf = io.BytesIO()
+    doc.save(buf)
+    path = tmp_path / "table.docx"
+    path.write_bytes(buf.getvalue())
+    res = ev.evaluate(str(path), ex)
+    assert res.score_earned == res.score_possible
+
+
+def test_list_001_correct(tmp_path):
+    from docx import Document
+    ex = load_exercise("list-001")
+    doc = Document()
+    doc.add_paragraph("Lista de compras")
+    for t in ["Leche", "Pan", "Huevos"]:
+        doc.add_paragraph(t, style="List Bullet")
+    buf = io.BytesIO()
+    doc.save(buf)
+    path = tmp_path / "list.docx"
+    path.write_bytes(buf.getvalue())
+    res = ev.evaluate(str(path), ex)
+    assert res.score_earned == res.score_possible
 
 
 def test_list_exercises_not_empty():

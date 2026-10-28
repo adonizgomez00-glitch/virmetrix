@@ -1,0 +1,33 @@
+{
+  "exercise_id": "list-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar tablas y listas (MO-100)",
+  "instructions": "Convierte los tres párrafos en una lista con viñetas.",
+  "target_phrase": "Lista de compras",
+  "expected_text": "Lista de compras\nLeche\nPan\nHuevos",
+  "criteria": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "target_occurrences",
+      "target": "Lista de compras",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "list_items_count",
+      "expected": 3
+    },
+    {
+      "id": "C3",
+      "type": "document_text_equals",
+      "expected": "Lista de compras\nLeche\nPan\nHuevos"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

@@ -1,0 +1,53 @@
+{
+  "exercise_id": "table-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar tablas y listas (MO-100)",
+  "instructions": "Inserta una tabla de 3 filas y 2 columnas. Primera fila: 'Producto' y 'Cantidad'. Segunda fila: 'Teclado' y '5'.",
+  "criteria": [
+    "C1",
+    "C2",
+    "C3",
+    "C4",
+    "C5"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "table_dimensions",
+      "table_index": 0,
+      "rows": 3,
+      "cols": 2
+    },
+    {
+      "id": "C3",
+      "type": "table_cell_text",
+      "table_index": 0,
+      "row": 0,
+      "col": 0,
+      "expected": "Producto"
+    },
+    {
+      "id": "C4",
+      "type": "table_cell_text",
+      "table_index": 0,
+      "row": 0,
+      "col": 1,
+      "expected": "Cantidad"
+    },
+    {
+      "id": "C5",
+      "type": "table_cell_text",
+      "table_index": 0,
+      "row": 1,
+      "col": 0,
+      "expected": "Teclado"
+    }
+  ],
+  "rules_version": "1.0.0"
+}
