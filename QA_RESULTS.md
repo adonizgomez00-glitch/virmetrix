@@ -99,6 +99,14 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Criterios: imágenes (texto alternativo) y cuadros de texto.
 - COM: pendiente validación en Windows.
 
+## ITER-010 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1.
+- Comando: `pytest -q` → **51 passed, 0 failed**.
+- Nuevos ejercicios: `doc-manage-001`, `doc-manage-002`, `doc-manage-003`.
+- Criterios: encabezados, orientación y propiedades.
+- COM: pendiente validación en Windows.
+
 ## Protocolo de actualización
 
 Para cada iteración incluir:

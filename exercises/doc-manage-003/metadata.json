@@ -1,0 +1,19 @@
+{
+  "exercise_id": "doc-manage-003",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar documentos (MO-100)",
+  "instructions": "Establece el título del documento en 'Informe final' en las propiedades.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "doc_property",
+      "property": "Title",
+      "expected": "Informe final"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

@@ -74,6 +74,10 @@ class PortableDocxEvaluator:
         drawing_count = 0
         alt_texts: list[str] = []
         textbox_texts: list[str] = []
+        header_texts: list[str] = []
+        footer_texts: list[str] = []
+        core_props: dict = {}
+        page_orient = None
 
         # Security / validation
         if not path.is_file():
@@ -133,6 +137,45 @@ class PortableDocxEvaluator:
                         textbox_texts.append("".join(t.text or "" for t in tb.iter(f"{{{W_NS}}}t")))
                 except Exception:
                     pass
+                # headers/footers
+                for name in zf.namelist():
+                    if name.startswith("word/header") and name.endswith(".xml"):
+                        try:
+                            header_texts.append(zf.read(name).decode("utf-8", errors="ignore"))
+                        except Exception:
+                            pass
+                    if name.startswith("word/footer") and name.endswith(".xml"):
+                        try:
+                            footer_texts.append(zf.read(name).decode("utf-8", errors="ignore"))
+                        except Exception:
+                            pass
+                # core properties
+                if "docProps/core.xml" in zf.namelist():
+                    try:
+                        core_xml = zf.read("docProps/core.xml").decode("utf-8", errors="ignore")
+                        core_root = etree.fromstring(core_xml.encode("utf-8"))
+                        for el in core_root.iter():
+                            tag = el.tag.split("}")[-1]
+                            if el.text and el.text.strip():
+                                core_props[tag] = el.text.strip()
+                    except Exception:
+                        pass
+                # page orientation
+                try:
+                    sectPr = root.find(f".//{{{W_NS}}}sectPr")
+                    if sectPr is not None:
+                        pgSz = sectPr.find(f"{{{W_NS}}}pgSz")
+                        if pgSz is not None:
+                            orient = pgSz.get(f"{{{W_NS}}}orient")
+                            if orient:
+                                page_orient = orient
+                            else:
+                                w = pgSz.get(f"{{{W_NS}}}w")
+                                h = pgSz.get(f"{{{W_NS}}}h")
+                                if w and h:
+                                    page_orient = "landscape" if int(w) > int(h) else "portrait"
+                except Exception:
+                    pass
         except (zipfile.BadZipFile, etree.XMLSyntaxError, Exception) as e:
             return self._error(exercise, f"Error al leer el DOCX: {type(e).__name__}")
 
@@ -152,7 +195,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -341,10 +384,13 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None):
         tables = tables or []
         alt_texts = alt_texts or []
         textbox_texts = textbox_texts or []
+        header_texts = header_texts or []
+        footer_texts = footer_texts or []
+        core_props = core_props or {}
         criteria = []
         for spec in specs:
             cid = spec["id"]
@@ -487,6 +533,30 @@ class PortableDocxEvaluator:
                 ok = any(expected in (t or "") for t in textbox_texts)
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = "Cuadro de texto contiene el texto esperado." if status == CriterionStatus.PASS else "Cuadro de texto ausente o incorrecto."
+            elif typ == "header_contains":
+                expected = spec.get("expected", "")
+                ok = any(expected in (h or "") for h in header_texts)
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Encabezado contiene el texto esperado." if status == CriterionStatus.PASS else "Encabezado ausente o incorrecto."
+            elif typ == "footer_contains":
+                expected = spec.get("expected", "")
+                ok = any(expected in (f or "") for f in footer_texts)
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Pie de página contiene el texto esperado." if status == CriterionStatus.PASS else "Pie de página ausente o incorrecto."
+            elif typ == "doc_property":
+                prop = spec.get("property", "")
+                expected = spec.get("expected", "")
+                actual = None
+                for k, v in core_props.items():
+                    if k.lower() == str(prop).lower():
+                        actual = v
+                        break
+                status = CriterionStatus.PASS if actual == expected else CriterionStatus.FAIL
+                ev = f"Propiedad '{prop}': '{actual}' (esperado '{expected}')."
+            elif typ == "page_orientation":
+                expected = spec.get("expected", "portrait")
+                status = CriterionStatus.PASS if (page_orient or "").lower().startswith(expected.lower()) else CriterionStatus.FAIL
+                ev = f"Orientación: {page_orient} (esperado {expected})."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

@@ -1,0 +1,18 @@
+{
+  "exercise_id": "doc-manage-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar documentos (MO-100)",
+  "instructions": "Configura la orientación de la página en horizontal (paisaje).",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "page_orientation",
+      "expected": "landscape"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

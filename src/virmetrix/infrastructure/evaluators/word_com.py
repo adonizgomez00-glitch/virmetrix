@@ -495,6 +495,55 @@ class WordComAdapter:
                     pass
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = "Cuadro de texto contiene el texto esperado." if status == CriterionStatus.PASS else "Cuadro de texto ausente o incorrecto."
+            elif typ == "header_contains":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    txt = doc.Sections(1).Headers(1).Range.Text or ""
+                    ok = expected in txt
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Encabezado contiene el texto esperado." if status == CriterionStatus.PASS else "Encabezado ausente o incorrecto."
+            elif typ == "footer_contains":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    txt = doc.Sections(1).Footers(1).Range.Text or ""
+                    ok = expected in txt
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Pie de página contiene el texto esperado." if status == CriterionStatus.PASS else "Pie de página ausente o incorrecto."
+            elif typ == "doc_property":
+                prop = spec.get("property", "")
+                expected = spec.get("expected", "")
+                actual = None
+                try:
+                    actual = doc.BuiltInDocumentProperties(prop).Value
+                except Exception:
+                    try:
+                        actual = doc.CustomDocumentProperties(prop).Value
+                    except Exception:
+                        actual = None
+                status = CriterionStatus.PASS if str(actual) == str(expected) else CriterionStatus.FAIL
+                ev = f"Propiedad '{prop}': '{actual}' (esperado '{expected}')."
+            elif typ == "page_orientation":
+                expected = spec.get("expected", "portrait").lower()
+                actual = None
+                try:
+                    actual = doc.PageSetup.Orientation
+                except Exception:
+                    actual = None
+                # 1 = portrait, 2 = landscape
+                if actual == 1:
+                    actual_str = "portrait"
+                elif actual == 2:
+                    actual_str = "landscape"
+                else:
+                    actual_str = str(actual)
+                status = CriterionStatus.PASS if actual_str == expected else CriterionStatus.FAIL
+                ev = f"Orientación: {actual_str} (esperado {expected})."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

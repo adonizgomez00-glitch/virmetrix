@@ -100,6 +100,36 @@
         "docx_portable",
         "word_com"
       ]
+    },
+    {
+      "exercise_id": "doc-manage-001",
+      "title": "Encabezado principal",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-002",
+      "title": "Orientación horizontal",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-003",
+      "title": "Título del documento",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
     }
   ]
 }
