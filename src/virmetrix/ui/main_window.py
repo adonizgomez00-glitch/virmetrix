@@ -11,6 +11,7 @@ from PySide6.QtCore import QThread, QTimer, Qt
 from PySide6.QtWidgets import (
     QApplication,
     QComboBox,
+    QHBoxLayout,
     QLabel,
     QMainWindow,
     QMessageBox,
@@ -27,16 +28,17 @@ from virmetrix.infrastructure.catalog.loader import list_exercises, load_exercis
 from virmetrix.infrastructure.persistence.sqlite import AttemptStore
 from virmetrix.ui.worker import EvaluationWorker
 
-from virmetrix.paths import resource_root
-
-ROOT = resource_root()
+ROOT = Path(__file__).resolve().parents[3]
 EXAM_DURATION_SECONDS = 300
 
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("VirMetrix")
+        self.setWindowTitle("VirMetrix — Práctica MOS Word (MO-100)")
+        self.resize(960, 720)
+        self.setMinimumSize(820, 620)
+
         self.orch = EvaluationOrchestrator()
         self.store = AttemptStore(Path.home() / ".virmetrix" / "history.sqlite")
 
@@ -57,124 +59,129 @@ class MainWindow(QMainWindow):
 
         central = QWidget()
         self.setCentralWidget(central)
-        layout = QVBoxLayout(central)
+        main_layout = QHBoxLayout(central)
 
-        # Modo de uso
-        layout.addWidget(QLabel("Modo:"))
+        # ---- Panel izquierdo: controles ----
+        left = QVBoxLayout()
+
+        left.addWidget(QLabel("Modo de uso:"))
         self.mode_use_combo = QComboBox()
         self.mode_use_combo.addItem("Práctica (sin tiempo)", ExamMode.PRACTICE)
         self.mode_use_combo.addItem("Examen (cronometrado)", ExamMode.EXAM)
         self.mode_use_combo.setAccessibleName("Modo de uso")
-        self.mode_use_combo.setToolTip("Selecciona práctica (sin tiempo) o examen (cronometrado).")
+        self.mode_use_combo.setToolTip("Práctica: sin tiempo. Examen: cronometrado.")
         self.mode_use_combo.currentIndexChanged.connect(self._on_mode_changed)
-        layout.addWidget(self.mode_use_combo)
+        left.addWidget(self.mode_use_combo)
 
-        # Ejercicio
-        layout.addWidget(QLabel("Ejercicio:"))
+        left.addWidget(QLabel("Ejercicio:"))
         self.exercise_combo = QComboBox()
         for ex in self.exercises:
             self.exercise_combo.addItem(ex["title"], ex["exercise_id"])
         self.exercise_combo.setAccessibleName("Selector de ejercicio")
         self.exercise_combo.setToolTip("Elige el ejercicio a practicar.")
         self.exercise_combo.currentIndexChanged.connect(self._on_exercise_changed)
-        layout.addWidget(self.exercise_combo)
+        left.addWidget(self.exercise_combo)
+
+        self.step_label = QLabel("")
+        self.step_label.setAccessibleName("Paso actual")
+        left.addWidget(self.step_label)
 
         self.instructions_label = QLabel("")
         self.instructions_label.setAccessibleName("Instrucciones del ejercicio")
         self.instructions_label.setWordWrap(True)
-        layout.addWidget(self.instructions_label)
+        left.addWidget(self.instructions_label)
 
-        # Temporizador
-        self.timer_label = QLabel("Tiempo: ∞")
-        self.timer_label.setAccessibleName("Temporizador")
-        layout.addWidget(self.timer_label)
-
-        # Modo de evaluación
+        left.addWidget(QLabel("Modo de evaluación:"))
         self.eval_mode_combo = QComboBox()
         for mode, (avail, reason) in self.orch.available_modes().items():
             label = f"{mode} — {'disponible' if avail else 'NO disponible: ' + reason}"
             self.eval_mode_combo.addItem(label, mode)
         self.eval_mode_combo.setAccessibleName("Modo de evaluación")
         self.eval_mode_combo.setToolTip("Selecciona el evaluador: portable o Word COM.")
-        layout.addWidget(self.eval_mode_combo)
-        self.mode_combo = self.eval_mode_combo  # alias for tests/compatibility
+        left.addWidget(self.eval_mode_combo)
+        self.mode_combo = self.eval_mode_combo
 
-        # Botones
-        btn_copy = QPushButton("Crear copia de trabajo")
+        btn_copy = QPushButton("1. Crear copia de trabajo")
         btn_copy.setAccessibleName("Crear copia de trabajo")
         btn_copy.setToolTip("Crea una copia de trabajo del documento de referencia.")
         btn_copy.clicked.connect(self.create_copy)
-        layout.addWidget(btn_copy)
+        left.addWidget(btn_copy)
 
-        btn_open = QPushButton("Abrir documento")
+        btn_open = QPushButton("2. Abrir documento en Word")
         btn_open.setAccessibleName("Abrir documento")
-        btn_open.setToolTip("Abre la copia de trabajo en Microsoft Word (o el programa predeterminado).")
+        btn_open.setToolTip("Abre la copia de trabajo en Microsoft Word.")
         btn_open.clicked.connect(self.open_document)
-        layout.addWidget(btn_open)
+        left.addWidget(btn_open)
 
-        nav_layout = QVBoxLayout()
-        btn_prev = QPushButton("Anterior")
+        nav_layout = QHBoxLayout()
+        btn_prev = QPushButton("◀ Anterior")
         btn_prev.setAccessibleName("Ejercicio anterior")
-        btn_prev.setToolTip("Ir al ejercicio anterior.")
         btn_prev.clicked.connect(self.prev_exercise)
         nav_layout.addWidget(btn_prev)
-        btn_next = QPushButton("Siguiente")
+        btn_next = QPushButton("Siguiente ▶")
         btn_next.setAccessibleName("Ejercicio siguiente")
-        btn_next.setToolTip("Ir al ejercicio siguiente.")
         btn_next.clicked.connect(self.next_exercise)
         nav_layout.addWidget(btn_next)
-        layout.addLayout(nav_layout)
+        left.addLayout(nav_layout)
 
         self.btn_start = QPushButton("Iniciar sesión")
         self.btn_start.setAccessibleName("Iniciar sesión")
-        self.btn_start.setToolTip("Inicia la sesión de práctica o examen.")
         self.btn_start.clicked.connect(self.start_session)
-        layout.addWidget(self.btn_start)
+        left.addWidget(self.btn_start)
 
         self.btn_pause = QPushButton("Pausar")
         self.btn_pause.setAccessibleName("Pausar o reanudar")
-        self.btn_pause.setToolTip("Pausa o reanuda la sesión.")
         self.btn_pause.clicked.connect(self.toggle_pause)
         self.btn_pause.setEnabled(False)
-        layout.addWidget(self.btn_pause)
+        left.addWidget(self.btn_pause)
 
-        self.btn_eval = QPushButton("Evaluar")
+        self.btn_eval = QPushButton("3. Evaluar")
         self.btn_eval.setAccessibleName("Evaluar")
         self.btn_eval.setToolTip("Evalúa la copia de trabajo (Enter).")
         self.btn_eval.clicked.connect(self.evaluate)
         self.btn_eval.setDefault(True)
-        layout.addWidget(self.btn_eval)
+        left.addWidget(self.btn_eval)
+
+        self.btn_cancel = QPushButton("Cancelar")
+        self.btn_cancel.setAccessibleName("Cancelar evaluación")
+        self.btn_cancel.clicked.connect(self.cancel_evaluation)
+        self.btn_cancel.setEnabled(False)
+        left.addWidget(self.btn_cancel)
+
+        self.btn_finish = QPushButton("Finalizar sesión")
+        self.btn_finish.setAccessibleName("Finalizar sesión")
+        self.btn_finish.clicked.connect(self.finish_session)
+        self.btn_finish.setEnabled(False)
+        left.addWidget(self.btn_finish)
+
+        btn_about = QPushButton("Acerca de")
+        btn_about.setAccessibleName("Acerca de VirMetrix")
+        btn_about.clicked.connect(self._show_about)
+        left.addWidget(btn_about)
+
+        left.addStretch()
+
+        # ---- Panel derecho: timer y resultados ----
+        right = QVBoxLayout()
+        self.timer_label = QLabel("Tiempo: ∞")
+        self.timer_label.setAccessibleName("Temporizador")
+        self.timer_label.setStyleSheet("font-size: 18px; font-weight: bold;")
+        right.addWidget(self.timer_label)
 
         self.progress = QProgressBar()
         self.progress.setRange(0, 0)
         self.progress.setVisible(False)
         self.progress.setAccessibleName("Progreso de evaluación")
-        layout.addWidget(self.progress)
+        right.addWidget(self.progress)
 
-        self.btn_cancel = QPushButton("Cancelar")
-        self.btn_cancel.setAccessibleName("Cancelar evaluación")
-        self.btn_cancel.setToolTip("Cancela la evaluación en curso.")
-        self.btn_cancel.clicked.connect(self.cancel_evaluation)
-        self.btn_cancel.setEnabled(False)
-        layout.addWidget(self.btn_cancel)
-
-        self.btn_finish = QPushButton("Finalizar")
-        self.btn_finish.setAccessibleName("Finalizar sesión")
-        self.btn_finish.setToolTip("Finaliza la sesión actual.")
-        self.btn_finish.clicked.connect(self.finish_session)
-        self.btn_finish.setEnabled(False)
-        layout.addWidget(self.btn_finish)
-
-        btn_about = QPushButton("Acerca de")
-        btn_about.setAccessibleName("Acerca de VirMetrix")
-        btn_about.setToolTip("Información de la aplicación.")
-        btn_about.clicked.connect(self._show_about)
-        layout.addWidget(btn_about)
-
+        right.addWidget(QLabel("Resultados:"))
         self.result_view = QTextEdit()
         self.result_view.setReadOnly(True)
         self.result_view.setAccessibleName("Resultados de la evaluación")
-        layout.addWidget(self.result_view)
+        right.addWidget(self.result_view)
+
+        main_layout.addLayout(left, 2)
+        main_layout.addLayout(right, 3)
 
         self._load_current_exercise()
         self._timer = QTimer(self)
@@ -185,7 +192,6 @@ class MainWindow(QMainWindow):
         eid = self.session.current_exercise_id
         if eid is None:
             return
-        # sync combo
         idx = self.exercise_combo.findData(eid)
         if idx >= 0:
             self.exercise_combo.blockSignals(True)
@@ -193,6 +199,7 @@ class MainWindow(QMainWindow):
             self.exercise_combo.blockSignals(False)
         self.exercise = load_exercise(eid)
         self.instructions_label.setText(self.exercise.instructions)
+        self.step_label.setText(f"Ejercicio {self.session.current_index + 1} de {len(self.session.exercise_ids)}: {self.exercise.exercise_id}")
         self.work_copy = None
 
     def _reference_path(self) -> Path:
@@ -208,10 +215,8 @@ class MainWindow(QMainWindow):
 
     def _on_exercise_changed(self, _index):
         eid = self.exercise_combo.currentData()
-        if eid and eid != self.session.current_exercise_id:
-            # keep session index in sync if possible
-            if eid in self.session.exercise_ids:
-                self.session.current_index = self.session.exercise_ids.index(eid)
+        if eid and eid in self.session.exercise_ids:
+            self.session.current_index = self.session.exercise_ids.index(eid)
         self._load_current_exercise()
         self.work_copy = None
         self.result_view.append(f"Ejercicio seleccionado: {eid}")
@@ -225,9 +230,18 @@ class MainWindow(QMainWindow):
         self.work_copy = self.orch.create_work_copy(str(ref), str(work_dir))
         self.result_view.append(f"Copia de trabajo creada: {self.work_copy}")
 
+    def open_document(self):
+        if not self.work_copy:
+            QMessageBox.warning(self, "Aviso", "Primero crea una copia de trabajo.")
+            return
+        try:
+            self.orch.open_document(self.work_copy)
+            self.result_view.append(f"Abriendo: {self.work_copy}")
+        except Exception as e:  # noqa: BLE001
+            QMessageBox.critical(self, "Error", f"No se pudo abrir el documento: {e}")
+
     def start_session(self):
         if self.session.status == SessionStatus.FINISHED:
-            # reset
             self.session = ExamSession(
                 mode=self.mode_use_combo.currentData(),
                 exercise_ids=[e["exercise_id"] for e in self.exercises],
@@ -273,29 +287,6 @@ class MainWindow(QMainWindow):
         if self.session.prev_exercise():
             self._load_current_exercise()
             self.work_copy = None
-
-    def open_document(self):
-        if not self.work_copy:
-            QMessageBox.warning(self, "Aviso", "Primero crea una copia de trabajo.")
-            return
-        try:
-            self.orch.open_document(self.work_copy)
-            self.result_view.append(f"Abriendo: {self.work_copy}")
-        except Exception as e:  # noqa: BLE001
-            QMessageBox.critical(self, "Error", f"No se pudo abrir el documento: {e}")
-
-    def cancel_evaluation(self):
-        if self._worker is not None:
-            try:
-                self._worker.cancel()
-            except Exception:
-                pass
-        if self._thread is not None and self._thread.isRunning():
-            self._thread.wait(2000)
-        self.progress.setVisible(False)
-        self.btn_cancel.setEnabled(False)
-        self.btn_eval.setEnabled(True)
-        self.result_view.append("Evaluaci\u00f3n cancelada.")
 
     def evaluate(self):
         if not self.work_copy:
@@ -360,6 +351,19 @@ class MainWindow(QMainWindow):
         self.result_view.setPlainText(f"Error: {msg}")
         self.btn_eval.setEnabled(True)
 
+    def cancel_evaluation(self):
+        if self._worker is not None:
+            try:
+                self._worker.cancel()
+            except Exception:
+                pass
+        if self._thread is not None and self._thread.isRunning():
+            self._thread.wait(2000)
+        self.progress.setVisible(False)
+        self.btn_cancel.setEnabled(False)
+        self.btn_eval.setEnabled(True)
+        self.result_view.append("Evaluación cancelada.")
+
     def finish_session(self):
         if self.session.status == SessionStatus.FINISHED:
             return
@@ -375,15 +379,14 @@ class MainWindow(QMainWindow):
         self.btn_pause.setText("Pausar")
         self.timer_label.setText(f"Tiempo: {self.session.format_remaining()}")
 
-
     def _show_about(self):
         QMessageBox.information(
             self,
             "Acerca de VirMetrix",
             "VirMetrix — simulador de práctica para MOS Word Associate (MO-100, Office 2019).\n"
             "Proyecto independiente, no afiliado a Microsoft.\n"
-            "Versión: 0.1.0 (ITER-006)\n"
-            "Licencia: por definir.",
+            "Versión: 0.1.0 (ITER-016)\n"
+            "Licencia: gratuito para práctica y autoevaluación.",
         )
 
 

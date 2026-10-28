@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-016 Build)  
-**Estado global:** Gate QA + progreso/cancelación. 41 ejercicios. 65 tests pass. Cobertura 80.52%. Pendiente: validación Windows y empaquetado final.
+**Última actualización:** 2026-10-27 (ITER-017 Build)  
+**Estado global:** UI rediseñada (estilo gmetrix). 41 ejercicios. 65 tests pass. Cobertura 80.52%. Pendiente: validación Windows.
 
 ## Resumen
 
