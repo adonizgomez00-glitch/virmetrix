@@ -1,0 +1,24 @@
+{
+  "exercise_id": "collab-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar la colaboración en documentos (MO-100)",
+  "instructions": "Añade un comentario con el texto 'Revisar este párrafo.'",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "comment_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "comment_contains",
+      "expected": "Revisar este párrafo."
+    }
+  ],
+  "rules_version": "1.0.0"
+}

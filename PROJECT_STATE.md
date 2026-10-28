@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-010 Build)  
-**Estado global:** ITER-001..009 cerrados; ITER-010 en progreso (administrar documentos).
+**Última actualización:** 2026-10-27 (ITER-011 Build)  
+**Estado global:** ITER-001..010 cerrados; ITER-011 en progreso (colaboración). Cobertura de los seis dominios MO-100.
 
 ## Resumen
 

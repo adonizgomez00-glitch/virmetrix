@@ -107,6 +107,14 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Criterios: encabezados, orientación y propiedades.
 - COM: pendiente validación en Windows.
 
+## ITER-011 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1.
+- Comando: `pytest -q` → **53 passed, 0 failed**.
+- Nuevos ejercicios: `collab-001`, `collab-002`.
+- Cobertura: los seis dominios de MO-100 tienen al menos un ejercicio (16 ejercicios en total).
+- COM: pendiente validación en Windows.
+
 ## Protocolo de actualización
 
 Para cada iteración incluir:

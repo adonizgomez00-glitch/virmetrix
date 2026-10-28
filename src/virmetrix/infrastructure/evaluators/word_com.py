@@ -544,6 +544,35 @@ class WordComAdapter:
                     actual_str = str(actual)
                 status = CriterionStatus.PASS if actual_str == expected else CriterionStatus.FAIL
                 ev = f"Orientación: {actual_str} (esperado {expected})."
+            elif typ == "comment_contains":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    for cm in doc.Comments:
+                        if expected in (cm.Range.Text or ""):
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Comentario contiene el texto esperado." if status == CriterionStatus.PASS else "Comentario ausente o incorrecto."
+            elif typ == "comment_count":
+                expected = spec.get("expected", 1)
+                try:
+                    count = doc.Comments.Count
+                except Exception:
+                    count = 0
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Comentarios: {count} (esperado >= {expected})."
+            elif typ == "tracked_changes_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    present = doc.Revisions.Count > 0
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Se detectaron cambios registrados." if present else "No se detectaron cambios registrados."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

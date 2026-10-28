@@ -78,6 +78,8 @@ class PortableDocxEvaluator:
         footer_texts: list[str] = []
         core_props: dict = {}
         page_orient = None
+        comments_text = ""
+        tracked_change_count = 0
 
         # Security / validation
         if not path.is_file():
@@ -149,6 +151,18 @@ class PortableDocxEvaluator:
                             footer_texts.append(zf.read(name).decode("utf-8", errors="ignore"))
                         except Exception:
                             pass
+                # comments
+                if "word/comments.xml" in zf.namelist():
+                    try:
+                        comments_text = zf.read("word/comments.xml").decode("utf-8", errors="ignore")
+                    except Exception:
+                        pass
+                # tracked changes count
+                try:
+                    tracked_change_count = doc_xml.decode("utf-8", errors="ignore").count("<w:ins ") + doc_xml.decode("utf-8", errors="ignore").count("<w:del ")
+                except Exception:
+                    tracked_change_count = 0
+
                 # core properties
                 if "docProps/core.xml" in zf.namelist():
                     try:
@@ -195,7 +209,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -384,7 +398,7 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0):
         tables = tables or []
         alt_texts = alt_texts or []
         textbox_texts = textbox_texts or []
@@ -557,6 +571,20 @@ class PortableDocxEvaluator:
                 expected = spec.get("expected", "portrait")
                 status = CriterionStatus.PASS if (page_orient or "").lower().startswith(expected.lower()) else CriterionStatus.FAIL
                 ev = f"Orientación: {page_orient} (esperado {expected})."
+            elif typ == "comment_contains":
+                expected = spec.get("expected", "")
+                status = CriterionStatus.PASS if expected and expected in (comments_text or "") else CriterionStatus.FAIL
+                ev = "Comentario contiene el texto esperado." if status == CriterionStatus.PASS else "Comentario ausente o incorrecto."
+            elif typ == "comment_count":
+                expected = spec.get("expected", 1)
+                count = (comments_text or "").count("<w:comment ")
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Comentarios: {count} (esperado >= {expected})."
+            elif typ == "tracked_changes_present":
+                expected = spec.get("expected", True)
+                present = tracked_change_count > 0
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Se detectaron cambios registrados." if present else "No se detectaron cambios registrados."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

@@ -1,0 +1,18 @@
+{
+  "exercise_id": "collab-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar la colaboración en documentos (MO-100)",
+  "instructions": "Activa el control de cambios y realiza una modificación en el documento.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "tracked_changes_present",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0"
+}

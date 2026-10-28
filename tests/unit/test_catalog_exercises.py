@@ -279,6 +279,71 @@ def test_doc_manage_003_property(tmp_path):
     assert res.score_earned == res.score_possible
 
 
+def test_collab_001_comment(tmp_path):
+    import io, zipfile
+    ex = load_exercise("collab-001")
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    content_types = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+  <Override PartName="/word/comments.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.comments+xml"/>
+</Types>'''
+    rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>'''
+    doc_rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/comments" Target="comments.xml"/>
+</Relationships>'''
+    document = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="{W}"><w:body><w:p><w:r><w:t>x</w:t></w:r></w:p></w:body></w:document>'''
+    comments = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:comments xmlns:w="{W}">
+  <w:comment w:id="0" w:author="A"><w:p><w:r><w:t>Revisar este párrafo.</w:t></w:r></w:p></w:comment>
+</w:comments>'''
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("[Content_Types].xml", content_types)
+        zf.writestr("_rels/.rels", rels)
+        zf.writestr("word/_rels/document.xml.rels", doc_rels)
+        zf.writestr("word/document.xml", document)
+        zf.writestr("word/comments.xml", comments)
+    path = tmp_path / "c.docx"
+    path.write_bytes(buf.getvalue())
+    res = ev.evaluate(str(path), ex)
+    assert res.score_earned == res.score_possible
+
+
+def test_collab_002_tracked(tmp_path):
+    import io, zipfile
+    ex = load_exercise("collab-002")
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    content_types = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>'''
+    rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>'''
+    document = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="{W}"><w:body><w:p><w:ins w:id="1" w:author="A" w:date="2020-01-01T00:00:00Z"><w:r><w:t>insertado</w:t></w:r></w:ins></w:p></w:body></w:document>'''
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("[Content_Types].xml", content_types)
+        zf.writestr("_rels/.rels", rels)
+        zf.writestr("word/document.xml", document)
+    path = tmp_path / "c2.docx"
+    path.write_bytes(buf.getvalue())
+    res = ev.evaluate(str(path), ex)
+    assert res.score_earned == res.score_possible
+
+
 def test_refs_002_toc(tmp_path):
     import io, zipfile
     ex = load_exercise("refs-002")

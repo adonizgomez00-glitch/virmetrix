@@ -130,6 +130,46 @@
         "docx_portable",
         "word_com"
       ]
+    },
+    {
+      "exercise_id": "collab-001",
+      "title": "Comentario de revisión",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-002",
+      "title": "Control de cambios",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-001",
+      "title": "Comentario de revisión",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-002",
+      "title": "Control de cambios",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
     }
   ]
 }
