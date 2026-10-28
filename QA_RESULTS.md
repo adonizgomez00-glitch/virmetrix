@@ -134,3 +134,32 @@ Nunca reemplazar ‚Äúno ejecutado‚Äù por ‚Äúaprobado‚Äù por inferencia.
 ### Defectos
 - Defecto corregido: `WordComAdapter.is_available()` usaba `Dispatch` y no llamaba `Quit`, dejando un proceso WINWORD residual. Corregido usando `DispatchEx` + `Quit`. Estado: cerrado.
 - Sin defectos abiertos tras la validaciÔøΩn.
+
+## ITER-003 ó ValidaciÛn Windows + Word COM (2026-10-27)
+
+- Entorno: Windows 10 Pro 10.0.19045, Python 3.12.10, Word v16.0, PySide6 6.11.2, pytest 9.1.1.
+- Pruebas autom·ticas: 38 passed, 0 failed.
+
+### ValidaciÛn COM por ejercicio
+
+Referencia (sin formato):
+- word-format-001: 3/5 (C1 pass, C2 fail, C3 fail, C4 pass, C5 pass)
+- word-format-002: 3/5 (C1 pass, C2 fail, C3 fail, C4 pass, C5 pass)
+- word-format-003: 3/5 (C1 pass, C2 fail, C3 fail, C4 pass, C5 pass)
+- word-format-004: 4/5 (C1 pass, C2 fail, C3 pass, C4 pass, C5 pass)
+
+Documento correcto (formato aplicado):
+- word-format-001 (bold 16 pt): 5/5
+- word-format-002 (italic 14 pt): 5/5
+- word-format-003 (bold 18 pt): 5/5
+- word-format-004 (italic 11 pt): 5/5
+
+Documento incorrecto (sin formato, 12 pt):
+- word-format-001: 3/5 (C2 fail, C3 fail)
+- word-format-002: 3/5 (C2 fail, C3 fail)
+- word-format-003: 3/5 (C2 fail, C3 fail)
+- word-format-004: 3/5 (C2 fail, C3 fail)
+
+### Defectos
+- Ninguno nuevo. La detecciÛn de cursiva (run_property italic) funciona correctamente en COM.
+- Sin procesos Word residuales tras las evaluaciones.
