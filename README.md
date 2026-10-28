@@ -87,3 +87,24 @@ Nombre del producto: **VirMetrix**. SAQI es la metodología de desarrollo, no el
 VirMetrix prepara para **Microsoft Office Specialist: Word Associate (Office 2019), examen MO-100**. No utilizar MO-110 como objetivo de este proyecto. Fuente oficial: https://learn.microsoft.com/en-us/credentials/certifications/mos-word-2019/
 
 La página oficial consultada indica 50 minutos, incluye español entre los idiomas y no muestra una fecha de retirada. Confirmar nuevamente antes de cada publicación.
+
+## Empaquetado (ITER-005)
+
+Generar ejecutable con PyInstaller:
+
+Linux:
+```bash
+./scripts/build_linux.sh
+```
+
+Windows (PowerShell):
+```powershell
+.\scripts\build_windows.ps1
+```
+
+Salida: `dist/VirMetrix/` (ejecutable + recursos). Para un instalador `.exe` convencional, usar Inno Setup o NSIS sobre `dist/VirMetrix/`.
+
+Notas:
+- El bundle incluye `exercises/` automáticamente.
+- El historial SQLite se guarda en `%USERPROFILE%\.virmetrix\history.sqlite` (Windows) o `~/.virmetrix/history.sqlite` (Linux).
+- En Windows, el modo `word_com` requiere Microsoft Word de escritorio.

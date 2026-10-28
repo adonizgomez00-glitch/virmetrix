@@ -58,6 +58,15 @@ No se han registrado defectos de implementación porque aún no existe implement
 - UI: sin bloqueo (evaluación en QThread).
 - COM: pendiente validación en Windows.
 
+## ITER-005 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, PyInstaller 6.22.3.
+- Comando: `pyinstaller --clean --noconfirm virmetrix.spec` → build exitoso.
+- Bundle: `dist/VirMetrix/VirMetrix` arranca sin error (QT_QPA_PLATFORM=offscreen).
+- Catálogo: carga desde el bundle (`_internal/exercises/catalog.json`).
+- Pruebas: `pytest -q` → 42 passed, 0 failed.
+- Windows: pendiente build y validación de instalador .exe.
+
 ## Protocolo de actualización
 
 Para cada iteración incluir:

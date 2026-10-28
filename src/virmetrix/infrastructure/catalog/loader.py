@@ -6,8 +6,9 @@ import json
 from pathlib import Path
 
 from virmetrix.domain.ports import ExerciseMetadata
+from virmetrix.paths import resource_root
 
-ROOT = Path(__file__).resolve().parents[4]
+ROOT = resource_root()
 
 
 def list_exercises() -> list[dict]:

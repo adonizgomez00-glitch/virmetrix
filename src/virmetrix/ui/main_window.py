@@ -26,7 +26,9 @@ from virmetrix.infrastructure.catalog.loader import list_exercises, load_exercis
 from virmetrix.infrastructure.persistence.sqlite import AttemptStore
 from virmetrix.ui.worker import EvaluationWorker
 
-ROOT = Path(__file__).resolve().parents[3]
+from virmetrix.paths import resource_root
+
+ROOT = resource_root()
 EXAM_DURATION_SECONDS = 300
 
 

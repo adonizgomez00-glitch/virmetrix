@@ -156,6 +156,13 @@ Se consultó el PDF oficial de MO-100 y se añadieron los dominios, pesos y subo
 - Fase 14 Improve Skills: propuestas en `SKILL_CHANGELOG.md` (P1-P3) pendientes de gobernanza.
 - Release candidate aprobado por el usuario.
 
+## Actualización — 2026-10-27 (ITER-005 Build)
+
+- PyInstaller spec, main.py, paths.py, scripts de build.
+- Bundle Linux validado (arranque + catálogo).
+- Pruebas: 42 pass.
+- Pendiente: build/validación en Windows + instalador.
+
 ## Actualización — 2026-10-27 (ITER-004 Build)
 
 - Modo práctica/examen, temporizador 300 s, pausa/reanudación, finalización idempotente.

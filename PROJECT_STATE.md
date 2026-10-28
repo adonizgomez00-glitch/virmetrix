@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-004 Build)  
-**Estado global:** ITER-001/002/003 cerrados; ITER-004 en progreso (temporizador y modo examen).
+**Última actualización:** 2026-10-27 (ITER-005 Build)  
+**Estado global:** ITER-001..004 cerrados; ITER-005 en progreso (empaquetado Windows).
 
 ## Resumen
 

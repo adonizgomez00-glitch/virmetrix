@@ -366,7 +366,9 @@ class WordComAdapter:
     @staticmethod
     def _load_sidecar(exercise: ExerciseMetadata) -> dict:
         try:
-            base = Path(__file__).resolve().parents[4] / "exercises" / exercise.exercise_id
+            from virmetrix.paths import resource_root
+
+            base = resource_root() / "exercises" / exercise.exercise_id
             meta_path = base / "metadata.json"
             if meta_path.is_file():
                 return json.loads(meta_path.read_text(encoding="utf-8"))

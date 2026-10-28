@@ -177,7 +177,9 @@ class PortableDocxEvaluator:
         # Try to load metadata.json from exercises/<id>/
         try:
             # exercise_id may map to exercises/<id>/metadata.json
-            base = Path(__file__).resolve().parents[4] / "exercises" / exercise.exercise_id
+            from virmetrix.paths import resource_root
+
+            base = resource_root() / "exercises" / exercise.exercise_id
             meta_path = base / "metadata.json"
             if meta_path.is_file():
                 import json
