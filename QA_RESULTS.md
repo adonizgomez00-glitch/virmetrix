@@ -263,3 +263,12 @@ Documento incorrecto (sin formato, 12 pt):
 - UI smoke en modo Word COM: sin congelamiento; historial persistente (5 intentos tras reabrir).
 - Procesos Word residuales: ninguno.
 - App en ejecuciï¿½n: PID 8276, ventana "VirMetrix".
+
+## Validación Windows — Iteraciones ITER-013 e ITER-014 (2026-10-27)
+
+- Entorno: Windows 10 Pro 10.0.19045, Python 3.12.10, Word v16.0, PySide6 6.11.2, pytest 9.1.1.
+- Pruebas automáticas: 53 passed, 0 failed.
+- Nuevos ejercicios validados en COM (referencias): refs-006, table-003, text-para-003, text-para-004 — completados sin excepciones.
+- Funcionalidad "Abrir documento" (ITER-014): os.startfile abre la copia de trabajo en Word correctamente.
+- Procesos Word residuales: ninguno (salvo el abierto intencionalmente por el usuario).
+- App en ejecución: PID 6276, ventana "VirMetrix".
