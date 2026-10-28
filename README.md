@@ -82,6 +82,10 @@ El stack inicial queda aprobado para el MVP:
 
 Nombre del producto: **VirMetrix**. SAQI es la metodología de desarrollo, no el nombre de la aplicación.
 
+## Licencia
+
+VirMetrix es gratuito para practicar y autoevaluarse. No se requiere licencia de pago. El proyecto es independiente y no está afiliado a Microsoft.
+
 ## Corrección de objetivo de certificación
 
 VirMetrix prepara para **Microsoft Office Specialist: Word Associate (Office 2019), examen MO-100**. No utilizar MO-110 como objetivo de este proyecto. Fuente oficial: https://learn.microsoft.com/en-us/credentials/certifications/mos-word-2019/
