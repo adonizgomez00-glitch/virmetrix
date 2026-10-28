@@ -1,0 +1,18 @@
+{
+  "exercise_id": "text-para-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+  "instructions": "Aplica el estilo 'Título 1' a un párrafo.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "paragraph_style",
+      "expected": "Heading1"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

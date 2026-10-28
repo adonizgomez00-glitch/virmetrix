@@ -1,0 +1,23 @@
+{
+  "exercise_id": "doc-manage-007",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar documentos (MO-100)",
+  "instructions": "Configura los cuatro márgenes del documento a 1 pulgada.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "page_margins",
+      "expected": {
+        "top": "1440",
+        "bottom": "1440",
+        "left": "1440",
+        "right": "1440"
+      }
+    }
+  ],
+  "rules_version": "1.0.0"
+}

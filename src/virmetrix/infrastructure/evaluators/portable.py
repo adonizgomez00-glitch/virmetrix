@@ -209,7 +209,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -398,13 +398,52 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None):
         tables = tables or []
         alt_texts = alt_texts or []
         textbox_texts = textbox_texts or []
         header_texts = header_texts or []
         footer_texts = footer_texts or []
         core_props = core_props or {}
+
+        # Derived data for new criterion types
+        page_margins = {}
+        paragraph_styles: list[str] = []
+        paragraph_indents: list[str] = []
+        paragraph_spacings: list[str] = []
+        section_columns = None
+        has_merged_cell = False
+        has_repeating_header = False
+        if root is not None:
+            sectPr = root.find(f".//{{{W_NS}}}sectPr")
+            if sectPr is not None:
+                pgMar = sectPr.find(f"{{{W_NS}}}pgMar")
+                if pgMar is not None:
+                    for k in ("top", "bottom", "left", "right"):
+                        v = pgMar.get(f"{{{W_NS}}}{k}")
+                        if v is not None:
+                            page_margins[k] = v
+                cols = sectPr.find(f"{{{W_NS}}}cols")
+                if cols is not None:
+                    section_columns = cols.get(f"{{{W_NS}}}num")
+            for p in root.iter(f"{{{W_NS}}}p"):
+                pPr = p.find(f"{{{W_NS}}}pPr")
+                if pPr is not None:
+                    ps = pPr.find(f"{{{W_NS}}}pStyle")
+                    if ps is not None and ps.get(f"{{{W_NS}}}val"):
+                        paragraph_styles.append(ps.get(f"{{{W_NS}}}val"))
+                    ind = pPr.find(f"{{{W_NS}}}ind")
+                    if ind is not None and ind.get(f"{{{W_NS}}}left") is not None:
+                        paragraph_indents.append(ind.get(f"{{{W_NS}}}left"))
+                    spacing = pPr.find(f"{{{W_NS}}}spacing")
+                    if spacing is not None and spacing.get(f"{{{W_NS}}}after") is not None:
+                        paragraph_spacings.append(spacing.get(f"{{{W_NS}}}after"))
+            for tc in root.iter(f"{{{W_NS}}}tc"):
+                if tc.find(f".//{{{W_NS}}}gridSpan") is not None:
+                    has_merged_cell = True
+            for trPr in root.iter(f"{{{W_NS}}}trPr"):
+                if trPr.find(f"{{{W_NS}}}tblHeader") is not None:
+                    has_repeating_header = True
         criteria = []
         for spec in specs:
             cid = spec["id"]
@@ -560,9 +599,11 @@ class PortableDocxEvaluator:
             elif typ == "doc_property":
                 prop = spec.get("property", "")
                 expected = spec.get("expected", "")
+                prop_map = {"title": "title", "author": "creator", "subject": "subject", "creator": "creator"}
+                lookup = prop_map.get(str(prop).lower(), str(prop).lower())
                 actual = None
                 for k, v in core_props.items():
-                    if k.lower() == str(prop).lower():
+                    if k.lower() == lookup:
                         actual = v
                         break
                 status = CriterionStatus.PASS if actual == expected else CriterionStatus.FAIL
@@ -585,6 +626,38 @@ class PortableDocxEvaluator:
                 present = tracked_change_count > 0
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Se detectaron cambios registrados." if present else "No se detectaron cambios registrados."
+            elif typ == "page_margins":
+                expected = spec.get("expected", {})
+                ok = True
+                for k, v in expected.items():
+                    if page_margins.get(k) != str(v):
+                        ok = False
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = f"Márgenes: {page_margins} (esperado {expected})."
+            elif typ == "paragraph_style":
+                expected = spec.get("expected", "")
+                status = CriterionStatus.PASS if expected in paragraph_styles else CriterionStatus.FAIL
+                ev = f"Estilo de párrafo '{expected}' {'aplicado' if status == CriterionStatus.PASS else 'no aplicado'}."
+            elif typ == "section_columns":
+                expected = spec.get("expected", "1")
+                status = CriterionStatus.PASS if str(section_columns) == str(expected) else CriterionStatus.FAIL
+                ev = f"Columnas: {section_columns} (esperado {expected})."
+            elif typ == "paragraph_indent":
+                expected = spec.get("expected", "")
+                status = CriterionStatus.PASS if str(expected) in paragraph_indents else CriterionStatus.FAIL
+                ev = f"Sangría: {paragraph_indents} (esperado {expected})."
+            elif typ == "paragraph_spacing":
+                expected = spec.get("expected", "")
+                status = CriterionStatus.PASS if str(expected) in paragraph_spacings else CriterionStatus.FAIL
+                ev = f"Espaciado: {paragraph_spacings} (esperado {expected})."
+            elif typ == "merged_cell_present":
+                expected = spec.get("expected", True)
+                status = CriterionStatus.PASS if has_merged_cell == bool(expected) else CriterionStatus.FAIL
+                ev = "Celda combinada detectada." if has_merged_cell else "No se detectó celda combinada."
+            elif typ == "repeating_header":
+                expected = spec.get("expected", True)
+                status = CriterionStatus.PASS if has_repeating_header == bool(expected) else CriterionStatus.FAIL
+                ev = "Encabezado de tabla repetido." if has_repeating_header else "No se repite encabezado de tabla."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

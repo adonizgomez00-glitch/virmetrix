@@ -123,7 +123,15 @@ No se han registrado defectos de implementaciÃ³n porque aÃºn no existe implement
 - Total catÃ¡logo: 28 ejercicios.
 - COM: pendiente validaciÃ³n en Windows.
 
-## Protocolo de actualizaciÃ³n
+## ITER-013 â€” Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1.
+- Comando: `pytest -q` â†’ **53 passed, 0 failed**.
+- Nuevos ejercicios: 12 (2 por dominio).
+- Total catÃ¡logo: 41 ejercicios.
+- COM: pendiente validaciÃ³n en Windows.
+
+## Protocolo de actualizaciÃ³n:
 
 Para cada iteraciÃ³n incluir:
 
@@ -239,12 +247,12 @@ Documento incorrecto (sin formato, 12 pt):
 - Sin procesos Word residuales tras las evaluaciones.
 - Ajuste post-validaciÃ³n: `word-format-004` tamaÃ±o esperado 11â†’12 pt para evitar falso positivo por fuente por defecto de Word (la validaciÃ³n original se realizÃ³ con 11 pt).
 
-## Validación Windows — Iteraciones ITER-005 a ITER-012 (2026-10-27)
+## Validaciï¿½n Windows ï¿½ Iteraciones ITER-005 a ITER-012 (2026-10-27)
 
 - Entorno: Windows 10 Pro 10.0.19045, Python 3.12.10, Word v16.0, PySide6 6.11.2, pytest 9.1.1.
-- Pruebas automáticas: 53 passed, 0 failed.
-- Catálogo: 29 ejercicios (formato, tablas, listas, referencias, gráficos, gestión de documento, colaboración, texto/párrafo).
-- Validación COM sobre referencias de todos los ejercicios: completada sin excepciones ni bloqueos.
+- Pruebas automï¿½ticas: 53 passed, 0 failed.
+- Catï¿½logo: 29 ejercicios (formato, tablas, listas, referencias, grï¿½ficos, gestiï¿½n de documento, colaboraciï¿½n, texto/pï¿½rrafo).
+- Validaciï¿½n COM sobre referencias de todos los ejercicios: completada sin excepciones ni bloqueos.
 - UI smoke en modo Word COM: sin congelamiento; historial persistente (5 intentos tras reabrir).
 - Procesos Word residuales: ninguno.
-- App en ejecución: PID 8276, ventana "VirMetrix".
+- App en ejecuciï¿½n: PID 8276, ventana "VirMetrix".

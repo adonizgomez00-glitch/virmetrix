@@ -1,0 +1,18 @@
+{
+  "exercise_id": "graphics-006",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+  "instructions": "Inserta un cuadro de texto con el texto 'Nota lateral avanzada'.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "textbox_contains",
+      "expected": "Nota lateral avanzada"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

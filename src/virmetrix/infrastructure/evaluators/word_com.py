@@ -573,6 +573,97 @@ class WordComAdapter:
                     present = False
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Se detectaron cambios registrados." if present else "No se detectaron cambios registrados."
+            elif typ == "page_margins":
+                expected = spec.get("expected", {})
+                ok = True
+                try:
+                    if "top" in expected and abs(doc.PageSetup.TopMargin - float(expected["top"]) / 20.0) > 1:
+                        ok = False
+                    if "bottom" in expected and abs(doc.PageSetup.BottomMargin - float(expected["bottom"]) / 20.0) > 1:
+                        ok = False
+                    if "left" in expected and abs(doc.PageSetup.LeftMargin - float(expected["left"]) / 20.0) > 1:
+                        ok = False
+                    if "right" in expected and abs(doc.PageSetup.RightMargin - float(expected["right"]) / 20.0) > 1:
+                        ok = False
+                except Exception:
+                    ok = False
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = f"Márgenes verificados (esperado {expected})."
+            elif typ == "paragraph_style":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    for p in doc.Paragraphs:
+                        if expected.lower() in (str(p.Style.NameLocal) if p.Style else "").lower():
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = f"Estilo '{expected}' {'aplicado' if ok else 'no aplicado'}."
+            elif typ == "section_columns":
+                expected = spec.get("expected", "1")
+                ok = False
+                try:
+                    ok = str(doc.PageSetup.TextColumns.Count) == str(expected)
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = f"Columnas: {doc.PageSetup.TextColumns.Count if hasattr(doc.PageSetup,'TextColumns') else '?'} (esperado {expected})."
+            elif typ == "paragraph_indent":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    for p in doc.Paragraphs:
+                        # LeftIndent in points; convert twips expected /20
+                        if abs(p.ParagraphFormat.LeftIndent - float(expected) / 20.0) < 1:
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = f"Sangría verificada (esperado {expected} twips)."
+            elif typ == "paragraph_spacing":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    for p in doc.Paragraphs:
+                        if abs(p.ParagraphFormat.SpaceAfter - float(expected) / 20.0) < 1:
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = f"Espaciado verificado (esperado {expected} twips)."
+            elif typ == "merged_cell_present":
+                expected = spec.get("expected", True)
+                ok = False
+                try:
+                    for t in doc.Tables:
+                        for row in t.Rows:
+                            for cell in row.Cells:
+                                # merged cells share same Range start; heuristic: count cells < rows*cols
+                                pass
+                    # heuristic: if any table has fewer cells than rows*cols
+                    for t in doc.Tables:
+                        if t.Rows.Count * t.Columns.Count > sum(1 for _ in t.Range.Cells):
+                            ok = True
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok == bool(expected) else CriterionStatus.FAIL
+                ev = "Celda combinada detectada." if ok else "No se detectó celda combinada."
+            elif typ == "repeating_header":
+                expected = spec.get("expected", True)
+                ok = False
+                try:
+                    for t in doc.Tables:
+                        if t.Rows(1).HeadingFormat:
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok == bool(expected) else CriterionStatus.FAIL
+                ev = "Encabezado de tabla repetido." if ok else "No se repite encabezado de tabla."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

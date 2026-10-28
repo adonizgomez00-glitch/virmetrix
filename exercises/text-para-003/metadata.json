@@ -1,0 +1,18 @@
+{
+  "exercise_id": "text-para-003",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+  "instructions": "Aplica una sangría izquierda de 0.5 pulgadas al párrafo.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "paragraph_indent",
+      "expected": "720"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

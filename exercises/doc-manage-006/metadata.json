@@ -1,0 +1,19 @@
+{
+  "exercise_id": "doc-manage-006",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar documentos (MO-100)",
+  "instructions": "Establece la propiedad Author del documento en 'Estudiante'.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "doc_property",
+      "property": "Author",
+      "expected": "Estudiante"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

@@ -1,0 +1,18 @@
+{
+  "exercise_id": "refs-005",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Crear y administrar referencias (MO-100)",
+  "instructions": "Inserta una nota final con el texto 'Nota final avanzada.'",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "endnote_contains",
+      "expected": "Nota final avanzada."
+    }
+  ],
+  "rules_version": "1.0.0"
+}
