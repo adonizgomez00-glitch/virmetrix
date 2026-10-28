@@ -122,12 +122,12 @@ class MainWindow(QMainWindow):
         btn_open.clicked.connect(self.open_document)
         layout.addWidget(btn_open)
 
-        btn_eval = QPushButton("Evaluar (Grade)")
-        btn_eval.setAccessibleName("Evaluar")
-        btn_eval.setToolTip("Evalúa la copia de trabajo.")
-        btn_eval.clicked.connect(self.evaluate)
-        btn_eval.setDefault(True)
-        layout.addWidget(btn_eval)
+        self.btn_eval = QPushButton("Evaluar (Grade)")
+        self.btn_eval.setAccessibleName("Evaluar")
+        self.btn_eval.setToolTip("Evalúa la copia de trabajo.")
+        self.btn_eval.clicked.connect(self.evaluate)
+        self.btn_eval.setDefault(True)
+        layout.addWidget(self.btn_eval)
 
         self.btn_cancel = QPushButton("Cancelar")
         self.btn_cancel.setAccessibleName("Cancelar evaluación")
