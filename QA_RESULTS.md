@@ -238,3 +238,13 @@ Documento incorrecto (sin formato, 12 pt):
 - Ninguno nuevo. La detecciï¿½n de cursiva (run_property italic) funciona correctamente en COM.
 - Sin procesos Word residuales tras las evaluaciones.
 - Ajuste post-validaciÃ³n: `word-format-004` tamaÃ±o esperado 11â†’12 pt para evitar falso positivo por fuente por defecto de Word (la validaciÃ³n original se realizÃ³ con 11 pt).
+
+## Validación Windows — Iteraciones ITER-005 a ITER-012 (2026-10-27)
+
+- Entorno: Windows 10 Pro 10.0.19045, Python 3.12.10, Word v16.0, PySide6 6.11.2, pytest 9.1.1.
+- Pruebas automáticas: 53 passed, 0 failed.
+- Catálogo: 29 ejercicios (formato, tablas, listas, referencias, gráficos, gestión de documento, colaboración, texto/párrafo).
+- Validación COM sobre referencias de todos los ejercicios: completada sin excepciones ni bloqueos.
+- UI smoke en modo Word COM: sin congelamiento; historial persistente (5 intentos tras reabrir).
+- Procesos Word residuales: ninguno.
+- App en ejecución: PID 8276, ventana "VirMetrix".
