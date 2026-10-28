@@ -138,7 +138,17 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Funcionalidad: abrir documento en programa predeterminado (Word en Windows).
 - COM: pendiente validación en Windows.
 
-## Protocolo de actualización::
+## ITER-015 — Gate QA (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1, PyInstaller 6.22.3.
+- Comando: `pytest --cov=src/virmetrix --cov-report=term -q` → **65 passed, 0 failed**, cobertura 80.52% (umbral 80%).
+- Bundle Linux: arranca y evalúa (`dist/VirMetrix/VirMetrix`).
+- Seguridad: límites ZIP/XML, traversal, sin macros.
+- Accesibilidad básica: nombres accesibles, tooltips, botón por defecto, diálogo "Acerca de".
+- Windows: validación COM completa (iteraciones 005–014), 53+ tests, sin defectos abiertos.
+- Licencias: pendiente definir licencia de código y contenido (ver PROJECT_STATE).
+
+## Protocolo de actualización:::
 
 Para cada iteración incluir:
 
@@ -264,11 +274,11 @@ Documento incorrecto (sin formato, 12 pt):
 - Procesos Word residuales: ninguno.
 - App en ejecuci�n: PID 8276, ventana "VirMetrix".
 
-## Validaci�n Windows � Iteraciones ITER-013 e ITER-014 (2026-10-27)
+## Validaci�n Windows � Iteraciones ITER-013 e ITER-014 (2026-10-27)
 
 - Entorno: Windows 10 Pro 10.0.19045, Python 3.12.10, Word v16.0, PySide6 6.11.2, pytest 9.1.1.
-- Pruebas autom�ticas: 53 passed, 0 failed.
-- Nuevos ejercicios validados en COM (referencias): refs-006, table-003, text-para-003, text-para-004 � completados sin excepciones.
+- Pruebas autom�ticas: 53 passed, 0 failed.
+- Nuevos ejercicios validados en COM (referencias): refs-006, table-003, text-para-003, text-para-004 � completados sin excepciones.
 - Funcionalidad "Abrir documento" (ITER-014): os.startfile abre la copia de trabajo en Word correctamente.
 - Procesos Word residuales: ninguno (salvo el abierto intencionalmente por el usuario).
-- App en ejecuci�n: PID 6276, ventana "VirMetrix".
+- App en ejecuci�n: PID 6276, ventana "VirMetrix".

@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-014 Build)  
-**Estado global:** ITER-001..013 cerrados; ITER-014 en progreso (abrir documento en Word). 41 ejercicios.
+**Última actualización:** 2026-10-27 (ITER-015 Gate QA)  
+**Estado global:** Gate QA completado. 41 ejercicios. 65 tests pass. Cobertura 80.52%. Pendiente: licencia y empaquetado final en Windows.
 
 ## Resumen
 
