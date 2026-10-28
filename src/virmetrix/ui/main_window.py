@@ -224,11 +224,6 @@ class MainWindow(QMainWindow):
         work_dir = Path.home() / ".virmetrix" / "work"
         self.work_copy = self.orch.create_work_copy(str(ref), str(work_dir))
         self.result_view.append(f"Copia de trabajo creada: {self.work_copy}")
-        try:
-            self.orch.open_document(self.work_copy)
-            self.result_view.append("Documento abierto en el programa predeterminado.")
-        except Exception as e:  # noqa: BLE001
-            self.result_view.append(f"No se pudo abrir automáticamente: {e}")
 
     def start_session(self):
         if self.session.status == SessionStatus.FINISHED:
@@ -290,13 +285,17 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Error", f"No se pudo abrir el documento: {e}")
 
     def cancel_evaluation(self):
+        if self._worker is not None:
+            try:
+                self._worker.cancel()
+            except Exception:
+                pass
         if self._thread is not None and self._thread.isRunning():
-            self._thread.terminate()
             self._thread.wait(2000)
         self.progress.setVisible(False)
         self.btn_cancel.setEnabled(False)
         self.btn_eval.setEnabled(True)
-        self.result_view.append("Evaluación cancelada.")
+        self.result_view.append("Evaluaci\u00f3n cancelada.")
 
     def evaluate(self):
         if not self.work_copy:
