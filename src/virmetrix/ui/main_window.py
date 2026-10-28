@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMessageBox,
+    QProgressBar,
     QPushButton,
     QTextEdit,
     QVBoxLayout,
@@ -143,6 +144,19 @@ class MainWindow(QMainWindow):
         self.btn_eval.clicked.connect(self.evaluate)
         self.btn_eval.setDefault(True)
         layout.addWidget(self.btn_eval)
+
+        self.progress = QProgressBar()
+        self.progress.setRange(0, 0)
+        self.progress.setVisible(False)
+        self.progress.setAccessibleName("Progreso de evaluación")
+        layout.addWidget(self.progress)
+
+        self.btn_cancel = QPushButton("Cancelar")
+        self.btn_cancel.setAccessibleName("Cancelar evaluación")
+        self.btn_cancel.setToolTip("Cancela la evaluación en curso.")
+        self.btn_cancel.clicked.connect(self.cancel_evaluation)
+        self.btn_cancel.setEnabled(False)
+        layout.addWidget(self.btn_cancel)
 
         self.btn_finish = QPushButton("Finalizar")
         self.btn_finish.setAccessibleName("Finalizar sesión")
@@ -275,6 +289,15 @@ class MainWindow(QMainWindow):
         except Exception as e:  # noqa: BLE001
             QMessageBox.critical(self, "Error", f"No se pudo abrir el documento: {e}")
 
+    def cancel_evaluation(self):
+        if self._thread is not None and self._thread.isRunning():
+            self._thread.terminate()
+            self._thread.wait(2000)
+        self.progress.setVisible(False)
+        self.btn_cancel.setEnabled(False)
+        self.btn_eval.setEnabled(True)
+        self.result_view.append("Evaluación cancelada.")
+
     def evaluate(self):
         if not self.work_copy:
             QMessageBox.warning(self, "Aviso", "Primero crea una copia de trabajo.")
@@ -286,6 +309,8 @@ class MainWindow(QMainWindow):
             return
 
         self.btn_eval.setEnabled(False)
+        self.btn_cancel.setEnabled(True)
+        self.progress.setVisible(True)
         self.result_view.append("Evaluando...")
 
         self._started_at = datetime.now(timezone.utc).isoformat()
@@ -325,10 +350,14 @@ class MainWindow(QMainWindow):
         for c in result.criteria:
             lines.append(f"{c.criterion_id}: {c.status.value} — {c.evidence}")
         lines.append(f"Historial guardado. Intentos totales: {self.store.count()}")
+        self.progress.setVisible(False)
+        self.btn_cancel.setEnabled(False)
         self.result_view.setPlainText("\n".join(lines))
         self.btn_eval.setEnabled(True)
 
     def _on_failed(self, msg):
+        self.progress.setVisible(False)
+        self.btn_cancel.setEnabled(False)
         self.result_view.setPlainText(f"Error: {msg}")
         self.btn_eval.setEnabled(True)
 
