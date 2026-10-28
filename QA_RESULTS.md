@@ -49,6 +49,15 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Pruebas parametrizadas: 4 ejercicios correctos → puntuación completa.
 - COM de nuevos ejercicios: no ejecutado (Linux); pendiente validación Windows.
 
+## ITER-004 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1, PySide6 6.11.2.
+- Comando: `pytest -q` → **42 passed, 0 failed**.
+- Sesión: modo práctica/examen, temporizador 300 s, pausa/reanudación, finalización idempotente.
+- Navegación anterior/siguiente entre ejercicios.
+- UI: sin bloqueo (evaluación en QThread).
+- COM: pendiente validación en Windows.
+
 ## Protocolo de actualización
 
 Para cada iteración incluir:
