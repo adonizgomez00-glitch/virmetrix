@@ -131,7 +131,14 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Total catálogo: 41 ejercicios.
 - COM: pendiente validación en Windows.
 
-## Protocolo de actualización:
+## ITER-014 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1.
+- Comando: `pytest -q` → **53 passed, 0 failed**.
+- Funcionalidad: abrir documento en programa predeterminado (Word en Windows).
+- COM: pendiente validación en Windows.
+
+## Protocolo de actualización::
 
 Para cada iteración incluir:
 

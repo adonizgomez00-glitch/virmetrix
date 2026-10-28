@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-013 Build)  
-**Estado global:** ITER-001..012 cerrados; ITER-013 en progreso (ampliación adicional). 41 ejercicios.
+**Última actualización:** 2026-10-27 (ITER-014 Build)  
+**Estado global:** ITER-001..013 cerrados; ITER-014 en progreso (abrir documento en Word). 41 ejercicios.
 
 ## Resumen
 

@@ -45,3 +45,19 @@ class EvaluationOrchestrator:
             for chunk in iter(lambda: f.read(65536), b""):
                 h.update(chunk)
         return h.hexdigest()
+
+    @staticmethod
+    def open_document(path: str) -> None:
+        import os
+        import subprocess
+        import sys
+
+        if sys.platform == "win32":
+            os.startfile(path)
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", path])
+        else:
+            try:
+                subprocess.Popen(["xdg-open", path])
+            except FileNotFoundError:
+                pass

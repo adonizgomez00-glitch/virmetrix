@@ -105,6 +105,12 @@ class MainWindow(QMainWindow):
         btn_copy.clicked.connect(self.create_copy)
         layout.addWidget(btn_copy)
 
+        btn_open = QPushButton("Abrir documento")
+        btn_open.setAccessibleName("Abrir documento")
+        btn_open.setToolTip("Abre la copia de trabajo en Microsoft Word (o el programa predeterminado).")
+        btn_open.clicked.connect(self.open_document)
+        layout.addWidget(btn_open)
+
         nav_layout = QVBoxLayout()
         btn_prev = QPushButton("Anterior")
         btn_prev.setAccessibleName("Ejercicio anterior")
@@ -204,6 +210,11 @@ class MainWindow(QMainWindow):
         work_dir = Path.home() / ".virmetrix" / "work"
         self.work_copy = self.orch.create_work_copy(str(ref), str(work_dir))
         self.result_view.append(f"Copia de trabajo creada: {self.work_copy}")
+        try:
+            self.orch.open_document(self.work_copy)
+            self.result_view.append("Documento abierto en el programa predeterminado.")
+        except Exception as e:  # noqa: BLE001
+            self.result_view.append(f"No se pudo abrir automáticamente: {e}")
 
     def start_session(self):
         if self.session.status == SessionStatus.FINISHED:
@@ -253,6 +264,16 @@ class MainWindow(QMainWindow):
         if self.session.prev_exercise():
             self._load_current_exercise()
             self.work_copy = None
+
+    def open_document(self):
+        if not self.work_copy:
+            QMessageBox.warning(self, "Aviso", "Primero crea una copia de trabajo.")
+            return
+        try:
+            self.orch.open_document(self.work_copy)
+            self.result_view.append(f"Abriendo: {self.work_copy}")
+        except Exception as e:  # noqa: BLE001
+            QMessageBox.critical(self, "Error", f"No se pudo abrir el documento: {e}")
 
     def evaluate(self):
         if not self.work_copy:
