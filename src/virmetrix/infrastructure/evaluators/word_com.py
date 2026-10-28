@@ -451,6 +451,50 @@ class WordComAdapter:
                         ok = False
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = "Se detectó tabla de contenido." if status == CriterionStatus.PASS else "No se detectó tabla de contenido."
+            elif typ == "drawing_count":
+                expected = spec.get("expected", 1)
+                count = 0
+                try:
+                    count = doc.InlineShapes.Count
+                except Exception:
+                    count = 0
+                status = CriterionStatus.PASS if count == expected else CriterionStatus.FAIL
+                ev = f"Imágenes/dibujos: {count} (esperado {expected})."
+            elif typ == "alt_text_contains":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    for shp in doc.InlineShapes:
+                        if expected in (getattr(shp, "AlternativeText", "") or ""):
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                # also shapes
+                try:
+                    for shp in doc.Shapes:
+                        if expected in (getattr(shp, "AlternativeText", "") or ""):
+                            ok = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Texto alternativo correcto." if status == CriterionStatus.PASS else "Texto alternativo ausente o incorrecto."
+            elif typ == "textbox_contains":
+                expected = spec.get("expected", "")
+                ok = False
+                try:
+                    for shp in doc.Shapes:
+                        try:
+                            if expected in (shp.TextFrame.TextRange.Text or ""):
+                                ok = True
+                                break
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Cuadro de texto contiene el texto esperado." if status == CriterionStatus.PASS else "Cuadro de texto ausente o incorrecto."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

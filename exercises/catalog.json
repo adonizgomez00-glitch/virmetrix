@@ -80,6 +80,26 @@
         "docx_portable",
         "word_com"
       ]
+    },
+    {
+      "exercise_id": "graphics-001",
+      "title": "Imagen con texto alternativo",
+      "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "graphics-002",
+      "title": "Cuadro de texto",
+      "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
     }
   ]
 }

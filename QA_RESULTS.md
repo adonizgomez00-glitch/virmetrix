@@ -91,6 +91,14 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Criterios: notas al pie y tabla de contenido.
 - COM: pendiente validación en Windows.
 
+## ITER-009 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1.
+- Comando: `pytest -q` → **48 passed, 0 failed**.
+- Nuevos ejercicios: `graphics-001`, `graphics-002`.
+- Criterios: imágenes (texto alternativo) y cuadros de texto.
+- COM: pendiente validación en Windows.
+
 ## Protocolo de actualización
 
 Para cada iteración incluir:

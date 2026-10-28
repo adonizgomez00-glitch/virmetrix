@@ -1,0 +1,24 @@
+{
+  "exercise_id": "graphics-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+  "instructions": "Inserta una imagen y establece su texto alternativo como 'Logo de la empresa'.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "drawing_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "alt_text_contains",
+      "expected": "Logo de la empresa"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

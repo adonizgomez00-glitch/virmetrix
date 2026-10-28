@@ -120,6 +120,65 @@ def test_refs_001_footnote(tmp_path):
     assert res.score_earned == res.score_possible
 
 
+def test_graphics_001_alt_text(tmp_path):
+    import io, zipfile
+    ex = load_exercise("graphics-001")
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    WP = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+    content_types = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>'''
+    rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>'''
+    document = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="{W}" xmlns:wp="{WP}">
+  <w:body><w:p><w:r><w:drawing><wp:inline><wp:docPr id="1" name="Picture" descr="Logo de la empresa"/></wp:inline></w:drawing></w:r></w:p></w:body>
+</w:document>'''
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("[Content_Types].xml", content_types)
+        zf.writestr("_rels/.rels", rels)
+        zf.writestr("word/document.xml", document)
+    path = tmp_path / "g1.docx"
+    path.write_bytes(buf.getvalue())
+    res = ev.evaluate(str(path), ex)
+    assert res.score_earned == res.score_possible
+
+
+def test_graphics_002_textbox(tmp_path):
+    import io, zipfile
+    ex = load_exercise("graphics-002")
+    W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+    content_types = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>'''
+    rels = '''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>'''
+    document = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="{W}">
+  <w:body><w:p><w:r><w:drawing><w:txbxContent><w:p><w:r><w:t>Nota lateral</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p></w:body>
+</w:document>'''
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w") as zf:
+        zf.writestr("[Content_Types].xml", content_types)
+        zf.writestr("_rels/.rels", rels)
+        zf.writestr("word/document.xml", document)
+    path = tmp_path / "g2.docx"
+    path.write_bytes(buf.getvalue())
+    res = ev.evaluate(str(path), ex)
+    assert res.score_earned == res.score_possible
+
+
 def test_refs_002_toc(tmp_path):
     import io, zipfile
     ex = load_exercise("refs-002")

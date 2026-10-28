@@ -1,0 +1,24 @@
+{
+  "exercise_id": "graphics-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+  "instructions": "Inserta un cuadro de texto con el texto 'Nota lateral'.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "drawing_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "textbox_contains",
+      "expected": "Nota lateral"
+    }
+  ],
+  "rules_version": "1.0.0"
+}

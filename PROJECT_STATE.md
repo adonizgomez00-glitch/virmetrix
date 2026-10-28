@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-008 Build)  
-**Estado global:** ITER-001..007 cerrados; ITER-008 en progreso (referencias).
+**Última actualización:** 2026-10-27 (ITER-009 Build)  
+**Estado global:** ITER-001..008 cerrados; ITER-009 en progreso (elementos gráficos).
 
 ## Resumen
 

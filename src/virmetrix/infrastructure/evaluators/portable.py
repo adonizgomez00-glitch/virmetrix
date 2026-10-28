@@ -17,6 +17,7 @@ from virmetrix.domain.ports import (
 )
 
 W_NS = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+WP_NS = "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
 NS = {"w": W_NS}
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10 MB
@@ -70,6 +71,9 @@ class PortableDocxEvaluator:
         endnotes_text = ""
         has_toc = False
         footnote_ref_count = 0
+        drawing_count = 0
+        alt_texts: list[str] = []
+        textbox_texts: list[str] = []
 
         # Security / validation
         if not path.is_file():
@@ -121,6 +125,14 @@ class PortableDocxEvaluator:
                     has_toc = "TOC" in doc_xml.decode("utf-8", errors="ignore")
                 except Exception:
                     has_toc = False
+                try:
+                    drawing_count = len(root.findall(f".//{{{W_NS}}}drawing"))
+                    for dp in root.iter(f"{{{WP_NS}}}docPr"):
+                        alt_texts.append(dp.get("descr") or "")
+                    for tb in root.iter(f"{{{W_NS}}}txbxContent"):
+                        textbox_texts.append("".join(t.text or "" for t in tb.iter(f"{{{W_NS}}}t")))
+                except Exception:
+                    pass
         except (zipfile.BadZipFile, etree.XMLSyntaxError, Exception) as e:
             return self._error(exercise, f"Error al leer el DOCX: {type(e).__name__}")
 
@@ -140,7 +152,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -329,8 +341,10 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None):
         tables = tables or []
+        alt_texts = alt_texts or []
+        textbox_texts = textbox_texts or []
         criteria = []
         for spec in specs:
             cid = spec["id"]
@@ -459,6 +473,20 @@ class PortableDocxEvaluator:
             elif typ == "toc_present":
                 status = CriterionStatus.PASS if has_toc else CriterionStatus.FAIL
                 ev = "Se detectó tabla de contenido." if status == CriterionStatus.PASS else "No se detectó tabla de contenido."
+            elif typ == "drawing_count":
+                expected = spec.get("expected", 1)
+                status = CriterionStatus.PASS if drawing_count == expected else CriterionStatus.FAIL
+                ev = f"Imágenes/dibujos: {drawing_count} (esperado {expected})."
+            elif typ == "alt_text_contains":
+                expected = spec.get("expected", "")
+                ok = any(expected in (a or "") for a in alt_texts)
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Texto alternativo correcto." if status == CriterionStatus.PASS else "Texto alternativo ausente o incorrecto."
+            elif typ == "textbox_contains":
+                expected = spec.get("expected", "")
+                ok = any(expected in (t or "") for t in textbox_texts)
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Cuadro de texto contiene el texto esperado." if status == CriterionStatus.PASS else "Cuadro de texto ausente o incorrecto."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."
