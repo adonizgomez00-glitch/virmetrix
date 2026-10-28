@@ -67,6 +67,14 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Pruebas: `pytest -q` → 42 passed, 0 failed.
 - Windows: pendiente build y validación de instalador .exe.
 
+## ITER-006 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1, PySide6 6.11.2.
+- Comando: `pytest -q` → **42 passed, 0 failed**.
+- Accesibilidad: nombres accesibles, tooltips, botón por defecto, diálogo "Acerca de".
+- UI smoke: pass.
+- Lector de pantalla: pendiente validación en Windows.
+
 ## Protocolo de actualización
 
 Para cada iteración incluir:

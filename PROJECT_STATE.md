@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-005 Build)  
-**Estado global:** ITER-001..004 cerrados; ITER-005 en progreso (empaquetado Windows).
+**Última actualización:** 2026-10-27 (ITER-006 Build)  
+**Estado global:** ITER-001..005 cerrados; ITER-006 en progreso (accesibilidad).
 
 ## Resumen
 
