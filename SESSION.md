@@ -156,6 +156,12 @@ Se consultó el PDF oficial de MO-100 y se añadieron los dominios, pesos y subo
 - Fase 14 Improve Skills: propuestas en `SKILL_CHANGELOG.md` (P1-P3) pendientes de gobernanza.
 - Release candidate aprobado por el usuario.
 
+## Actualización — 2026-10-27 (ITER-018 Build)
+
+- UI compacta estilo gmetrix (siempre encima, pasos numerados).
+- Pruebas: 65 pass.
+- Pendiente: validación en Windows.
+
 ## Actualización — 2026-10-27 (ITER-017 Build)
 
 - UI rediseñada: paneles, pasos numerados, tamaño de ventana.

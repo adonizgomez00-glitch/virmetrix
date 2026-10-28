@@ -162,7 +162,14 @@ No se han registrado defectos de implementación porque aún no existe implement
 - UI rediseñada: paneles izquierdo/derecho, pasos numerados, tamaño de ventana.
 - COM: pendiente validación en Windows.
 
-## Protocolo de actualización:::::
+## ITER-018 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1, PySide6 6.11.2.
+- Comando: `pytest -q` → **65 passed, 0 failed**.
+- UI: panel compacto, siempre encima, pasos numerados.
+- COM: pendiente validación en Windows.
+
+## Protocolo de actualización::::::
 
 Para cada iteración incluir:
 
