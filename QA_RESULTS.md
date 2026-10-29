@@ -195,6 +195,20 @@ No se han registrado defectos de implementación porque aún no existe implement
 - Nuevos tests: `tests/integration/test_ui_panels.py` (pasos, puntuación, escape HTML).
 - COM: pendiente validación en Windows.
 
+## ITER-021 — Validación Windows + Word COM (2026-10-29)
+
+- Entorno: Windows (VM), Word v16.0, PySide6 6.11.2.
+- Repositorio en `ITER-021` + fix de `com_eval_cli.py`.
+- `pytest -q` → **68 passed, 0 failed**.
+- UI real con Word COM: evaluación completada sin bloqueo; score **1/2** mostrado con
+  colores; historial guardado; barra de progreso se oculta al terminar.
+- Ventana permanece encima de Word (topmost) y conserva el tamaño previsto.
+- Evidencia visual: `e2e_evidence/ui_iter021_windows.png`.
+- Observaciones: C1 fail y C2 pass se leen con iconos/colores; sin recortes horizontales.
+- COM: validado en Windows.
+- Ajuste posterior: orden de tabulación explícito y descripciones accesibles en los chips
+  de paso (preparación de la validación con Narrador).
+
 ## Protocolo de actualización:
 
 Para cada iteración incluir:

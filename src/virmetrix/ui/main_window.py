@@ -304,6 +304,7 @@ class MainWindow(QMainWindow):
             if card.objectName() in ("card", "cardAccent"):
                 _add_shadow(card)
 
+        self._setup_tab_order()
         self._load_current_exercise()
         self._timer = QTimer(self)
         self._timer.setInterval(1000)
@@ -350,6 +351,9 @@ class MainWindow(QMainWindow):
         self.chip_copy = _chip("1 · Copia")
         self.chip_edit = _chip("2 · Editar")
         self.chip_grade = _chip("3 · Evaluar")
+        self.chip_copy.setAccessibleName("Paso 1, crear copia")
+        self.chip_edit.setAccessibleName("Paso 2, editar en Word")
+        self.chip_grade.setAccessibleName("Paso 3, evaluar")
         for chip in (self.chip_copy, self.chip_edit, self.chip_grade):
             row.addWidget(chip, 1)
         return row
@@ -385,16 +389,16 @@ class MainWindow(QMainWindow):
 
         nav = QHBoxLayout()
         nav.setSpacing(8)
-        btn_prev = QPushButton("◀  Anterior")
-        btn_prev.setObjectName("ghost")
-        btn_prev.setAccessibleName("Ejercicio anterior")
-        btn_prev.clicked.connect(self.prev_exercise)
-        btn_next = QPushButton("Siguiente  ▶")
-        btn_next.setObjectName("ghost")
-        btn_next.setAccessibleName("Ejercicio siguiente")
-        btn_next.clicked.connect(self.next_exercise)
-        nav.addWidget(btn_prev)
-        nav.addWidget(btn_next)
+        self.btn_prev = QPushButton("◀  Anterior")
+        self.btn_prev.setObjectName("ghost")
+        self.btn_prev.setAccessibleName("Ejercicio anterior")
+        self.btn_prev.clicked.connect(self.prev_exercise)
+        self.btn_next = QPushButton("Siguiente  ▶")
+        self.btn_next.setObjectName("ghost")
+        self.btn_next.setAccessibleName("Ejercicio siguiente")
+        self.btn_next.clicked.connect(self.next_exercise)
+        nav.addWidget(self.btn_prev)
+        nav.addWidget(self.btn_next)
         col.addLayout(nav)
         return card
 
@@ -525,6 +529,7 @@ class MainWindow(QMainWindow):
         self.score_label.setVisible(False)
         self.score_caption = QLabel("sin evaluar")
         self.score_caption.setObjectName("scoreCaption")
+        self.score_caption.setAccessibleName("Detalle de puntuación")
         self.score_caption.setAlignment(Qt.AlignRight)
         score_box.addWidget(self.score_label)
         score_box.addWidget(self.score_caption)
@@ -559,12 +564,33 @@ class MainWindow(QMainWindow):
         self.stay_on_top.stateChanged.connect(self._toggle_stay_on_top)
         row.addWidget(self.stay_on_top)
         row.addStretch(1)
-        btn_about = QPushButton("Acerca de")
-        btn_about.setObjectName("ghost")
-        btn_about.setAccessibleName("Acerca de VirMetrix")
-        btn_about.clicked.connect(self._show_about)
-        row.addWidget(btn_about)
+        self.btn_about = QPushButton("Acerca de")
+        self.btn_about.setObjectName("ghost")
+        self.btn_about.setAccessibleName("Acerca de VirMetrix")
+        self.btn_about.clicked.connect(self._show_about)
+        row.addWidget(self.btn_about)
         return row
+
+    def _setup_tab_order(self) -> None:
+        order = [
+            self.mode_use_combo,
+            self.exercise_combo,
+            self.btn_prev,
+            self.btn_next,
+            self.eval_mode_combo,
+            self.btn_copy,
+            self.btn_open,
+            self.btn_eval,
+            self.btn_cancel,
+            self.btn_start,
+            self.btn_pause,
+            self.btn_finish,
+            self.stay_on_top,
+            self.btn_about,
+            self.result_view,
+        ]
+        for first, second in zip(order, order[1:]):
+            self.setTabOrder(first, second)
 
     # ---------------------------------------------------------------- steps
     def _set_step(self, step: int) -> None:
@@ -580,6 +606,13 @@ class MainWindow(QMainWindow):
             chip.setProperty("state", state)
             chip.style().unpolish(chip)
             chip.style().polish(chip)
+            chip.setAccessibleDescription(
+                {
+                    "active": "paso actual",
+                    "done": "completado",
+                    "idle": "pendiente",
+                }[state]
+            )
 
     # ------------------------------------------------------------- lifecycle
     def _toggle_stay_on_top(self, state):

@@ -1,46 +1,64 @@
-# Checklist de accesibilidad ó VirMetrix (Windows + Narrador)
+# Checklist de accesibilidad ‚Äî VirMetrix (Windows + Narrador)
 
-## PreparaciÛn
-1. Actualizar la app: `git pull` (hecho).
+## Preparaci√≥n
+
+1. Actualizar la app: `git pull`.
 2. Activar Narrador: `Win + Ctrl + Enter`.
-3. Ejecutar la app: `python main.py` (o el `.exe`).
+3. Ejecutar la app (desde la ra√≠z del repo):
+   ```powershell
+   $env:PYTHONPATH="src"
+   python -m virmetrix.ui.main_window
+   ```
 4. Usar solo teclado: `Tab`, `Shift+Tab`, `Enter`, flechas.
 
-## Orden de foco esperado
-- Modo de uso (Pr·ctica/Examen)
-- Selector de ejercicio
-- Instrucciones
-- Temporizador
-- Modo de evaluaciÛn (portable/Word COM)
-- Crear copia de trabajo
-- Ejercicio anterior
-- Ejercicio siguiente
-- Iniciar sesiÛn
-- Pausar o reanudar
-- Evaluar
-- Finalizar sesiÛn
-- Acerca de VirMetrix
-- Resultados de la evaluaciÛn
+## Orden de foco esperado (ITER-021)
 
-## VerificaciÛn por control (marcar OK / FAIL)
-- [ ] "Modo de uso" se anuncia con su nombre.
+1. Modo de uso (Pr√°ctica / Examen)
+2. Selector de ejercicio
+3. Anterior
+4. Siguiente
+5. Modo de evaluaci√≥n (Portable / Word COM)
+6. Crear copia de trabajo
+7. Abrir en Word
+8. Evaluar ahora
+9. Cancelar evaluaci√≥n (solo visible mientras eval√∫a)
+10. Iniciar
+11. Pausar / Reanudar
+12. Finalizar
+13. Mantener encima
+14. Acerca de
+15. Resultados de la evaluaci√≥n
+
+## Verificaci√≥n por control (marcar OK / FAIL)
+
+- [ ] La ventana anuncia "VirMetrix".
+- [ ] Los chips "Paso 1, crear copia", "Paso 2, editar en Word" y "Paso 3, evaluar"
+      se leen y anuncian su estado (paso actual / completado / pendiente).
+- [ ] "Modo de uso" se anuncia con su nombre y la opci√≥n seleccionada.
 - [ ] "Selector de ejercicio" anuncia el ejercicio actual.
 - [ ] "Instrucciones del ejercicio" se leen al cambiar de ejercicio.
-- [ ] "Temporizador" anuncia el tiempo restante al cambiar.
-- [ ] "Modo de evaluaciÛn" anuncia disponible/no disponible.
+- [ ] "Temporizador" anuncia el tiempo restante.
+- [ ] "Modo de evaluaci√≥n" anuncia si es Portable o Word COM y su disponibilidad.
 - [ ] "Crear copia de trabajo" tiene nombre y tooltip legible.
-- [ ] "Abrir documento" abre el archivo y no bloquea la UI.
-- [ ] "Evaluar" anuncia resultado/puntuaciÛn al terminar.
-- [ ] "Resultados de la evaluaciÛn" se leen (incluye C1..Cn y puntuaciÛn).
-- [ ] Mensajes de error (QMessageBox) se leen autom·ticamente.
+- [ ] "Abrir en Word" abre el archivo y no bloquea la UI.
+- [ ] "Evaluar ahora" anuncia el inicio y el final de la evaluaci√≥n.
+- [ ] "Cancelar evaluaci√≥n" solo aparece durante la evaluaci√≥n y se anuncia.
+- [ ] Puntuaci√≥n ("Puntuaci√≥n" + "Detalle de puntuaci√≥n") se lee al terminar.
+- [ ] Resultados por criterio se leen completos (C1..Cn, estado y evidencia).
+- [ ] Mensajes de error (QMessageBox) se leen autom√°ticamente.
 - [ ] Botones deshabilitados se anuncian como no disponibles.
 
 ## Anotar defectos
+
 - Controles sin nombre o mal anunciados:
 - Orden de foco incorrecto:
-- Textos que no se leen (temporizador, puntuaciÛn, errores):
+- Textos que no se leen (temporizador, puntuaci√≥n, errores):
 - Atajos faltantes (si aplica):
 
 ## Notas
-- Si el temporizador no se anuncia al cambiar, considerar usar `QAccessible.updateAccessibility` o un `QLabel` con `aria-live` equivalente.
+
+- Si el temporizador no se anuncia al cambiar, considerar `QAccessible.updateAccessibility`
+  o mostrar el tiempo tambi√©n en un control enfocable.
+- Si la puntuaci√≥n no se anuncia al terminar, enfocar el panel de resultados
+  autom√°ticamente tras la evaluaci√≥n.
 - Revisar `setTabOrder` si el orden visual no coincide con el de foco.

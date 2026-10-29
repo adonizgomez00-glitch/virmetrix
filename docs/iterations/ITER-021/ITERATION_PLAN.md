@@ -38,5 +38,18 @@ Reemplazar la apariencia genérica por una interfaz moderna tipo panel de examen
 
 ## Estado
 
-Implementado y validado en Linux. Pendiente validación visual en Windows
-(fuentes Segoe UI, sombras y topmost sobre Word).
+Implementado y validado en Linux y Windows.
+
+## Validación Windows (2026-10-29)
+
+- Word COM: evaluación completada sin bloqueo; score 1/2 con colores.
+- Historial guardado; barra de progreso oculta al finalizar; ventana topmost.
+- Evidencia: `e2e_evidence/ui_iter021_windows.png`.
+- 68 tests pass en Windows.
+
+## Accesibilidad (preparación Narrador)
+
+- Orden de tabulación explícito en `_setup_tab_order()`.
+- Chips de paso con `setAccessibleName` y estado accesible (actual/completado/pendiente).
+- Puntuación y su detalle con nombres accesibles.
+- Checklist actualizada en `ACCESSIBILITY_CHECKLIST.md`.

@@ -1,4 +1,13 @@
 
+## Actualización — 2026-10-29 (ITER-021 validada en Windows)
+
+- Validación real en Windows con Word COM: evaluación sin bloqueo, score 1/2 con colores.
+- Historial guardado y barra de progreso oculta al terminar; ventana topmost.
+- Evidencia: `e2e_evidence/ui_iter021_windows.png`.
+- 68 tests pass; cobertura 80.52%.
+- Preparación accesibilidad: orden de tabulación explícito y chips con descripción de estado.
+- Siguiente: validación con Narrador (ver `ACCESSIBILITY_CHECKLIST.md`).
+
 ## Actualización — 2026-10-27 (ITER-021 Build)
 
 - UI modernizada: cabecera con degradado, chips de progreso, tarjetas con sombra.

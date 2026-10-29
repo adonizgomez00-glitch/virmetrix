@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-021 Build)  
-**Estado global:** UI moderna (cabecera degradada, chips de pasos, puntuación con color). 41 ejercicios. 68 tests pass. Cobertura 80.52%. Pendiente: validación Windows.
+**Última actualización:** 2026-10-29 (ITER-021 validada en Windows)  
+**Estado global:** UI moderna validada con Word COM real. 41 ejercicios. 68 tests pass. Cobertura 80.52%. Pendiente: validación con Narrador y empaquetado/instalador Windows.
 
 ## Resumen
 
