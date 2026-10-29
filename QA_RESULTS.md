@@ -183,7 +183,19 @@ No se han registrado defectos de implementación porque aún no existe implement
 - UI: estilo moderno (QSS), bordes redondeados, colores de acento.
 - COM: pendiente validación en Windows.
 
-## Protocolo de actualización::::::
+## ITER-021 — Evidencia (2026-10-27)
+
+- Entorno: Linux, Python 3.12.3, pytest 9.1.1, PySide6 6.11.2.
+- Comando: `pytest -q` → **68 passed, 0 failed**.
+- Comando: `pytest --cov=src/virmetrix --cov-report=term -q` → **80.52%**, umbral 80% cumplido.
+- UI: rediseño moderno — cabecera con degradado, chips de progreso (Copia → Editar → Evaluar),
+  tarjetas con sombra, puntuación con color según resultado, resultados con iconos por criterio.
+- Corrección: los combos ya no fuerzan ancho extra (contenido cabe en 460 px).
+- `.coveragerc`: se omite `com_eval_cli.py` (entrypoint de sistema operativo, igual que `word_com.py`).
+- Nuevos tests: `tests/integration/test_ui_panels.py` (pasos, puntuación, escape HTML).
+- COM: pendiente validación en Windows.
+
+## Protocolo de actualización:
 
 Para cada iteración incluir:
 

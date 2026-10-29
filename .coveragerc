@@ -2,5 +2,6 @@
 omit =
     src/virmetrix/ui/*
     src/virmetrix/infrastructure/evaluators/word_com.py
+    src/virmetrix/infrastructure/evaluators/com_eval_cli.py
 [report]
 fail_under = 80

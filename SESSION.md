@@ -1,4 +1,13 @@
 
+## Actualización — 2026-10-27 (ITER-021 Build)
+
+- UI modernizada: cabecera con degradado, chips de progreso, tarjetas con sombra.
+- Puntuación con color (verde/ámbar/rojo) y criterios con iconos.
+- Cancelar visible solo durante la evaluación; scroll automático al resultado.
+- Corrección de ancho de combos (sin recortes en 460 px).
+- Pruebas: 68 pass; cobertura 80.52%.
+- Pendiente: validación visual en Windows (fuentes, sombras, topmost).
+
 ## Checkpoint — 2026-10-27 (fin de sesión)
 
 - Repositorio sincronizado con origin/main (commit 8dd48e4).

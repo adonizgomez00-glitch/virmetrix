@@ -1,7 +1,7 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-27 (ITER-020 Build)  
-**Estado global:** UI moderna (QSS). 41 ejercicios. 65 tests pass. Cobertura 80.52%. Pendiente: validación Windows.
+**Última actualización:** 2026-10-27 (ITER-021 Build)  
+**Estado global:** UI moderna (cabecera degradada, chips de pasos, puntuación con color). 41 ejercicios. 68 tests pass. Cobertura 80.52%. Pendiente: validación Windows.
 
 ## Resumen
 
