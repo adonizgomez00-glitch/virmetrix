@@ -1,0 +1,24 @@
+{
+  "exercise_id": "doc-manage-014",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar documentos (MO-100)",
+  "instructions": "Agrega un encabezado que contenga el texto \"Fecha\".",
+  "target_phrase": "Fecha",
+  "expected_text": "Encabezado con fecha.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "header_contains",
+      "expected": "Fecha"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

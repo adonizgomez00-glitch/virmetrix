@@ -524,6 +524,34 @@ class WordComAdapter:
                     pass
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = "Cuadro de texto contiene el texto esperado." if status == CriterionStatus.PASS else "Cuadro de texto ausente o incorrecto."
+            elif typ == "textbox_count":
+                expected = spec.get("expected", 1)
+                count = 0
+                try:
+                    xml = doc.Content.XML if hasattr(doc.Content, "XML") else ""
+                    count = str(xml).count("txbxContent")
+                except Exception:
+                    count = 0
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Cuadros de texto: {count} (esperado >= {expected})."
+            elif typ == "endnote_count":
+                expected = spec.get("expected", 1)
+                count = 0
+                try:
+                    count = doc.Endnotes.Count
+                except Exception:
+                    count = 0
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Notas finales: {count} (esperado >= {expected})."
+            elif typ == "tracked_change_count":
+                expected = spec.get("expected", 1)
+                count = 0
+                try:
+                    count = doc.Revisions.Count
+                except Exception:
+                    count = 0
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Cambios registrados: {count} (esperado >= {expected})."
             elif typ == "header_contains":
                 expected = spec.get("expected", "")
                 ok = False

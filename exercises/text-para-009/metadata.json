@@ -1,0 +1,24 @@
+{
+  "exercise_id": "text-para-009",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+  "instructions": "Aplica el estilo \"Normal\" al párrafo.",
+  "target_phrase": "Párrafo",
+  "expected_text": "Párrafo en estilo Normal.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "paragraph_style",
+      "expected": "Normal"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

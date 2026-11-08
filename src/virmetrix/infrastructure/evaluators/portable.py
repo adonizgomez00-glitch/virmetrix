@@ -451,10 +451,14 @@ class PortableDocxEvaluator:
                     section_columns = cols.get(f"{{{W_NS}}}num")
             for p in root.iter(f"{{{W_NS}}}p"):
                 pPr = p.find(f"{{{W_NS}}}pPr")
-                if pPr is not None:
-                    ps = pPr.find(f"{{{W_NS}}}pStyle")
-                    if ps is not None and ps.get(f"{{{W_NS}}}val"):
-                        paragraph_styles.append(ps.get(f"{{{W_NS}}}val"))
+                if pPr is None:
+                    paragraph_styles.append("Normal")
+                    continue
+                ps = pPr.find(f"{{{W_NS}}}pStyle")
+                if ps is not None and ps.get(f"{{{W_NS}}}val"):
+                    paragraph_styles.append(ps.get(f"{{{W_NS}}}val"))
+                else:
+                    paragraph_styles.append("Normal")
                     ind = pPr.find(f"{{{W_NS}}}ind")
                     if ind is not None and ind.get(f"{{{W_NS}}}left") is not None:
                         paragraph_indents.append(ind.get(f"{{{W_NS}}}left"))
@@ -604,6 +608,26 @@ class PortableDocxEvaluator:
                 ok = any(expected in (a or "") for a in alt_texts)
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = "Texto alternativo correcto." if status == CriterionStatus.PASS else "Texto alternativo ausente o incorrecto."
+            elif typ == "textbox_count":
+                expected = spec.get("expected", 1)
+                count = len(list(root.iter(f"{{{W_NS}}}txbxContent")))
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Cuadros de texto: {count} (esperado >= {expected})."
+            elif typ == "endnote_count":
+                expected = spec.get("expected", 1)
+                count = (endnotes_text or "").count("<w:endnote ") - (endnotes_text or "").count('w:type="separator"')
+                if count < 0: count = 0
+                # simpler: count endnote tags
+                count = (endnotes_text or "").count("<w:endnote")
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Notas finales: {count} (esperado >= {expected})."
+            elif typ == "tracked_change_count":
+                expected = spec.get("expected", 1)
+                count = (doc_xml if False else "").count if False else 0
+                # use already computed tracked_change_count
+                count = tracked_change_count
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Cambios registrados: {count} (esperado >= {expected})."
             elif typ == "textbox_contains":
                 expected = spec.get("expected", "")
                 ok = any(expected in (t or "") for t in textbox_texts)

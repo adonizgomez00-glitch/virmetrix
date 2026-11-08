@@ -1,0 +1,30 @@
+{
+  "exercise_id": "graphics-010",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+  "instructions": "Inserta una imagen con texto alternativo \"Portada\".",
+  "target_phrase": "Imagen",
+  "expected_text": "Imagen con texto alternativo Portada.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "drawing_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "alt_text_contains",
+      "expected": "Portada"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}
