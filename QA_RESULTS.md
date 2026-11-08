@@ -343,3 +343,15 @@ Documento incorrecto (sin formato, 12 pt):
 - Funcionalidad "Abrir documento" (ITER-014): os.startfile abre la copia de trabajo en Word correctamente.
 - Procesos Word residuales: ninguno (salvo el abierto intencionalmente por el usuario).
 - App en ejecuci�n: PID 6276, ventana "VirMetrix".
+
+## Validación Windows + Word COM — 2026-11-08 (post-mejoras)
+
+- Entorno: Windows 10 Pro 10.0.19045, Word 16.0.20326.20232, Python 3.12.10, PySide6 6.11.2, python-docx 1.2.0, lxml 5.2.1, pywin32 312, pytest 9.1.1, pytest-cov 7.1.0.
+- Pruebas: `pytest -q` → **68 passed, 0 failed** (31.56 s).
+- COM disponible: `(True, 'Word disponible (v16.0).')`.
+- Referencia (sin formato): `word_com 3/5` (C1 pass, C2 fail, C3 fail, C4 pass, C5 pass).
+- Documento correcto (formato aplicado + guardado): `word_com 5/5` (C1–C5 pass).
+- Ruido no bloqueante: faulthandler `0x800706be` (RPC server disconnected) en stderr durante tests que simulan COM no disponible; código de salida 0.
+- Proceso residual: 1 WINWORD (PID 9304) tras la ejecución (probablemente de la validación). Recomendación: cerrar manualmente o matar el proceso.
+- Conclusión: todas las comprobaciones con valor esperado cumplen. COM validado tras las mejoras de UI y puntuación.
+
