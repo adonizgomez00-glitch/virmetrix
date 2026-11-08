@@ -6,7 +6,7 @@ import pytest
 from PySide6.QtWidgets import QApplication
 
 from virmetrix.domain.ports import CriterionResult, CriterionStatus, EvaluationResult
-from virmetrix.ui.main_window import MainWindow
+from virmetrix.ui.main_window import ConfigWindow, PracticeWindow
 
 
 @pytest.fixture(scope="module")
@@ -15,8 +15,13 @@ def app():
 
 
 @pytest.fixture(scope="module")
-def window(app):
-    return MainWindow()
+def config(app):
+    return ConfigWindow()
+
+@pytest.fixture(scope="module")
+def window(config, app):
+    pw = PracticeWindow(config)
+    return pw
 
 
 def test_steps_track_progress(window):

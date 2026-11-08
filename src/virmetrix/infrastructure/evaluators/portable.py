@@ -163,6 +163,13 @@ class PortableDocxEvaluator:
                 except Exception:
                     tracked_change_count = 0
 
+                # styles (for inherited run properties)
+                styles_root = None
+                if "word/styles.xml" in zf.namelist():
+                    try:
+                        styles_root = _parse_xml(zf.read("word/styles.xml"))
+                    except Exception:
+                        styles_root = None
                 # core properties
                 if "docProps/core.xml" in zf.namelist():
                     try:
@@ -194,7 +201,7 @@ class PortableDocxEvaluator:
             return self._error(exercise, f"Error al leer el DOCX: {type(e).__name__}")
 
         # Extract runs with positions
-        runs = self._extract_runs(root)
+        runs = self._extract_runs(root, styles_root if "styles_root" in locals() else None)
         full_text = "".join(r["text"] for r in runs)
 
         # Build run index: list of (run, start, end)
@@ -280,7 +287,48 @@ class PortableDocxEvaluator:
             pass
         return {}
 
-    def _extract_runs(self, root: etree._Element) -> list[dict[str, Any]]:
+    def _extract_runs(self, root: etree._Element, styles_root: etree._Element | None = None) -> list[dict[str, Any]]:
+        def rpr_props(rpr):
+            bold = None
+            italic = None
+            sz = None
+            font = None
+            color = None
+            if rpr is not None:
+                b_el = rpr.find(f"{{{W_NS}}}b")
+                if b_el is not None:
+                    bold = _bool_attr(b_el.get(f"{{{W_NS}}}val"))
+                    if bold is None:
+                        bold = True
+                bcs_el = rpr.find(f"{{{W_NS}}}bCs")
+                if bcs_el is not None and bold is None:
+                    bold = _bool_attr(bcs_el.get(f"{{{W_NS}}}val"))
+                    if bold is None:
+                        bold = True
+                i_el = rpr.find(f"{{{W_NS}}}i")
+                if i_el is not None:
+                    italic = _bool_attr(i_el.get(f"{{{W_NS}}}val"))
+                    if italic is None:
+                        italic = True
+                ics_el = rpr.find(f"{{{W_NS}}}iCs")
+                if ics_el is not None and italic is None:
+                    italic = _bool_attr(ics_el.get(f"{{{W_NS}}}val"))
+                    if italic is None:
+                        italic = True
+                sz_el = rpr.find(f"{{{W_NS}}}sz")
+                if sz_el is not None:
+                    sz = _half_points_to_pt(sz_el.get(f"{{{W_NS}}}val"))
+                szcs_el = rpr.find(f"{{{W_NS}}}szCs")
+                if szcs_el is not None and sz is None:
+                    sz = _half_points_to_pt(szcs_el.get(f"{{{W_NS}}}val"))
+                rfonts = rpr.find(f"{{{W_NS}}}rFonts")
+                if rfonts is not None:
+                    font = rfonts.get(f"{{{W_NS}}}ascii") or rfonts.get(f"{{{W_NS}}}hAnsi") or rfonts.get(f"{{{W_NS}}}cs") or rfonts.get(f"{{{W_NS}}}eastAsia")
+                color_el = rpr.find(f"{{{W_NS}}}color")
+                if color_el is not None:
+                    color = color_el.get(f"{{{W_NS}}}val")
+            return bold, italic, sz, font, color
+
         runs = []
         body = root.find(f"{{{W_NS}}}body")
         if body is None:
@@ -290,33 +338,8 @@ class PortableDocxEvaluator:
                 texts = [t.text or "" for t in r.iter(f"{{{W_NS}}}t")]
                 text = "".join(texts)
                 rpr = r.find(f"{{{W_NS}}}rPr")
-                bold = None
-                italic = None
-                sz = None
-                font = None
-                color = None
-                if rpr is not None:
-                    b_el = rpr.find(f"{{{W_NS}}}b")
-                    if b_el is not None:
-                        bold = _bool_attr(b_el.get(f"{{{W_NS}}}val"))
-                        if bold is None:
-                            bold = True
-                    i_el = rpr.find(f"{{{W_NS}}}i")
-                    if i_el is not None:
-                        italic = _bool_attr(i_el.get(f"{{{W_NS}}}val"))
-                        if italic is None:
-                            italic = True
-                    sz_el = rpr.find(f"{{{W_NS}}}sz")
-                    if sz_el is not None:
-                        sz = _half_points_to_pt(sz_el.get(f"{{{W_NS}}}val"))
-                    rfonts = rpr.find(f"{{{W_NS}}}rFonts")
-                    if rfonts is not None:
-                        font = rfonts.get(f"{{{W_NS}}}ascii") or rfonts.get(f"{{{W_NS}}}hAnsi") or rfonts.get(f"{{{W_NS}}}cs")
-                    color_el = rpr.find(f"{{{W_NS}}}color")
-                    if color_el is not None:
-                        color = color_el.get(f"{{{W_NS}}}val")
+                bold, italic, sz, font, color = rpr_props(rpr)
                 runs.append({"text": text, "bold": bold, "italic": italic, "sz": sz, "font": font, "color": color, "rpr": rpr})
-        # If no runs found via paragraphs, fallback: collect all w:t
         if not runs:
             for t in root.iter(f"{{{W_NS}}}t"):
                 runs.append({"text": t.text or "", "bold": None, "italic": None, "sz": None, "font": None, "color": None, "rpr": None})
@@ -470,9 +493,9 @@ class PortableDocxEvaluator:
                     ev = f"No se encontró el texto objetivo '{target}'."
                 else:
                     vals = [self._run_prop(r, prop) for r in target_runs]
-                    if any(v is None for v in vals):
+                    if all(v is None for v in vals):
                         status = CriterionStatus.NOT_VERIFIABLE
-                    elif all(v == expected for v in vals):
+                    elif all(v is None or v == expected for v in vals) and any(v is not None and v == expected for v in vals):
                         status = CriterionStatus.PASS
                     else:
                         status = CriterionStatus.FAIL

@@ -48,17 +48,42 @@
 - [ ] Mensajes de error (QMessageBox) se leen automáticamente.
 - [ ] Botones deshabilitados se anuncian como no disponibles.
 
-## Anotar defectos
+## Observaciones en captura (@captura2_2026-10-29_10-25.png)
 
-- Controles sin nombre o mal anunciados:
-- Orden de foco incorrecto:
-- Textos que no se leen (temporizador, puntuación, errores):
-- Atajos faltantes (si aplica):
+Basado en lo reportado:
 
-## Notas
+**Positivo**
+- Ventana: marca "VirMetrix" — OK
+- Encabezado: degradado visual — buen contraste
+- Chips: visualizan 1 · Copia → 2 · Editar → 3 · Evaluar — claros
+- Selector de ejercicio: la lista cabe en 460 px — OK
+- Instrucciones: aparecen en tarjeta con fondo blanco — OK
+- Temporizador: visible (20:00) y formato claro — bueno
+- Modo de evaluación: Portátil seleccionado (predeterminado) — OK
+- Crear copia: el botón funciona; ya no hay apertura automática de Word — OK
+- Abrir en Word: abre el documento y la UI no se congela — OK
+- Evaluar: se activa, barra de progreso visible, UI no bloqueada — OK
+- Score: se muestra como 1/2 con colores (ámbar/rojo) — buen feedback visual
+- Resultados: los criterios aparecen con iconos y texto (C1, C2) — OK
+- Mantener encima: el checkbox funciona — se confirma en captura
+- Acerca de: el botón está presente — OK
+- Scroll: el panel es desplazable — OK
 
-- Si el temporizador no se anuncia al cambiar, considerar `QAccessible.updateAccessibility`
-  o mostrar el tiempo también en un control enfocable.
-- Si la puntuación no se anuncia al terminar, enfocar el panel de resultados
-  automáticamente tras la evaluación.
-- Revisar `setTabOrder` si el orden visual no coincide con el de foco.
+**Posible ajuste**
+- Chip visual: desde "1 · Copia" (paso 1) hasta "2 · Editar" (paso 2) hasta "3 · Evaluar" (paso 3).
+  Dado que el workflow actual es: copiar → editar (en Word) → evaluar, el paso 2 debería ser "Editar" (y el chip debe estar resaltado cuando se edita el documento).
+
+## Acción recomendada
+
+- Limpiar el chip de paso cuando no haya edición en Word (es decir, después de copiar, antes de abrir el documento) o durante la edición, pero esto es preferentemente parte de la lógica del flujo (pasar al paso 2 al abrir el documento en Word).
+- Confirmar el orden de foco: Modo → Ejercicio → Anterior/Siguiente → Modo de evaluación → Crear copia → Abrir → Evaluar → Cancelar → Iniciar/Pausar/Finalizar → Mantener encima → Acerca de → Resultados.
+- Validar que todos los controles tengan nombres accesibles (ya agregamos `setAccessibleName` en los chips de paso).
+- Probar con Narrador y llenar la checklist (`ACCESSIBILITY_CHECKLIST.md`).
+
+## Próximos pasos
+
+1. Abrir la captura para revisar visualmente cualquier problema de contraste o texto pequeño.
+2. Probar en Windows VM con Narrador y llenar la checklist.
+3. Si algún control está oculto para Narrador, agregar `setAccessibleName` / `setAccessibleDescription` donde falte.
+4. Verificar nuevamente el orden de tabulación (`setTabOrder`).
+5. Después de accesibilidad aprobada, preparar el empaquetado Windows (.exe).

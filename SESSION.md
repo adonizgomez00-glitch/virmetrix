@@ -332,3 +332,25 @@ Se consultó el PDF oficial de MO-100 y se añadieron los dominios, pesos y subo
 - Defecto corregido: `is_available()` dejaba proceso Word residual.
 - App en ejecuci�n: PID 5108, ventana �VirMetrix - word-format-001�.
 - Pr�xima acci�n: definir ITER-003 (cat�logo de ejercicios / temporizador / empaquetado) y a�adir prueba de regresi�n para residual de proceso.
+
+## Actualización — 2026-11-07 (Sesión de mejora UI y puntuación)
+
+- UI rediseñada en dos ventanas:
+  - `ConfigWindow` (vertical): modo, evaluador, copia de trabajo, abrir documento, sesión.
+  - `PracticeWindow` (horizontal): ejercicio, tarea, evaluación, resultado, temporizador.
+  - Botón “Iniciar práctica” abre la ventana horizontal.
+  - Ventana de práctica se ancla horizontalmente (ancho completo, parte inferior).
+- Automatización de copias de trabajo:
+  - Al cambiar de ejercicio (Anterior/Siguiente) se cierra la copia anterior y se crea/abre automáticamente la nueva.
+  - Se resetea la copia de trabajo al cambiar de ejercicio.
+- Corrección de puntuación (bold + tamaño de fuente):
+  - Portable: soporte de variantes `w:bCs`/`w:iCs`/`w:szCs`; tolerancia a runs fragmentados.
+  - Word COM: evaluación a nivel de caracteres; acepta valores `1` además de `-1`/`True`; `not_verifiable` cuando no se resuelve.
+- UX:
+  - Recordatorio de guardar documento (`Ctrl+S`) antes de evaluar (causa de `not_verifiable`).
+  - Botón “Abrir en Word” corregido.
+  - Al iniciar práctica se muestra el primer ejercicio sin necesidad de navegar.
+- Pruebas: 68 passed, 0 failed; cobertura 80.52%.
+- Build Linux: `dist/VirMetrix/VirMetrix` generado y ejecutable.
+- Pendiente Windows: revalidar COM/accesibilidad (Narrador) e instalador tras estos cambios.
+

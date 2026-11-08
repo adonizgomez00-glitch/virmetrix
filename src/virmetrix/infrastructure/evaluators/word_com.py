@@ -265,14 +265,14 @@ class WordComAdapter:
         try:
             if prop == "bold":
                 b = rng.Font.Bold
-                if b in (-1, True):
+                if b in (-1, True, 1):
                     return True
                 if b in (0, False):
                     return False
                 return None
             if prop == "italic":
                 it = rng.Font.Italic
-                if it in (-1, True):
+                if it in (-1, True, 1):
                     return True
                 if it in (0, False):
                     return False
@@ -289,6 +289,34 @@ class WordComAdapter:
         except Exception:
             return None
         return None
+
+    def _com_range_prop_all(self, rng, prop, expected):
+        """Evalúa una propiedad en todos los caracteres del rango (ignora espacios)."""
+        vals = []
+        try:
+            chars = rng.Characters
+            count = chars.Count
+        except Exception:
+            count = 0
+        if count and count < 100000:
+            for i in range(1, count + 1):
+                try:
+                    ch = chars(i)
+                    txt = getattr(ch, "Text", "") or ""
+                    if txt.strip() == "":
+                        continue
+                    vals.append(self._com_range_prop(ch, prop))
+                except Exception:
+                    vals.append(None)
+        else:
+            vals.append(self._com_range_prop(rng, prop))
+        if not vals:
+            vals.append(self._com_range_prop(rng, prop))
+        if all(v is None for v in vals):
+            return None
+        if all(v is None or v == expected for v in vals) and any(v is not None and v == expected for v in vals):
+            return True
+        return False
 
     def _evaluate_specs_com(self, specs, doc, full_text, target_phrase, expected_text, occurrences):
         criteria = []
@@ -312,9 +340,10 @@ class WordComAdapter:
                     end = start + len(target)
                     rng = doc.Range(start, end)
                     val = self._com_range_prop(rng, prop)
-                    if val is None:
-                        status = CriterionStatus.FAIL
-                    elif val == expected:
+                    agg = self._com_range_prop_all(rng, prop, expected)
+                    if agg is None:
+                        status = CriterionStatus.NOT_VERIFIABLE
+                    elif agg:
                         status = CriterionStatus.PASS
                     else:
                         status = CriterionStatus.FAIL

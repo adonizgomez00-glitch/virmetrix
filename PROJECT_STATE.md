@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-10-29 (ITER-021 validada en Windows)  
+**Última actualización:** 2026-11-07 (UI dos ventanas + automatización de copias + corrección puntuación)  
 **Estado global:** UI moderna validada con Word COM real. 41 ejercicios. 68 tests pass. Cobertura 80.52%. Pendiente: validación con Narrador y empaquetado/instalador Windows.
 
 ## Resumen
