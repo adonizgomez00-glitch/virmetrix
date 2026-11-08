@@ -1,0 +1,24 @@
+{
+  "exercise_id": "table-007",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar tablas y listas (MO-100)",
+  "instructions": "Divide la tabla en dos tablas de 2x2.",
+  "target_phrase": "A",
+  "expected_text": "",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_count",
+      "expected": 2
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

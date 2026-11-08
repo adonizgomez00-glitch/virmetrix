@@ -1,0 +1,31 @@
+{
+  "exercise_id": "table-008",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar tablas y listas (MO-100)",
+  "instructions": "Convierte el texto en una tabla de 2x2.",
+  "target_phrase": "X",
+  "expected_text": "",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "table_dimensions",
+      "rows": 2,
+      "cols": 2
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

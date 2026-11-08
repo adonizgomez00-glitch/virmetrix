@@ -1,0 +1,39 @@
+{
+  "exercise_id": "table-006",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar tablas y listas (MO-100)",
+  "instructions": "Crea una tabla de 3x2 con nombres y edades.",
+  "target_phrase": "Nombre",
+  "expected_text": "",
+  "criteria": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "table_dimensions",
+      "rows": 3,
+      "cols": 2
+    },
+    {
+      "id": "C3",
+      "type": "table_cell_text",
+      "row": 1,
+      "col": 0,
+      "expected": "Ana"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

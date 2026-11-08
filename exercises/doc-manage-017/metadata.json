@@ -1,0 +1,25 @@
+{
+  "exercise_id": "doc-manage-017",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar documentos (MO-100)",
+  "instructions": "Agrega la propiedad Category con el valor \"Informe\".",
+  "target_phrase": "Propiedad",
+  "expected_text": "Propiedad Category.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "doc_property",
+      "property": "Category",
+      "expected": "Informe"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

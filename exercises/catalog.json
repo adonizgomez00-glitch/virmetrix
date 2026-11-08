@@ -740,6 +740,156 @@
         "docx_portable",
         "word_com"
       ]
+    },
+    {
+      "exercise_id": "doc-manage-016",
+      "title": "Vínculo interno",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-017",
+      "title": "Propiedad Category",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-018",
+      "title": "Sin cambios registrados (inspección)",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-019",
+      "title": "Márgenes estrechos",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-010",
+      "title": "Símbolo copyright",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-011",
+      "title": "Borrar formato",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-012",
+      "title": "Tamaño 10 pt",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "table-006",
+      "title": "Tabla con datos ordenados",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "table-007",
+      "title": "Dividir tabla",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "table-008",
+      "title": "Convertir texto en tabla",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "refs-013",
+      "title": "Fuente bibliográfica",
+      "competency": "Crear y administrar referencias (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "graphics-014",
+      "title": "Forma con texto",
+      "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "graphics-015",
+      "title": "Imagen con texto alternativo Portada2",
+      "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-012",
+      "title": "Aceptar cambios",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-013",
+      "title": "Responder comentario",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
     }
   ]
 }
