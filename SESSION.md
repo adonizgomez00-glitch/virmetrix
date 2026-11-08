@@ -354,3 +354,35 @@ Se consultó el PDF oficial de MO-100 y se añadieron los dominios, pesos y subo
 - Build Linux: `dist/VirMetrix/VirMetrix` generado y ejecutable.
 - Pendiente Windows: revalidar COM/accesibilidad (Narrador) e instalador tras estos cambios.
 
+
+## Checkpoint — 2026-11-07 (fin de sesión)
+
+### Trabajo realizado
+- UI en dos ventanas (ConfigWindow vertical + PracticeWindow horizontal).
+- Automatización de copias de trabajo al cambiar de ejercicio.
+- Corrección de puntuación (bold/size) en portable y Word COM.
+- 35 ejercicios nuevos añadidos (total 89) para cobertura ~90-95% de subobjetivos verificables.
+- Tipos de criterio nuevos: hyperlink_present, background_present, textbox_count, endnote_count, tracked_change_count.
+- Licencia GPL v2 añadida.
+- Tutorial PDF de resolución de ejercicios generado y subido.
+- 68 tests pass, cobertura 80.52%.
+
+### Próximos pasos (mañana)
+1. Validar en VM Windows 10:
+   - Ejecutar `pytest -q` y verificar 68+ pass.
+   - Probar los 89 ejercicios en modo `word_com` (especialmente los nuevos de gráficos, referencias y colaboración).
+   - Verificar que los ejercicios con criterios no verificables en portable (impresión, accesibilidad, fondos, efectos) se comportan correctamente en COM.
+   - Comprobar que no haya procesos Word residuales tras evaluar.
+2. Accesibilidad (Narrador): validar nombres, orden de foco, anuncio de temporizador/puntuación (pendiente).
+3. Empaquetado Windows: build con PyInstaller + instalador (.exe) y validación de arranque.
+4. Revisar y corregir cualquier ejercicio que falle en Windows.
+5. Actualizar `QA_RESULTS.md` con evidencia reproducible.
+
+### Archivos clave
+- `src/virmetrix/ui/main_window.py` (dos ventanas)
+- `src/virmetrix/infrastructure/evaluators/portable.py`
+- `src/virmetrix/infrastructure/evaluators/word_com.py`
+- `exercises/` (89 ejercicios)
+- `docs/Tutorial_Ejercicios_VirMetrix.pdf`
+- `LICENSE` (GPL v2)
+
