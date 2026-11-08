@@ -644,6 +644,25 @@ class PortableDocxEvaluator:
                 count = (comments_text or "").count("<w:comment ")
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
                 ev = f"Comentarios: {count} (esperado >= {expected})."
+            elif typ == "hyperlink_present":
+                expected = spec.get("expected", True)
+                count = len(root.findall(f".//{{{W_NS}}}hyperlink"))
+
+                present = count > 0
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = f"Hipervínculos: {count}."
+            elif typ == "background_present":
+                expected = spec.get("expected", True)
+                # check w:background in document.xml raw
+                present = False
+                try:
+                    # root is document root; background is child of w:document, not in body. Check parent? root.tag is document, so:
+                    bg = root.find(f"{{{W_NS}}}background")
+                    present = bg is not None
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Fondo de página detectado." if present else "No se detectó fondo de página."
             elif typ == "tracked_changes_present":
                 expected = spec.get("expected", True)
                 present = tracked_change_count > 0

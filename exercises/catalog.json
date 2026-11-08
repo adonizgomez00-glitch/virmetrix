@@ -152,26 +152,6 @@
       ]
     },
     {
-      "exercise_id": "collab-001",
-      "title": "Comentario de revisión",
-      "competency": "Administrar la colaboración en documentos (MO-100)",
-      "difficulty": "básico",
-      "modes": [
-        "docx_portable",
-        "word_com"
-      ]
-    },
-    {
-      "exercise_id": "collab-002",
-      "title": "Control de cambios",
-      "competency": "Administrar la colaboración en documentos (MO-100)",
-      "difficulty": "básico",
-      "modes": [
-        "docx_portable",
-        "word_com"
-      ]
-    },
-    {
       "exercise_id": "doc-manage-004",
       "title": "Pie de página principal",
       "competency": "Administrar documentos (MO-100)",
@@ -404,6 +384,206 @@
     {
       "exercise_id": "collab-006",
       "title": "Comentario de aprobación",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-008",
+      "title": "Encabezado con número de página",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-009",
+      "title": "Pie de página con fecha",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-010",
+      "title": "Búsqueda y reemplazo",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-011",
+      "title": "Hipervínculo a sitio web",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-012",
+      "title": "Fondo de página",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "doc-manage-013",
+      "title": "Propiedad Keywords",
+      "competency": "Administrar documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-005",
+      "title": "Espaciado después de párrafo",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-006",
+      "title": "Columnas de texto",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-007",
+      "title": "Fuente Consolas",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "text-para-008",
+      "title": "Color azul",
+      "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "table-004",
+      "title": "Tabla con encabezado repetido",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "table-005",
+      "title": "Tabla de 4x3",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "list-004",
+      "title": "Lista numerada de 3 elementos",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "list-005",
+      "title": "Lista de 5 elementos",
+      "competency": "Administrar tablas y listas (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "refs-007",
+      "title": "Nota al pie con texto Referencia",
+      "competency": "Crear y administrar referencias (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "refs-008",
+      "title": "Nota final con texto Conclusión",
+      "competency": "Crear y administrar referencias (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "graphics-007",
+      "title": "Cuadro de texto con texto Aviso",
+      "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "graphics-008",
+      "title": "Imagen con texto alternativo Logo",
+      "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-007",
+      "title": "Sin cambios registrados",
+      "competency": "Administrar la colaboración en documentos (MO-100)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ]
+    },
+    {
+      "exercise_id": "collab-008",
+      "title": "Tres comentarios",
       "competency": "Administrar la colaboración en documentos (MO-100)",
       "difficulty": "básico",
       "modes": [

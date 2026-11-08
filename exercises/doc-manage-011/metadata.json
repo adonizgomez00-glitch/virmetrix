@@ -1,0 +1,23 @@
+{
+  "exercise_id": "doc-manage-011",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar documentos (MO-100)",
+  "instructions": "Inserta un hipervínculo con el texto \"ejemplo\" que apunte a https://example.com.",
+  "target_phrase": "ejemplo",
+  "expected_text": "Visita ejemplo",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "hyperlink_present",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable"
+  ]
+}

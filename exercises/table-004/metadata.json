@@ -1,0 +1,37 @@
+{
+  "exercise_id": "table-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar tablas y listas (MO-100)",
+  "instructions": "Crea una tabla de 3x3 y repite la fila de encabezado.",
+  "target_phrase": "Enc1",
+  "expected_text": "",
+  "criteria": [
+    "C1",
+    "C2",
+    "C3"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "table_dimensions",
+      "rows": 3,
+      "cols": 3
+    },
+    {
+      "id": "C3",
+      "type": "repeating_header",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

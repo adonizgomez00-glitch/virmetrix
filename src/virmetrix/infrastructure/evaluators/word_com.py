@@ -593,6 +593,26 @@ class WordComAdapter:
                     count = 0
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
                 ev = f"Comentarios: {count} (esperado >= {expected})."
+            elif typ == "hyperlink_present":
+                expected = spec.get("expected", True)
+                count = 0
+                try:
+                    count = doc.Hyperlinks.Count
+                except Exception:
+                    count = 0
+                present = count > 0
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = f"Hipervínculos: {count}."
+            elif typ == "background_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    xml = doc.Content.XML if hasattr(doc.Content, "XML") else ""
+                    present = "background" in str(xml).lower()
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Fondo de página detectado." if present else "No se detectó fondo de página."
             elif typ == "tracked_changes_present":
                 expected = spec.get("expected", True)
                 present = False

@@ -1,0 +1,24 @@
+{
+  "exercise_id": "list-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar tablas y listas (MO-100)",
+  "instructions": "Convierte los tres párrafos en una lista numerada.",
+  "target_phrase": "Primero",
+  "expected_text": "Primero\nSegundo\nTercero",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "list_items_count",
+      "expected": 3
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

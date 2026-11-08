@@ -1,0 +1,30 @@
+{
+  "exercise_id": "refs-007",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Crear y administrar referencias (MO-100)",
+  "instructions": "Inserta una nota al pie que contenga el texto \"Referencia\".",
+  "target_phrase": "Texto",
+  "expected_text": "Texto con nota.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "footnote_count",
+      "expected": 1
+    },
+    {
+      "id": "C2",
+      "type": "footnote_contains",
+      "expected": "Referencia"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

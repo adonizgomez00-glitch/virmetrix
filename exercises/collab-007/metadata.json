@@ -1,0 +1,24 @@
+{
+  "exercise_id": "collab-007",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar la colaboración en documentos (MO-100)",
+  "instructions": "Asegúrate de que no haya cambios registrados en el documento.",
+  "target_phrase": "Texto",
+  "expected_text": "Texto sin cambios registrados.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "tracked_changes_present",
+      "expected": false
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "exercise_id": "doc-manage-008",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Administrar documentos (MO-100)",
+  "instructions": "Agrega un encabezado que contenga el texto \"Página\".",
+  "target_phrase": "Página",
+  "expected_text": "Documento con encabezado.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "header_contains",
+      "expected": "Página"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "exercise_id": "text-para-007",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
+  "instructions": "Aplica la fuente Consolas al texto \"Texto en fuente Consolas.\".",
+  "target_phrase": "Texto",
+  "expected_text": "Texto en fuente Consolas.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "run_property",
+      "target": "Texto en fuente Consolas.",
+      "property": "font_name",
+      "expected": "Consolas"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ]
+}
