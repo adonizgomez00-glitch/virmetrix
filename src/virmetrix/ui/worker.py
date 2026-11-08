@@ -48,6 +48,13 @@ class EvaluationWorker(QObject):
                 self.failed.emit(f"{type(e).__name__}: {e}")
 
     def _run_com(self) -> EvaluationResult:
+        if getattr(sys, "frozen", False):
+            # Ejecutable empaquetado: no existe com_eval_cli.py como fichero
+            # suelto y sys.executable es el propio exe (relanzarlo abria otra
+            # instancia de la GUI). Se evalua en el proceso actual: este worker
+            # ya corre en un QThread y WordComAdapter inicializa COM por
+            # llamada (pythoncom.CoInitialize), asi que es seguro.
+            return self.orchestrator.evaluate(self.mode, self.work_file_path, self.exercise)
         helper = Path(__file__).resolve().parents[1] / "infrastructure" / "evaluators" / "com_eval_cli.py"
         cmd = [sys.executable, str(helper), self.work_file_path, self.exercise.exercise_id]
         self._proc = subprocess.Popen(

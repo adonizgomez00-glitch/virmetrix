@@ -31,9 +31,14 @@ from virmetrix.application.orchestrator import EvaluationOrchestrator
 from virmetrix.application.session import ExamMode, ExamSession, SessionStatus
 from virmetrix.infrastructure.catalog.loader import list_exercises, load_exercise
 from virmetrix.infrastructure.persistence.sqlite import AttemptStore
+from virmetrix.paths import resource_root
 from virmetrix.ui.worker import EvaluationWorker
 
-ROOT = Path(__file__).resolve().parents[3]
+# resource_root() funciona en desarrollo y en el ejecutable empaquetado:
+# en modo congelado (PyInstaller) apunta a _internal/, donde se copian los
+# ejercicios. Path(__file__).resolve().parents[3] en congelado apunta un
+# nivel mas arriba (dist\VirMetrix) y el reference.docx no se encontraba.
+ROOT = resource_root()
 EXAM_DURATION_SECONDS = 300
 
 APP_QSS = """

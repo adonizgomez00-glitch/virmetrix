@@ -1,6 +1,6 @@
 # QA Results
 
-**Estado:** no se han ejecutado pruebas de software; solo se ha creado documentación inicial.
+**Estado:** VALIDADO EN WINDOWS (2026-11-08): 68 pruebas OK, Word COM (True), 3/5 y 5/5 - ver ultimo registro del fichero. Historico ITER-001: no se han ejecutado pruebas de software; solo se ha creado documentación inicial.
 
 ## Resumen
 
@@ -355,3 +355,42 @@ Documento incorrecto (sin formato, 12 pt):
 - Proceso residual: 1 WINWORD (PID 9304) tras la ejecución (probablemente de la validación). Recomendación: cerrar manualmente o matar el proceso.
 - Conclusión: todas las comprobaciones con valor esperado cumplen. COM validado tras las mejoras de UI y puntuación.
 
+## Validacion Windows - Checklist WINDOWS_VALIDATION.md (2026-11-08)
+
+- SO: Microsoft Windows 10 Pro 10.0.19045 (build 19045).
+- Word: 16.0.20326.20232 (fichero) / COM 16.0 build 16.0.20326.
+- Python: 3.12.10 (venv .venv, instalacion per-user; el Python 3.15 del sistema NO sirve por el pin PySide6==6.11.2).
+- Dependencias: PySide6 6.11.2, python-docx 1.2.0, lxml 5.2.1, pywin32 312, pytest 9.1.1, pytest-cov 7.1.0.
+
+### 3. Pruebas portables
+- Comando: `$env:PYTHONPATH="src"; pytest -q`
+- Resultado: exit 0 -> **68 passed in 31.56s**, 0 failed.
+
+### 4. Disponibilidad Word COM
+- Comando: `python -c "from virmetrix.infrastructure.evaluators.word_com import WordComAdapter; print(WordComAdapter().is_available())"`
+- Resultado: exit 0 -> `(True, 'Word disponible (v16.0).')`
+
+### 5. Evaluacion COM (word-format-001)
+- Comando: script temporal con EvaluationOrchestrator + load_exercise (PYTHONPATH=src).
+- Copia de trabajo: `C:\Users\Adoniz\.virmetrix\work\reference.docx`
+- Referencia sin formato: `word_com 3 / 5`
+  - C1 pass - Ocurrencias de 'Informe de resultados': 1 (esperado 1).
+  - C2 fail - Propiedad 'bold' en objetivo: False.
+  - C3 fail - Propiedad 'size_pt' en objetivo: 11.0.
+  - C4 pass - Texto vecino conserva formato de referencia.
+  - C5 pass - Texto del documento coincide con el esperado.
+- Documento correcto (negrita + 16 pt aplicados solo a la frase con Word COM y guardado con Save): `word_com 5 / 5`
+  - C1 pass - Ocurrencias: 1. C2 pass - bold: True. C3 pass - size_pt: 16.0. C4 pass - vecino intacto. C5 pass - texto coincidente.
+- Ambos resultados coinciden EXACTAMENTE con lo esperado por el checklist.
+
+### 6. UI (paso 6)
+- Lanzada con `python -m virmetrix.ui.main_window` para validacion manual: crear copia de trabajo, evaluar en docx_portable y word_com, comprobar no-bloqueo e historial, probar Siguiente/Anterior.
+- Estado: pendiente de confirmacion manual del usuario.
+
+### 7. Pruebas por dominio (paso 7, opcional)
+- Pendientes: word-format-001, text-para-004, table-004, refs-001, graphics-001, collab-002.
+
+### Observaciones / defectos
+- Ningun defecto nuevo: las 4 comprobaciones con valor esperado (68 passed, COM True, 3/5, 5/5) cumplen.
+- Ruido no bloqueante: pytest emite 6 volcados `Windows fatal exception: code 0x800706be` (RPC server disconnected) en stderr, originados en `src/virmetrix/infrastructure/evaluators/word_com.py` y `src/virmetrix/application/orchestrator.py` durante tests que simulan COM no disponible. pytest termina con exit 0 y 68 passed. Posible mejora: silenciar faulthandler en esos tests.
+- Proceso WINWORD residual detectado tras la fase de evidencia: comprobar si procede de los scripts de validacion (Dispatch + Quit) y no del adaptador de la app (DispatchEx + Quit).
