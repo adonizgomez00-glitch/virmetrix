@@ -84,6 +84,8 @@ Nombre del producto: **VirMetrix**. SAQI es la metodología de desarrollo, no el
 
 ## Licencia
 
+VirMetrix se distribuye bajo la **GNU General Public License v2.0** (ver `LICENSE`).
+
 VirMetrix es gratuito para practicar y autoevaluarse. No se requiere licencia de pago. El proyecto es independiente y no está afiliado a Microsoft.
 
 ## Corrección de objetivo de certificación
