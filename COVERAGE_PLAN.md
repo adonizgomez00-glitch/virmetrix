@@ -34,3 +34,9 @@
 - collab-002: control de cambios (pendiente)
 
 **Estado:** implementación por iteraciones; cada ejercicio incluye criterios declarativos y pruebas.
+
+## Evaluación A vs Evaluación B
+
+- **Evaluación A** (actual, 89 ejercicios): cobertura ~40 % de los bullets oficiales (29/73).
+- **Evaluación B** (planificada): cubre los 44 bullets restantes (~30 ejercicios nuevos).
+- Plan detallado: `docs/EVALUATION_B_PLAN.md`.
