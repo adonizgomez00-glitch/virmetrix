@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
-  "instructions": "Inserta el símbodo © en el documento.",
+  "instructions": "Inserta el símbolo © en el documento.",
   "target_phrase": "Texto",
-  "expected_text": "Texto con símbodo ©.",
+  "expected_text": "Texto con símbolo ©.",
   "criteria": [
     "C1"
   ],
@@ -13,7 +13,7 @@
     {
       "id": "C1",
       "type": "document_text_equals",
-      "expected": "Texto con símbodo ©."
+      "expected": "Texto con símbolo ©."
     }
   ],
   "rules_version": "1.0.0",
