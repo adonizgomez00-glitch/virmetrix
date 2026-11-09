@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from PySide6.QtCore import QThread, QTimer, Qt
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -948,7 +948,12 @@ MainWindow = ConfigWindow
 
 def run():
     app = QApplication(sys.argv)
+    icon_path = ROOT / "virmetrix.ico"
+    if icon_path.is_file():
+        app.setWindowIcon(QIcon(str(icon_path)))
     w = ConfigWindow()
+    if icon_path.is_file():
+        w.setWindowIcon(QIcon(str(icon_path)))
     w.show()
     sys.exit(app.exec())
 
