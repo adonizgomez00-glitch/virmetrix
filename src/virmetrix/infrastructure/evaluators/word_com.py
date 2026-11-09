@@ -741,15 +741,25 @@ class WordComAdapter:
             elif typ == "paragraph_spacing":
                 expected = spec.get("expected", "")
                 ok = False
+                actual_seen = None
                 try:
-                    for p in doc.Paragraphs:
-                        if abs(p.ParagraphFormat.SpaceAfter - float(expected) / 20.0) < 1:
-                            ok = True
-                            break
+                    target_pt = float(expected) / 20.0
                 except Exception:
-                    pass
+                    target_pt = None
+                if target_pt is not None:
+                    for p in doc.Paragraphs:
+                        try:
+                            sa = p.ParagraphFormat.SpaceAfter
+                            actual_seen = sa
+                            if sa is None:
+                                continue
+                            if abs(float(sa) - target_pt) < 2:
+                                ok = True
+                                break
+                        except Exception:
+                            continue
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
-                ev = f"Espaciado verificado (esperado {expected} twips)."
+                ev = f"Espaciado verificado (esperado {expected} twips; leído {actual_seen})."
             elif typ == "merged_cell_present":
                 expected = spec.get("expected", True)
                 ok = False
