@@ -692,9 +692,16 @@ class WordComAdapter:
                 expected = spec.get("expected", "")
                 ok = False
                 try:
+                    norm_expected = str(expected).lower().replace(" ", "")
                     for p in doc.Paragraphs:
-                        if expected.lower() in (str(p.Style.NameLocal) if p.Style else "").lower():
-                            ok = True
+                        style = getattr(p, "Style", None)
+                        if style is None:
+                            continue
+                        for name in (getattr(style, "Name", None), getattr(style, "NameLocal", None)):
+                            if name and norm_expected in str(name).lower().replace(" ", ""):
+                                ok = True
+                                break
+                        if ok:
                             break
                 except Exception:
                     pass
