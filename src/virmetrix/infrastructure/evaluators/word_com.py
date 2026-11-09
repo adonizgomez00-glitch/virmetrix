@@ -285,7 +285,16 @@ class WordComAdapter:
             if prop == "font_name":
                 return rng.Font.Name
             if prop == "color":
-                return rng.Font.Color
+                c = rng.Font.Color
+                # Font.Color es un entero OLE_COLOR (BGR), no una cadena hex.
+                # Convertir a cadena hex RGB (p. ej. 255 -> "FF0000") para
+                # comparar con el expected del ejercicio.
+                if isinstance(c, int) and c >= 0:
+                    r = c & 0xFF
+                    g = (c >> 8) & 0xFF
+                    b = (c >> 16) & 0xFF
+                    return f"{r:02X}{g:02X}{b:02X}"
+                return None
         except Exception:
             return None
         return None
