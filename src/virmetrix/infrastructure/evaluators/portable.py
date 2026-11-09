@@ -678,8 +678,12 @@ class PortableDocxEvaluator:
             elif typ == "comment_count":
                 expected = spec.get("expected", 1)
                 count = (comments_text or "").count("<w:comment ")
-                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
-                ev = f"Comentarios: {count} (esperado >= {expected})."
+                if expected == 0:
+                    status = CriterionStatus.PASS if count == 0 else CriterionStatus.FAIL
+                    ev = f"Comentarios: {count} (esperado 0)."
+                else:
+                    status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                    ev = f"Comentarios: {count} (esperado >= {expected})."
             elif typ == "hyperlink_present":
                 expected = spec.get("expected", True)
                 count = len(root.findall(f".//{{{W_NS}}}hyperlink"))
