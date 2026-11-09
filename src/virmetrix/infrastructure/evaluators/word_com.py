@@ -387,7 +387,12 @@ class WordComAdapter:
                 else:
                     norm_full = "".join(full_text.split())
                     norm_expected = "".join(str(expected).split())
-                    status = CriterionStatus.PASS if norm_full == norm_expected else CriterionStatus.FAIL
+                    if norm_full == norm_expected:
+                        status = CriterionStatus.PASS
+                    elif "©" in norm_expected and "©" in norm_full and norm_full.replace("©", "") == norm_expected.replace("©", ""):
+                        status = CriterionStatus.PASS
+                    else:
+                        status = CriterionStatus.FAIL
                     ev = "Texto del documento coincide con el esperado." if status == CriterionStatus.PASS else "El texto del documento difiere del esperado."
             elif typ == "table_count":
                 expected = spec.get("expected", 1)
