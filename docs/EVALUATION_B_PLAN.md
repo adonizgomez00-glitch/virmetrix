@@ -91,6 +91,24 @@ del PDF "MO-100 Skills Measured" (29/73 bullets). La Evaluación B debe cubrir l
 - Ventaja: flexible; una sola fuente.
 - Desventaja: requiere cambios en UI y loader.
 
+## 6b. Estado de implementación de la Evaluación B
+
+- **UI:** selector de módulo (A/B/Todo) implementado en `ConfigWindow` (`module_combo`).
+- **Loader:** `ExerciseMetadata.module` añadido; `list_exercises()` devuelve `module`.
+- **Ejercicios B generados:** 33 ejercicios (b-*) con metadata + reference.docx básicos.
+- **Criterios nuevos (no implementados aún):** los ejercicios B usan tipos de criterio nuevos
+  (section_break_present, cell_margins, text_effects, format_painter_used, smartart_present,
+  model3d_present, image_background_removed, object_position, text_wrap, comment_resolved,
+  comment_count=0, revisions_reviewed, track_changes_locked, internal_hyperlink,
+  formatting_marks_visible, alternative_format, print_settings, remove_personal_info,
+  text_effects, format_painter_used, section_break, footnote_props, citation_present,
+  bibliography_present, toc_custom, shape_count, smartart_present, model3d_present,
+  image_background_removed, object_position, text_wrap, comment_resolved, comment_count,
+  revisions_reviewed, track_changes_locked, internal_hyperlink, formatting_marks_visible,
+  alternative_format, print_settings, remove_personal_info).
+  Estos devuelven "Tipo de criterio desconocido" (ERROR) hasta que se implementen en
+  `portable.py` y `word_com.py`.
+
 ## 7. Requisito de UI: selector de Evaluación A/B
 
 Para soportar dos módulos, la ventana de configuración (`ConfigWindow`) debe incluir

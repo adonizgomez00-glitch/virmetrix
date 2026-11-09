@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-refs-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Personalizar TOC",
+  "instructions": "Personaliza la tabla de contenido para mostrar solo niveles 1-2.",
+  "target_phrase": "TOC",
+  "expected_text": "TOC personalizado.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "toc_custom",
+      "expected": "1-2"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

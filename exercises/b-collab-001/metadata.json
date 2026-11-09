@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-collab-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Resolver comentario",
+  "instructions": "Resuelve el comentario existente en el documento.",
+  "target_phrase": "Comentario",
+  "expected_text": "Comentario resuelto.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "comment_resolved",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

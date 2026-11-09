@@ -31,4 +31,5 @@ def load_exercise(exercise_id: str) -> ExerciseMetadata:
         target_phrase=data.get("target_phrase"),
         expected_text=data.get("expected_text"),
         criteria_specs=data.get("criteria_specs", []),
+        module=data.get("module", "A"),
     )

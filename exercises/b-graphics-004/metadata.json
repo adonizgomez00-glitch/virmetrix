@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-graphics-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Quitar fondo de imagen",
+  "instructions": "Quita el fondo de la imagen insertada.",
+  "target_phrase": "Imagen",
+  "expected_text": "Fondo quitado.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "image_background_removed",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

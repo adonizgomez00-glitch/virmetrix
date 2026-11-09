@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-table-005",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Redimensionar tabla",
+  "instructions": "Ajusta el ancho de la tabla al ancho de la página.",
+  "target_phrase": "Tabla",
+  "expected_text": "Tabla ajustada.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_autofit",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

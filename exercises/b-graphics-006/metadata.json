@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-graphics-006",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Ajustar texto alrededor",
+  "instructions": "Configura el ajuste de texto de la imagen como 'Estrecho'.",
+  "target_phrase": "Imagen",
+  "expected_text": "Ajuste configurado.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "text_wrap",
+      "expected": "tight"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

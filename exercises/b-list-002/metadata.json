@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-list-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Reiniciar numeración",
+  "instructions": "Reinicia la numeración de la lista en 1.",
+  "target_phrase": "Lista",
+  "expected_text": "Numeración reiniciada.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "list_restart",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

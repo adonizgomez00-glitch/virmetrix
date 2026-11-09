@@ -19,5 +19,6 @@
   "rules_version": "1.0.0",
   "modes": [
     "docx_portable"
-  ]
+  ],
+  "module": "A"
 }

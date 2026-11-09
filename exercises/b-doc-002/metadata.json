@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-doc-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Mostrar/ocultar símbodos de formato",
+  "instructions": "Muestra los símbodos de formato (¶).",
+  "target_phrase": "Símbodos",
+  "expected_text": "Símbodos visibles.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "formatting_marks_visible",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

@@ -13,5 +13,6 @@
       "type": "toc_present"
     }
   ],
-  "rules_version": "1.0.0"
+  "rules_version": "1.0.0",
+  "module": "A"
 }

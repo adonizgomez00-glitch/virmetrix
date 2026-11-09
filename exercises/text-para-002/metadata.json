@@ -25,5 +25,6 @@
   ],
   "rules_version": "1.0.0",
   "target_phrase": "Informe de resultados",
-  "expected_text": "El presente Informe de resultados resume los hallazgos del ejercicio."
+  "expected_text": "El presente Informe de resultados resume los hallazgos del ejercicio.",
+  "module": "A"
 }

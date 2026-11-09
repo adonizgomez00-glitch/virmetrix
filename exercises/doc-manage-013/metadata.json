@@ -21,5 +21,6 @@
   "modes": [
     "docx_portable",
     "word_com"
-  ]
+  ],
+  "module": "A"
 }

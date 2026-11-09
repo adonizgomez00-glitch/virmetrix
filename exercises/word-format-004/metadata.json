@@ -49,5 +49,6 @@
       "expected": "El presente Informe de resultados resume los hallazgos del ejercicio."
     }
   ],
-  "rules_version": "1.0.0"
+  "rules_version": "1.0.0",
+  "module": "A"
 }

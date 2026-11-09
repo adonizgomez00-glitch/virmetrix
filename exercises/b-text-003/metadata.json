@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-text-003",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Saltos de sección",
+  "instructions": "Inserta un salto de sección continua.",
+  "target_phrase": "Sección",
+  "expected_text": "Salto insertado.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "section_break",
+      "expected": "continuous"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

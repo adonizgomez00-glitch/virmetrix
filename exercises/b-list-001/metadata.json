@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-list-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Niveles de lista",
+  "instructions": "Crea una lista de dos niveles (principal y subnivel).",
+  "target_phrase": "Lista",
+  "expected_text": "Lista con niveles.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "list_levels",
+      "expected": 2
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

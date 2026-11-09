@@ -123,7 +123,8 @@ class ConfigWindow(QMainWindow):
         self.orch = EvaluationOrchestrator()
         self.store = AttemptStore(Path.home() / ".virmetrix" / "history.sqlite")
 
-        self.exercises = list_exercises()
+        self._all_exercises = list_exercises()
+        self.exercises = [e for e in self._all_exercises if e.get("module", "A") == "A"]
         if not self.exercises:
             raise RuntimeError("Catálogo vacío.")
 
@@ -213,6 +214,20 @@ class ConfigWindow(QMainWindow):
         self.mode_use_combo.currentIndexChanged.connect(self._on_mode_changed)
         row_mode.addWidget(self.mode_use_combo, 1)
         col.addLayout(row_mode)
+
+        row_mod = QHBoxLayout()
+        row_mod.setSpacing(8)
+        lbl_mod = QLabel("Evaluación")
+        lbl_mod.setObjectName("counter")
+        row_mod.addWidget(lbl_mod)
+        self.module_combo = QComboBox()
+        self.module_combo.addItem("Evaluación A (actual)", "A")
+        self.module_combo.addItem("Evaluación B (pendiente)", "B")
+        self.module_combo.addItem("Todo (A + B)", "all")
+        self.module_combo.setAccessibleName("Módulo de evaluación")
+        self.module_combo.currentIndexChanged.connect(self._on_module_changed)
+        row_mod.addWidget(self.module_combo, 1)
+        col.addLayout(row_mod)
 
         row_eval = QHBoxLayout()
         row_eval.setSpacing(8)
@@ -331,6 +346,23 @@ class ConfigWindow(QMainWindow):
         else:
             self.session.duration_seconds = None
 
+    def _filtered_exercises(self) -> list[dict]:
+        mod = self.module_combo.currentData() if hasattr(self, "module_combo") else "A"
+        if mod == "all":
+            return [e for e in self._all_exercises]
+        return [e for e in self._all_exercises if e.get("module", "A") == mod]
+
+    def _on_module_changed(self, _index):
+        self.exercises = self._filtered_exercises()
+        if not self.exercises:
+            QMessageBox.information(self, "Evaluación", "No hay ejercicios disponibles para este módulo.")
+            return
+        self.session = ExamSession(
+            mode=self.mode_use_combo.currentData(),
+            exercise_ids=[e["exercise_id"] for e in self.exercises],
+            duration_seconds=(EXAM_DURATION_SECONDS if self.mode_use_combo.currentData() == ExamMode.EXAM else None),
+        )
+
     def _reference_path(self) -> Path:
         return ROOT / "exercises" / self.session.current_exercise_id / "reference.docx"
 
@@ -408,8 +440,8 @@ class ConfigWindow(QMainWindow):
         self.session.current_index = 0
         if self.practice_window is None:
             self.practice_window = PracticeWindow(self)
-        else:
-            self.practice_window._load_current_exercise()
+        self.practice_window.exercises = self.exercises
+        self.practice_window._load_current_exercise()
         self.practice_window.show()
         self.practice_window.raise_()
         self.practice_window.activateWindow()

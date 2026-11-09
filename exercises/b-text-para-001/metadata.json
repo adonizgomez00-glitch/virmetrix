@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-text-para-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Saltos de página y sección",
+  "instructions": "Inserta un salto de página antes del segundo párrafo.",
+  "target_phrase": "Párrafo",
+  "expected_text": "Texto con salto.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "section_break_present",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

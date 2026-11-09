@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-table-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Convertir texto a tabla",
+  "instructions": "Convierte el texto separado por tabuladores en una tabla.",
+  "target_phrase": "Texto",
+  "expected_text": "Tabla creada.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_count",
+      "expected": 1
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

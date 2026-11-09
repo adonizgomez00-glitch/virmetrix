@@ -1,0 +1,25 @@
+{
+  "exercise_id": "b-graphics-003",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación B — Insertar icono 3D",
+  "instructions": "Inserta un icono 3D en el documento.",
+  "target_phrase": "Icono 3D",
+  "expected_text": "Icono 3D insertado.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "model3d_present",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "B"
+}

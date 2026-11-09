@@ -73,3 +73,4 @@ class ExerciseMetadata:
     target_phrase: str | None = None
     expected_text: str | None = None
     criteria_specs: list[dict] = field(default_factory=list)
+    module: str = "A"
