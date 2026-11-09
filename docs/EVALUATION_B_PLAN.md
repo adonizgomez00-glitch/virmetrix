@@ -91,6 +91,21 @@ del PDF "MO-100 Skills Measured" (29/73 bullets). La Evaluación B debe cubrir l
 - Ventaja: flexible; una sola fuente.
 - Desventaja: requiere cambios en UI y loader.
 
+## 7. Requisito de UI: selector de Evaluación A/B
+
+Para soportar dos módulos, la ventana de configuración (`ConfigWindow`) debe incluir
+un selector (combo o radio) **"Evaluación: A / B / Todo"** antes de iniciar la sesión,
+análogo al selector de modo (Práctica/Examen). El selector filtra `exercise_ids` de la
+sesión según el módulo elegido.
+
+- Si se elige "Todo", se mezclan A y B (útil para simulacro completo).
+- El historial SQLite debe registrar el módulo de cada intento (añadir columna `module`
+  a la tabla de intentos o derivarlo del `exercise_id`).
+- El panel de resultados puede mostrar el módulo activo.
+
+Este requisito aplica especialmente a la Opción 3, pero también es deseable en la
+Opción 2 (con filtro por prefijo de ID).
+
 ## 4. Verificabilidad (portable vs COM)
 
 No todos los bullets nuevos son verificables automáticamente:
