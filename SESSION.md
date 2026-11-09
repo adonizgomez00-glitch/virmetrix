@@ -386,3 +386,69 @@ Se consultó el PDF oficial de MO-100 y se añadieron los dominios, pesos y subo
 - `docs/Tutorial_Ejercicios_VirMetrix.pdf`
 - `LICENSE` (GPL v2)
 
+---
+
+## Checkpoint — 2026-11-09 (sesión actual)
+
+### Trabajo realizado
+
+#### A. Publicación del .exe en GitHub
+- Causa: `dist/` y `build/` estaban en `.gitignore`, por eso el binario no aparecía en GitHub.
+- Solución:
+  - Carpeta `releases/` trackeada (con `.gitkeep` + `README.md`) para subir binarios manualmente.
+  - `.github/workflows/build-windows.yml`: compila el `.exe` en Windows (GitHub Actions) en cada push a `main` (artefacto) y publica un **GitHub Release** al crear un tag `v*`.
+  - Excepción en `.gitignore` para `releases/*.exe`/`*.zip`.
+  - README actualizado con instrucciones de descarga.
+- Releases publicados: `v0.1.1`, `v0.1.2`, `v0.1.3`, `v0.1.4` (cada uno con `VirMetrix-windows.zip`).
+
+#### B. Bugs detectados y corregidos (modo COM / Word)
+
+1. **Ejercicio 10 (graphics-002) — instrucción incompleta.**
+   - Antes: "Inserta un cuadro de texto con el texto 'Nota lateral'."
+   - Ahora: "Inserta una imagen y, a su lado, un cuadro de texto con el texto 'Nota lateral'."
+   - Criterios: `drawing_count` esperado 1 → 2 (imagen + cuadro); `textbox_contains` = "Nota lateral".
+   - `word_com` `drawing_count`: ahora suma `InlineShapes.Count + Shapes.Count` (antes solo InlineShapes) para contar imagen + cuadro de texto.
+   - Título en catálogo: "Imagen y cuadro de texto".
+   - Tests actualizados y pasando.
+
+2. **Ejercicio 12 (doc-manage-002) — orientación de página falsea portrait.**
+   - Causa: portable usaba el primer `sectPr` (`root.find`); en documentos con saltos de sección intermedios (portrait) se reportaba portrait aunque la sección principal fuera landscape. word_com usaba `doc.PageSetup` (primera sección).
+   - Fix: portable usa el último `sectPr` (`findall(...)[-1]`); word_com usa la última sección (`Sections(Sections.Count)`).
+   - Reproducido con `multi.docx` (1ª portrait + 2ª landscape) → ahora reporta landscape.
+
+3. **Ejercicio 19 (text-para-002) y 30? no — text-para-008 — color.**
+   - Ejercicios afectados: `text-para-002` (rojo, esperado `FF0000`) y `text-para-008` (azul, esperado `0000FF`).
+   - Causa: word_com devolvía `Font.Color` como entero OLE_COLOR (BGR) (p. ej. 255) y se comparaba con la cadena hex `"FF0000"` → siempre fail. Mensaje: `Propiedad 'color' en objetivo: 255`.
+   - Fix: convertir el entero OLE_COLOR a cadena hex RGB (`r = c & 0xFF`, etc.). 255 → `"FF0000"`.
+   - Modo portable ya funcionaba (extrae `w:color/@w:val`).
+
+4. **Ejercicio 31 (text-para-004) — estilo "Heading1" no aplicado.**
+   - Causa: word_com comparaba `expected.lower()` (`"heading1"`) como subcadena de `Style.NameLocal` (`"Título 1"` en español o `"Heading 1"` en inglés, con espacio) → nunca coincidía.
+   - Fix: normalizar (minúsculas, sin espacios) y comprobar tanto `Style.Name` como `Style.NameLocal`.
+
+5. **Ejercicio 30 (text-para-003) — sangría izquierda.**
+   - Causa: el `try/except` envolvía todo el bucle; si un párrafo lanzaba excepción, se abortaba y `ok` quedaba `False`. Mensaje: `Sangría verificada (esperado 720 twips).`
+   - Fix: `try/except` por párrafo; tolerancia ampliada a 2 pt; mensaje incluye el valor real leído (`leído X`) para diagnóstico.
+
+#### C. Icono de la aplicación
+- Añadido `virmetrix.ico` (raíz del repo) a la UI (`run()` aplica `QIcon` a la app y a la ventana) y al empaquetado (PyInstaller `icon=` + `datas`).
+
+#### D. Commits de esta sesión (en orden)
+- `407904b` feat: permitir publicar .exe en GitHub (carpeta releases + workflow build Windows)
+- `c522107` fix: añadir permissions contents:write para crear release
+- `176eec7` fix: ejercicio 10 (graphics-002) pide imagen + cuadro de texto 'Nota lateral'
+- `1323795` fix: orientacion de pagina usa la ultima seccion
+- `c8f0c09` fix: color en word_com se convierte de OLE_COLOR (BGR) a hex RGB
+- `ed8e35f` fix: paragraph_style en word_com compara nombre de estilo normalizado
+- `878a4e0` fix: paragraph_indent en word_com no aborta el bucle y diagnostica el valor leido
+- `b03ae01` feat: icono de la app (virmetrix.ico) en UI y en el ejecutable
+
+#### E. Tests
+- 68 passed, 0 failed tras cada cambio.
+
+#### F. Pendientes
+- Validar los fixes de COM en VM Windows (Word real): color, estilo Heading1, sangría, orientación, drawing_count imagen+textbox.
+- Comprobar que no haya procesos Word residuales tras evaluar.
+- Accesibilidad (Narrador) pendiente.
+- Revisar si Word guarda el color como nombre (`w:val="red"`) en vez de hex en algunos casos (portable podría necesitar normalización).
+

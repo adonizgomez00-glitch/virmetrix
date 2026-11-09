@@ -1,6 +1,6 @@
 # PROJECT_STATE
 
-**Última actualización:** 2026-11-07 (UI dos ventanas + automatización de copias + corrección puntuación)  
+**Última actualización:** 2026-11-09 (publicación .exe en GitHub + corrección de bugs COM: orientación, color, estilo Heading1, sangría, ejercicio 10; icono de app)  
 **Estado global:** UI moderna validada con Word COM real. 41 ejercicios. 68 tests pass. Cobertura 80.52%. Pendiente: validación con Narrador y empaquetado/instalador Windows.
 
 ## Resumen

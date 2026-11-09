@@ -355,6 +355,37 @@ Documento incorrecto (sin formato, 12 pt):
 - Proceso residual: 1 WINWORD (PID 9304) tras la ejecución (probablemente de la validación). Recomendación: cerrar manualmente o matar el proceso.
 - Conclusión: todas las comprobaciones con valor esperado cumplen. COM validado tras las mejoras de UI y puntuación.
 
+## Sesión 2026-11-09 — Bugs detectados y corregidos
+
+### Bugs en modo COM (word_com) corregidos
+
+| Ejercicio | Título | Bug | Causa | Fix (commit) |
+|---|---|---|---|---|
+| 10 (graphics-002) | Cuadro de texto | Instrucción no mencionaba la imagen requerida; evaluador solo contaba 1 dibujo | Instrucción incompleta; `drawing_count` solo contaba InlineShapes | Instrucción + criterio `drawing_count`=2; `drawing_count` suma InlineShapes+Shapes (`176eec7`) |
+| 12 (doc-manage-002) | Orientación horizontal | Reportaba portrait aunque la sección principal fuera landscape | Portable usaba el primer `sectPr`; word_com usaba `PageSetup` (primera sección) | Usar último `sectPr` / última sección (`1323795`) |
+| 19 (text-para-002) | Color rojo | `Propiedad 'color' en objetivo: 255` y fail | `Font.Color` es OLE_COLOR (BGR) int, comparado con hex string | Convertir OLE_COLOR a hex RGB (`c8f0c09`) |
+| 31 (text-para-004) | Estilo Título 1 | `Estilo 'Heading1' no aplicado` | Comparaba `"heading1"` (sin espacio) con `"Heading 1"` / `"Título 1"` (con espacio/localizado) | Normalizar (minúsculas, sin espacios) y comprobar `Name` y `NameLocal` (`ed8e35f`) |
+| 30 (text-para-003) | Sangría izquierda | `Sangría verificada (esperado 720 twips).` y fail | `try/except` abortaba el bucle; sin diagnóstico | `try/except` por párrafo, tolerancia 2 pt, mensaje con valor leído (`878a4e0`) |
+
+### Publicación del .exe
+- Causa original: `dist/` y `build/` en `.gitignore`.
+- Solución: carpeta `releases/` trackeada + workflow GitHub Actions (build Windows + release en tag `v*`).
+- Releases: `v0.1.1`, `v0.1.2`, `v0.1.3`, `v0.1.4` (último incluye icono + todos los fixes).
+
+### Icono de la aplicación
+- `virmetrix.ico` aplicado en UI (`QIcon`) y en el ejecutable (PyInstaller `icon=` + `datas`) (`b03ae01`).
+
+### Modo portable
+- Sin bugs nuevos; todos los ejercicios afectados pasan en portable.
+
+### Pendientes de validación en Windows real
+- Color (rojo/azul) en Word COM.
+- Estilo Heading1/Título 1.
+- Sangría izquierda (verificar valor leído con el nuevo diagnóstico).
+- Orientación horizontal en documentos con saltos de sección.
+- drawing_count imagen+cuadro de texto.
+- Procesos Word residuales.
+
 ## Validacion Windows - Checklist WINDOWS_VALIDATION.md (2026-11-08)
 
 - SO: Microsoft Windows 10 Pro 10.0.19045 (build 19045).
