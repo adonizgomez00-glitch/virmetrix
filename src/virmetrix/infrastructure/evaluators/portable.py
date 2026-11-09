@@ -620,10 +620,12 @@ class PortableDocxEvaluator:
                 ev = f"Cuadros de texto: {count} (esperado >= {expected})."
             elif typ == "endnote_count":
                 expected = spec.get("expected", 1)
-                count = (endnotes_text or "").count("<w:endnote ") - (endnotes_text or "").count('w:type="separator"')
+                # Contar solo las notas de contenido (excluir la raiz <w:endnotes>
+                # y las entradas separator/continuationSeparator).
+                count = (endnotes_text or "").count("<w:endnote ")
+                count -= (endnotes_text or "").count('w:type="separator"')
+                count -= (endnotes_text or "").count('w:type="continuationSeparator"')
                 if count < 0: count = 0
-                # simpler: count endnote tags
-                count = (endnotes_text or "").count("<w:endnote")
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
                 ev = f"Notas finales: {count} (esperado >= {expected})."
             elif typ == "tracked_change_count":
