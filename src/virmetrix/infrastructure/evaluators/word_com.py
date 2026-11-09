@@ -484,9 +484,12 @@ class WordComAdapter:
                 expected = spec.get("expected", 1)
                 count = 0
                 try:
-                    count = doc.InlineShapes.Count
+                    count = doc.InlineShapes.Count + doc.Shapes.Count
                 except Exception:
-                    count = 0
+                    try:
+                        count = doc.InlineShapes.Count
+                    except Exception:
+                        count = 0
                 status = CriterionStatus.PASS if count == expected else CriterionStatus.FAIL
                 ev = f"Imágenes/dibujos: {count} (esperado {expected})."
             elif typ == "alt_text_contains":

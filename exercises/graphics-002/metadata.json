@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Insertar y dar formato a elementos gráficos (MO-100)",
-  "instructions": "Inserta un cuadro de texto con el texto 'Nota lateral'.",
+  "instructions": "Inserta una imagen y, a su lado, un cuadro de texto con el texto 'Nota lateral'.",
   "criteria": [
     "C1",
     "C2"
@@ -12,7 +12,7 @@
     {
       "id": "C1",
       "type": "drawing_count",
-      "expected": 1
+      "expected": 2
     },
     {
       "id": "C2",

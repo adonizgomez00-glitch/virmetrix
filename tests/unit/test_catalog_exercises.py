@@ -165,8 +165,8 @@ def test_graphics_002_textbox(tmp_path):
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
 </Relationships>'''
     document = f'''<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="{W}">
-  <w:body><w:p><w:r><w:drawing><w:txbxContent><w:p><w:r><w:t>Nota lateral</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p></w:body>
+<w:document xmlns:w="{W}" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <w:body><w:p><w:r><w:drawing><wp:inline><wp:docPr id="1" name="Picture" descr="Imagen"/></wp:inline></w:drawing></w:r><w:r><w:drawing><w:txbxContent><w:p><w:r><w:t>Nota lateral</w:t></w:r></w:p></w:txbxContent></w:drawing></w:r></w:p></w:body>
 </w:document>'''
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as zf:
