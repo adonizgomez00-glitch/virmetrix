@@ -110,6 +110,12 @@ Windows (PowerShell):
 
 Salida: `dist/VirMetrix/` (ejecutable + recursos). Para un instalador `.exe` convencional, usar Inno Setup o NSIS sobre `dist/VirMetrix/`.
 
+### Descarga del .exe
+
+- El binario compilado se publica automáticamente en **GitHub Actions → Artifacts** en cada push a `main`.
+- Al crear un tag `v*`, se genera además un **GitHub Release** con el `.zip` adjunto (descargable desde la pestaña Releases).
+- Si quieres commitear un `.exe` manualmente al repositorio, colócalo en la carpeta `releases/` (no está ignorada). Evita commitear `dist/` o `build/`.
+
 Notas:
 - El bundle incluye `exercises/` automáticamente.
 - El historial SQLite se guarda en `%USERPROFILE%\.virmetrix\history.sqlite` (Windows) o `~/.virmetrix/history.sqlite` (Linux).

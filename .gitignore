@@ -12,3 +12,9 @@ dist/
 build/
 *.egg-info/
 .DS_Store
+
+# Binarios de release se publican en GitHub Releases / carpeta releases/
+# (dist/ y build/ siguen ignorados; solo se permite releases/)
+!releases/
+!releases/*.exe
+!releases/*.zip
