@@ -355,6 +355,45 @@ Documento incorrecto (sin formato, 12 pt):
 - Proceso residual: 1 WINWORD (PID 9304) tras la ejecución (probablemente de la validación). Recomendación: cerrar manualmente o matar el proceso.
 - Conclusión: todas las comprobaciones con valor esperado cumplen. COM validado tras las mejoras de UI y puntuación.
 
+## Pruebas adversariales y de stress (2026-11-09)
+
+### Entorno
+- Linux, Python 3.12.3, pytest 9.1.1, PySide6 6.11.2.
+- Modo COM no disponible (Windows requerido); validado que `WordComAdapter` devuelve error controlado.
+- 89 ejercicios en catálogo; 68 tests pasan.
+
+### Portable (docx_portable) — resultados
+- **Todos los 89 `reference.docx` evalúan sin crash** (zip válido + XML parseable).
+- **Adversarial (tests/adversarial/test_portable_security.py): 8/8 pass.**
+  - Traversal de rutas (`../`, `..\`) → error controlado.
+  - ZIP inválido, archivo vacío, archivo inexistente → error controlado.
+  - Falta `document.xml` → error controlado.
+  - Límite de tamaño (`MAX_FILE_SIZE`) y de entradas (`MAX_ENTRIES`) → error controlado.
+  - Nombre de archivo con unicode → no crashea.
+  - Herencia de formato (sin formato directo) → `not_verifiable`, no se cuenta como pass.
+- **XXE:** parser con `resolve_entities=False, no_network=True, huge_tree=False`; entidad no resuelta, sin fuga de archivos.
+- **Path traversal con bytes nulos:** zipfile no permite nombres con `\x00` (rechazado por el formato ZIP).
+- **Documentos sin `sectPr`, sin `pPr`, sin `rPr`:** no crashean; valores quedan `None` y criterios fallan de forma controlada.
+- **Documentos con texto grande:** sin crash (límite de tamaño protege).
+
+### Consistencia portable vs COM
+- Identificados 12 bugs potenciales en modo COM (ver `bugs_com.csv`); 7 corregidos en esta sesión (orientación, color, estilo Heading1, sangría, paragraph_spacing, drawing_count imagen+textbox, endnote_count en portable).
+- Pendientes de validación en VM Windows: background_present (#1), header/footer en otra sección (#2), merged_cell heuristic (#3), márgenes/columnas en otra sección (#4), footnote_count (#5), tracked changes (#6), hyperlink en encabezado (#7), list por estilo (#8), textbox_count por subcadena (#9), doc_property tipos (#11), alt_text (#12).
+
+### Trivial passes
+- Reducidos de 40 a 1 (`text-para-011`, criterio de diseño débil: `document_text_equals` no puede verificar ausencia de formato). Propuesta: cambiar a criterio `run_property` con `bold=False`/`italic=False`.
+
+### Corrupción en Word
+- 7 `reference.docx` (refs-007..013) tenían `footnotes.xml`/`endnotes.xml` sin relación ni content type → Word los marcaba corruptos. Corregido.
+- collab-012 regrabado con LibreOffice para mayor compatibilidad.
+- Los 89 archivos pasan zip + parseo XML + conversión LibreOffice.
+
+### Modo COM
+- No ejecutable en Linux; `WordComAdapter.is_available()` devuelve `(False, ...)` y `evaluate()` devuelve `status="error"` controlado. Sin crashes.
+
+### Pruebas unitarias
+- 68 passed, 0 failed (incluye 8 adversariales).
+
 ## Sesión 2026-11-09 — Bugs detectados y corregidos
 
 ### Bugs en modo COM (word_com) corregidos
