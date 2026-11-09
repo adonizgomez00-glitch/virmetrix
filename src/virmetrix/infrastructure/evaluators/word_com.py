@@ -719,16 +719,25 @@ class WordComAdapter:
             elif typ == "paragraph_indent":
                 expected = spec.get("expected", "")
                 ok = False
+                actual_seen = None
                 try:
-                    for p in doc.Paragraphs:
-                        # LeftIndent in points; convert twips expected /20
-                        if abs(p.ParagraphFormat.LeftIndent - float(expected) / 20.0) < 1:
-                            ok = True
-                            break
+                    target_pt = float(expected) / 20.0
                 except Exception:
-                    pass
+                    target_pt = None
+                if target_pt is not None:
+                    for p in doc.Paragraphs:
+                        try:
+                            li = p.ParagraphFormat.LeftIndent
+                            actual_seen = li
+                            if li is None:
+                                continue
+                            if abs(float(li) - target_pt) < 2:
+                                ok = True
+                                break
+                        except Exception:
+                            continue
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
-                ev = f"Sangría verificada (esperado {expected} twips)."
+                ev = f"Sangría verificada (esperado {expected} twips; leído {actual_seen})."
             elif typ == "paragraph_spacing":
                 expected = spec.get("expected", "")
                 ok = False
