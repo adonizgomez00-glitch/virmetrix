@@ -740,6 +740,190 @@ class PortableDocxEvaluator:
                 expected = spec.get("expected", True)
                 status = CriterionStatus.PASS if has_repeating_header == bool(expected) else CriterionStatus.FAIL
                 ev = "Encabezado de tabla repetido." if has_repeating_header else "No se repite encabezado de tabla."
+            elif typ == "section_break_present":
+                expected = spec.get("expected", True)
+                # mas de un sectPr en el body => hay salto de seccion
+                sect_count = len(root.findall(f".//{{{W_NS}}}sectPr")) if root is not None else 0
+                present = sect_count > 1
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Salto de seccion detectado." if present else "No se detecto salto de seccion."
+            elif typ == "section_break":
+                expected = str(spec.get("expected", "nextPage")).lower()
+                present = False
+                try:
+                    for sp in (root.findall(f".//{{{W_NS}}}sectPr") if root is not None else []):
+                        t = sp.find(f"{{{W_NS}}}type")
+                        if t is not None and (t.get(f"{{{W_NS}}}val") or "").lower() == expected:
+                            present = True
+                            break
+                    # nextPage es el default; si hay mas de un sectPr se asume nextPage
+                    if expected == "nextpage" and len(root.findall(f".//{{{W_NS}}}sectPr") if root is not None else []) > 1:
+                        present = True
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = f"Salto de seccion '{expected}' detectado." if present else f"No se detecto salto '{expected}'."
+            elif typ == "shape_count":
+                expected = spec.get("expected", 1)
+                count = 0
+                try:
+                    # formas: w:drawing con a:sp (shape) o mc:AlternateContent con shape
+                    for dr in (root.iter(f"{{{W_NS}}}drawing") if root is not None else []):
+                        xml = etree.tostring(dr, encoding="unicode")
+                        if "a:sp " in xml or "<a:sp>" in xml or "spPr" in xml and "pic:pic" not in xml:
+                            # heuristic: drawing that is not a picture/textbox
+                            if "pic:pic" not in xml and "txbxContent" not in xml:
+                                count += 1
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Formas: {count} (esperado >= {expected})."
+            elif typ == "smartart_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    xml = etree.tostring(root, encoding="unicode") if root is not None else ""
+                    present = "smartArt" in xml.lower() or "dgm:relIds" in xml or "quickStyle" in xml and "smartart" in xml.lower()
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "SmartArt detectado." if present else "No se detecto SmartArt."
+            elif typ == "model3d_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    xml = etree.tostring(root, encoding="unicode") if root is not None else ""
+                    present = "3dmodel" in xml.lower() or "model3d" in xml.lower() or "am3d" in xml.lower()
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Modelo 3D detectado." if present else "No se detecto modelo 3D."
+            elif typ == "image_background_removed":
+                # No verificable en OOXML sin comparar imagen; marcar not_verifiable
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Eliminacion de fondo de imagen no verificable en portable."
+            elif typ == "object_position":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Posicion de objeto no verificable en portable."
+            elif typ == "text_wrap":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Ajuste de texto no verificable en portable."
+            elif typ == "comment_resolved":
+                # Best-effort: not_verifiable in portable (requires comments part).
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Resolucion de comentarios no verificable en portable (solo COM)."
+            elif typ == "revisions_reviewed":
+                expected = spec.get("expected", True)
+                present = tracked_change_count > 0
+                # "reviewed" => no quedan revisiones
+                ok = (not present) == bool(expected)
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Cambios revisados (sin revisiones)." if not present else "Aun quedan cambios registrados."
+            elif typ == "track_changes_locked":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Bloqueo de seguimiento no verificable en portable."
+            elif typ == "internal_hyperlink":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    for hl in (root.iter(f"{{{W_NS}}}hyperlink") if root is not None else []):
+                        if hl.get(f"{{{W_NS}}}anchor"):
+                            present = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Hipervinculo interno detectado." if present else "No se detecto hipervinculo interno."
+            elif typ == "formatting_marks_visible":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Marcas de formato no verificables en portable (configuracion de Word)."
+            elif typ == "alternative_format":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Formato alternativo no verificable en portable."
+            elif typ == "print_settings":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Configuracion de impresion no verificable en portable."
+            elif typ == "remove_personal_info":
+                expected = spec.get("expected", True)
+                present_info = False
+                try:
+                    cp = core_props or {}
+                    for k, v in cp.items():
+                        if v and str(v).strip():
+                            present_info = True
+                            break
+                except Exception:
+                    pass
+                # pass if info removed (no personal info) matches expected True
+                removed = not present_info
+                status = CriterionStatus.PASS if removed == bool(expected) else CriterionStatus.FAIL
+                ev = "Propiedades personales eliminadas." if removed else "Aun hay propiedades personales."
+            elif typ == "text_effects":
+                expected = spec.get("expected", "shadow")
+                present = False
+                try:
+                    xml = etree.tostring(root, encoding="unicode") if root is not None else ""
+                    present = "w:effect" in xml or "effectLst" in xml or "shadow" in xml.lower()
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Efecto de texto detectado." if present else "No se detecto efecto de texto."
+            elif typ == "format_painter_used":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Pincel de formato no verificable en portable."
+            elif typ == "footnote_props":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Propiedades de nota no verificables en portable."
+            elif typ == "citation_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    xml = etree.tostring(root, encoding="unicode") if root is not None else ""
+                    present = "citation" in xml.lower() or "fldSimple" in xml and "CITATION" in xml
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Cita detectada." if present else "No se detecto cita."
+            elif typ == "bibliography_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    xml = etree.tostring(root, encoding="unicode") if root is not None else ""
+                    present = "bibliography" in xml.lower()
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Bibliografia detectada." if present else "No se detecto bibliografia."
+            elif typ == "toc_custom":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "TOC personalizado no verificable en portable."
+            elif typ == "cell_margins":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Margenes de celda no verificables en portable."
+            elif typ == "table_sorted":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Ordenacion de tabla no verificable en portable."
+            elif typ == "table_autofit":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Ajuste de tabla no verificable en portable."
+            elif typ == "list_levels":
+                expected = spec.get("expected", 2)
+                count = 0
+                try:
+                    ilvls = set()
+                    for e in (root.iter(f"{{{W_NS}}}ilvl") if root is not None else []):
+                        ilvls.add(e.get(f"{{{W_NS}}}val"))
+                    count = len(ilvls) if ilvls else 1
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Niveles de lista: {count} (esperado >= {expected})."
+            elif typ == "list_restart":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Reinicio de numeracion no verificable en portable."
+            elif typ == "list_start_value":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Valor inicial de lista no verificable en portable."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

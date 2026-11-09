@@ -798,6 +798,169 @@ class WordComAdapter:
                     pass
                 status = CriterionStatus.PASS if ok == bool(expected) else CriterionStatus.FAIL
                 ev = "Encabezado de tabla repetido." if ok else "No se repite encabezado de tabla."
+            elif typ == "section_break_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    present = doc.Sections.Count > 1
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Salto de seccion detectado." if present else "No se detecto salto de seccion."
+            elif typ == "section_break":
+                expected = str(spec.get("expected", "nextPage")).lower()
+                present = False
+                try:
+                    present = doc.Sections.Count > 1
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = f"Salto de seccion '{expected}' detectado." if present else f"No se detecto salto '{expected}'."
+            elif typ == "shape_count":
+                expected = spec.get("expected", 1)
+                count = 0
+                try:
+                    count = doc.Shapes.Count
+                except Exception:
+                    count = 0
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Formas: {count} (esperado >= {expected})."
+            elif typ == "smartart_present":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "SmartArt no verificable en COM (pendiente)."
+            elif typ == "model3d_present":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Modelo 3D no verificable en COM (pendiente)."
+            elif typ == "image_background_removed":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Eliminacion de fondo no verificable en COM (pendiente)."
+            elif typ == "object_position":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Posicion de objeto no verificable en COM (pendiente)."
+            elif typ == "text_wrap":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Ajuste de texto no verificable en COM (pendiente)."
+            elif typ == "comment_resolved":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Resolucion de comentarios no verificable en COM (pendiente)."
+            elif typ == "revisions_reviewed":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    present = doc.Revisions.Count > 0
+                except Exception:
+                    present = False
+                ok = (not present) == bool(expected)
+                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
+                ev = "Cambios revisados (sin revisiones)." if not present else "Aun quedan cambios registrados."
+            elif typ == "track_changes_locked":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Bloqueo de seguimiento no verificable en COM (pendiente)."
+            elif typ == "internal_hyperlink":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    for hl in doc.Hyperlinks:
+                        if getattr(hl, "SubAddress", None):
+                            present = True
+                            break
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Hipervinculo interno detectado." if present else "No se detecto hipervinculo interno."
+            elif typ == "formatting_marks_visible":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Marcas de formato no verificables en COM (pendiente)."
+            elif typ == "alternative_format":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Formato alternativo no verificable en COM (pendiente)."
+            elif typ == "print_settings":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Configuracion de impresion no verificable en COM (pendiente)."
+            elif typ == "remove_personal_info":
+                expected = spec.get("expected", True)
+                present_info = False
+                try:
+                    for prop in ("Title", "Subject", "Author", "Keywords", "Comments", "Category"):
+                        try:
+                            v = doc.BuiltInDocumentProperties(prop).Value
+                            if v and str(v).strip():
+                                present_info = True
+                                break
+                        except Exception:
+                            pass
+                except Exception:
+                    pass
+                removed = not present_info
+                status = CriterionStatus.PASS if removed == bool(expected) else CriterionStatus.FAIL
+                ev = "Propiedades personales eliminadas." if removed else "Aun hay propiedades personales."
+            elif typ == "text_effects":
+                expected = spec.get("expected", "shadow")
+                present = False
+                try:
+                    # check Font.Shadow/Outline/Glow
+                    present = bool(doc.Content.Font.Shadow) or bool(doc.Content.Font.Outline)
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Efecto de texto detectado." if present else "No se detecto efecto de texto."
+            elif typ == "format_painter_used":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Pincel de formato no verificable en COM (pendiente)."
+            elif typ == "footnote_props":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Propiedades de nota no verificables en COM (pendiente)."
+            elif typ == "citation_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    present = doc.Fields.Count > 0
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Cita detectada." if present else "No se detecto cita."
+            elif typ == "bibliography_present":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    present = "BIBLIOGRAPHY" in (doc.Content.Text or "")
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Bibliografia detectada." if present else "No se detecto bibliografia."
+            elif typ == "toc_custom":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "TOC personalizado no verificable en COM (pendiente)."
+            elif typ == "cell_margins":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Margenes de celda no verificables en COM (pendiente)."
+            elif typ == "table_sorted":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Ordenacion de tabla no verificable en COM (pendiente)."
+            elif typ == "table_autofit":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Ajuste de tabla no verificable en COM (pendiente)."
+            elif typ == "list_levels":
+                expected = spec.get("expected", 2)
+                count = 0
+                try:
+                    levels = set()
+                    for p in doc.Paragraphs:
+                        try:
+                            levels.add(p.Range.ListFormat.ListLevelNumber)
+                        except Exception:
+                            pass
+                    count = len(levels) if levels else 1
+                except Exception:
+                    pass
+                status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
+                ev = f"Niveles de lista: {count} (esperado >= {expected})."
+            elif typ == "list_restart":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Reinicio de numeracion no verificable en COM (pendiente)."
+            elif typ == "list_start_value":
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Valor inicial de lista no verificable en COM (pendiente)."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."
