@@ -182,8 +182,13 @@ class PortableDocxEvaluator:
                     except Exception:
                         pass
                 # page orientation
+                # Usar el ULTIMO sectPr del documento (seccion principal/final),
+                # no el primero: los saltos de seccion intermedios aparecen antes
+                # en el XML y podrian tener orientacion distinta (p. ej. portrait),
+                # falseando el resultado.
                 try:
-                    sectPr = root.find(f".//{{{W_NS}}}sectPr")
+                    sectPrs = root.findall(f".//{{{W_NS}}}sectPr")
+                    sectPr = sectPrs[-1] if sectPrs else None
                     if sectPr is not None:
                         pgSz = sectPr.find(f"{{{W_NS}}}pgSz")
                         if pgSz is not None:

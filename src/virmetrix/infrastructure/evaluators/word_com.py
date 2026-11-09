@@ -592,9 +592,19 @@ class WordComAdapter:
                 expected = spec.get("expected", "portrait").lower()
                 actual = None
                 try:
-                    actual = doc.PageSetup.Orientation
+                    # Usar la ULTIMA seccion (principal/final) en lugar de
+                    # PageSetup, que apunta a la primera seccion y podria
+                    # falsear el resultado en documentos con saltos de seccion.
+                    sections = getattr(doc, "Sections", None)
+                    if sections is not None and sections.Count:
+                        actual = sections(sections.Count).PageSetup.Orientation
+                    else:
+                        actual = doc.PageSetup.Orientation
                 except Exception:
-                    actual = None
+                    try:
+                        actual = doc.PageSetup.Orientation
+                    except Exception:
+                        actual = None
                 # 1 = portrait, 2 = landscape
                 if actual == 1:
                     actual_str = "portrait"
