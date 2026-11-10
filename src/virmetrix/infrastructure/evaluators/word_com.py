@@ -1042,15 +1042,35 @@ class WordComAdapter:
                 expected = str(spec.get("expected", "")).lower()
                 present = False
                 try:
-                    ns = doc.Sections(1).Footnotes
-                    # NumberStyle property (WdNoteNumberStyle)
-                    style = getattr(ns, "NumberStyle", None)
+                    ns = None
+                    try:
+                        ns = doc.Footnotes
+                    except Exception:
+                        try:
+                            ns = doc.Sections(1).Footnotes
+                        except Exception:
+                            ns = None
+                    style = getattr(ns, "NumberStyle", None) if ns is not None else None
+                    # WdNoteNumberStyle: 0=Arabic, 1=UppercaseRoman, 2=LowercaseRoman
                     if expected in ("roman", "romanos"):
-                        present = style in (5, 6, 7, 8)  # roman variants
+                        present = style in (1, 2)
                     else:
                         present = style is not None
                 except Exception:
                     present = False
+                # Fallback: inspeccionar el XML (footnotes.xml / settings) por "roman"
+                if not present and expected in ("roman", "romanos"):
+                    try:
+                        xml = ""
+                        try:
+                            xml = str(getattr(doc, "WordOpenXML", "") or "")
+                        except Exception:
+                            xml = ""
+                        low = xml.lower()
+                        if "roman" in low or "lowerroman" in low or "upperroman" in low:
+                            present = True
+                    except Exception:
+                        pass
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Propiedades de nota configuradas." if present else "No se detectaron propiedades de nota."
             elif typ == "citation_present":
@@ -1066,9 +1086,34 @@ class WordComAdapter:
                 expected = spec.get("expected", True)
                 present = False
                 try:
-                    present = "BIBLIOGRAPHY" in (doc.Content.Text or "")
+                    # 1) Campos de Word con codigo BIBLIOGRAPHY
+                    try:
+                        for f in doc.Fields:
+                            try:
+                                if "BIBLIOGRAPHY" in str(getattr(f, "Code", "")).upper():
+                                    present = True
+                                    break
+                            except Exception:
+                                continue
+                    except Exception:
+                        pass
+                    # 2) Texto visible que contenga "Bibliography" (resultado del campo)
+                    if not present:
+                        try:
+                            if "bibliography" in (doc.Content.Text or "").lower():
+                                present = True
+                        except Exception:
+                            pass
+                    # 3) Fallback: inspeccionar el XML del documento
+                    if not present:
+                        try:
+                            xml = str(getattr(doc, "WordOpenXML", "") or "")
+                            if "bibliography" in xml.lower():
+                                present = True
+                        except Exception:
+                            pass
                 except Exception:
-                    pass
+                    present = False
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Bibliografia detectada." if present else "No se detecto bibliografia."
             elif typ == "toc_custom":

@@ -468,3 +468,4 @@ Documento incorrecto (sin formato, 12 pt):
 ## Pendientes reportados durante validación Windows (Evaluación B)
 
 - **Ejercicio 24 (`b-doc-003`, "Guardar en formato alternativo")**: criterio `alternative_format` es trivial (siempre pass) → "deja pasar sin hacer nada". Pendiente de endurecer (verificar el formato real del archivo guardado) o marcar como verificación manual. No se ha modificado código; queda como recordatorio.
+- **Ejercicio 28 (`b-text-002`, "Format Painter")**: criterio `format_painter_used` es trivial (siempre pass) → "deja pasar sin hacer nada". Pendiente de endurecer o marcar como verificación manual. No se ha modificado código; queda como recordatorio.
