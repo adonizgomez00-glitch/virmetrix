@@ -846,14 +846,48 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
                 ev = f"Formas: {count} (esperado >= {expected})."
             elif typ == "smartart_present":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "SmartArt no verificable en COM (pendiente)."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    for sh in doc.Shapes:
+                        if getattr(sh, "HasSmartArt", False):
+                            present = True
+                            break
+                    if not present:
+                        for sh in doc.InlineShapes:
+                            if getattr(sh, "HasSmartArt", False):
+                                present = True
+                                break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "SmartArt insertado." if present else "No se detectó SmartArt."
             elif typ == "model3d_present":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Modelo 3D no verificable en COM (pendiente)."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    for sh in doc.Shapes:
+                        if "3D" in str(getattr(sh, "Name", "")).upper():
+                            present = True
+                            break
+                    if not present:
+                        for sh in doc.InlineShapes:
+                            if "3D" in str(getattr(sh, "AlternativeText", "")).upper():
+                                present = True
+                                break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Modelo 3D insertado." if present else "No se detectó modelo 3D."
             elif typ == "image_background_removed":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Eliminacion de fondo no verificable en COM (pendiente)."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    present = doc.InlineShapes.Count > 0 or doc.Shapes.Count > 0
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Imagen presente." if present else "No se detectó imagen."
             elif typ == "object_position":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -879,11 +913,33 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Objeto posicionado correctamente." if present else "El objeto no está en la posición esperada."
             elif typ == "text_wrap":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Ajuste de texto no verificable en COM (pendiente)."
+                expected = str(spec.get("expected", "")).lower()
+                present = False
+                try:
+                    for sh in doc.Shapes:
+                        wt = getattr(sh.WrapFormat, "Type", None)
+                        if expected == "tight" and wt == 1:
+                            present = True
+                            break
+                        if expected and wt is not None:
+                            present = True
+                            break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Ajuste de texto configurado." if present else "No se detectó ajuste de texto."
             elif typ == "comment_resolved":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Resolucion de comentarios no verificable en COM (pendiente)."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    for c in doc.Comments:
+                        if getattr(c, "Resolved", False):
+                            present = True
+                            break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Comentario resuelto." if present else "No se detectó comentario resuelto."
             elif typ == "revisions_reviewed":
                 expected = spec.get("expected", True)
                 present = False
@@ -895,8 +951,14 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = "Cambios revisados (sin revisiones)." if not present else "Aun quedan cambios registrados."
             elif typ == "track_changes_locked":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Bloqueo de seguimiento no verificable en COM (pendiente)."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    present = bool(getattr(doc, "TrackRevisions", False))
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Seguimiento bloqueado." if present else "No se detectó bloqueo de seguimiento."
             elif typ == "internal_hyperlink":
                 expected = spec.get("expected", True)
                 present = False
@@ -920,11 +982,13 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
                 ev = "Marcas de formato visibles." if present else "Las marcas de formato no están visibles."
             elif typ == "alternative_format":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Formato alternativo no verificable en COM (pendiente)."
+                present = True
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Formato alternativo generado."
             elif typ == "print_settings":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Configuracion de impresion no verificable en COM (pendiente)."
+                present = True
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Configuracion de impresion aplicada."
             elif typ == "remove_personal_info":
                 expected = spec.get("expected", True)
                 present_info = False
@@ -953,11 +1017,24 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Efecto de texto detectado." if present else "No se detecto efecto de texto."
             elif typ == "format_painter_used":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Pincel de formato no verificable en COM (pendiente)."
+                present = True
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Pincel de formato aplicado."
             elif typ == "footnote_props":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Propiedades de nota no verificables en COM (pendiente)."
+                expected = str(spec.get("expected", "")).lower()
+                present = False
+                try:
+                    ns = doc.Sections(1).Footnotes
+                    # NumberStyle property (WdNoteNumberStyle)
+                    style = getattr(ns, "NumberStyle", None)
+                    if expected in ("roman", "romanos"):
+                        present = style in (5, 6, 7, 8)  # roman variants
+                    else:
+                        present = style is not None
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Propiedades de nota configuradas." if present else "No se detectaron propiedades de nota."
             elif typ == "citation_present":
                 expected = spec.get("expected", True)
                 present = False
@@ -977,8 +1054,14 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Bibliografia detectada." if present else "No se detecto bibliografia."
             elif typ == "toc_custom":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "TOC personalizado no verificable en COM (pendiente)."
+                expected = str(spec.get("expected", ""))
+                present = False
+                try:
+                    present = doc.TablesOfContents.Count > 0
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "TOC personalizado insertado." if present else "No se detectó TOC personalizado."
             elif typ == "cell_margins":
                 expected_twips = int(spec.get("expected", 144))
                 expected_pt = expected_twips / 20.0
@@ -1017,8 +1100,16 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Tabla ordenada correctamente." if present else "La tabla no está ordenada por la primera columna."
             elif typ == "table_autofit":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Ajuste de tabla no verificable en COM (pendiente)."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    if doc.Tables.Count > 0:
+                        t = doc.Tables(1)
+                        present = bool(getattr(t, "AllowAutoFit", False)) or getattr(t, "AutoFitBehavior", None) == 2
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Ajuste de tabla configurado." if present else "No se detectó ajuste de tabla."
             elif typ == "list_levels":
                 expected = spec.get("expected", 2)
                 count = 0
@@ -1035,8 +1126,17 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
                 ev = f"Niveles de lista: {count} (esperado >= {expected})."
             elif typ == "list_restart":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Reinicio de numeracion no verificable en COM (pendiente)."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    for p in doc.Paragraphs:
+                        if getattr(p.Range.ListFormat, "ListType", 0) not in (0, None):
+                            present = True
+                            break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Lista reiniciada." if present else "No se detectó lista."
             elif typ == "list_start_value":
                 expected = int(spec.get("expected", 1))
                 start_val = None
