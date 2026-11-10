@@ -849,14 +849,8 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Modelo 3D detectado." if present else "No se detecto modelo 3D."
             elif typ == "image_background_removed":
-                present = False
-                try:
-                    xml = etree.tostring(root, encoding="unicode") if root is not None else ""
-                    present = "drawing" in xml or "pic:pic" in xml
-                except Exception:
-                    present = False
-                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Imagen presente." if present else "No se detectó imagen."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Imagen de fondo eliminable: no verificable desde el OOXML."
             elif typ == "object_position":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -920,12 +914,8 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
                 ev = "Comentario resuelto." if present else "No se detectó comentario resuelto."
             elif typ == "revisions_reviewed":
-                expected = spec.get("expected", True)
-                present = tracked_change_count > 0
-                # "reviewed" => no quedan revisiones
-                ok = (not present) == bool(expected)
-                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
-                ev = "Cambios revisados (sin revisiones)." if not present else "Aun quedan cambios registrados."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Cambios revisados no verificable desde el OOXML."
             elif typ == "track_changes_locked":
                 expected = bool(spec.get("expected", True))
                 present = False
@@ -949,18 +939,15 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Hipervinculo interno detectado." if present else "No se detecto hipervinculo interno."
             elif typ == "formatting_marks_visible":
-                expected = bool(spec.get("expected", True))
-                present = bool(expected)
-                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
-                ev = "Marcas de formato configuradas."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Marcas de formato no verificables desde el archivo."
             elif typ == "alternative_format":
-                present = True
-                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Formato alternativo generado."
+                expected = spec.get("expected", True)
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Formato alternativo no verificable."
             elif typ == "print_settings":
-                present = True
-                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Configuracion de impresion aplicada."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Configuracion de impresion no verificable desde el archivo."
             elif typ == "remove_personal_info":
                 expected = spec.get("expected", True)
                 present_info = False
@@ -987,9 +974,8 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Efecto de texto detectado." if present else "No se detecto efecto de texto."
             elif typ == "format_painter_used":
-                present = True
-                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Pincel de formato aplicado."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Pincel de formato no verificable desde el archivo."
             elif typ == "footnote_props":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -1124,10 +1110,8 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
                 ev = f"Niveles de lista: {count} (esperado >= {expected})."
             elif typ == "list_restart":
-                expected = bool(spec.get("expected", True))
-                present = (list_items or 0) > 0
-                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
-                ev = "Lista reiniciada." if present else "No se detectó lista."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Reinicio de lista no verificable desde el OOXML."
             elif typ == "list_start_value":
                 expected = int(spec.get("expected", 1))
                 start_val = None

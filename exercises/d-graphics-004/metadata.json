@@ -1,0 +1,19 @@
+{
+  "exercise_id": "d-graphics-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación D — Gráficos (similar a B)",
+  "instructions": "Inserta una imagen y posicíonala en el centro de la página.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "object_position",
+      "expected": "center"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "D"
+}

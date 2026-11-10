@@ -1,0 +1,19 @@
+{
+  "exercise_id": "d-table-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación D — Tablas (similar a B)",
+  "instructions": "Divide la tabla después de la fila 2 (segunda fila), creando dos tablas independientes.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_count",
+      "expected": 2
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "D"
+}

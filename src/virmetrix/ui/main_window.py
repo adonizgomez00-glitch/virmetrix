@@ -540,7 +540,7 @@ class ConfigWindow(QMainWindow):
             "VirMetrix — simulador de práctica para MOS Word Associate "
             "(MO-100, Office 2019).\n"
             "Proyecto independiente, no afiliado a Microsoft.\n"
-            "Versión: 0.1.0 (ITER-021)\n"
+            f"Versión: {self.APP_VERSION}\n"
             "Licencia: gratuito para práctica y autoevaluación.",
         )
 
@@ -548,7 +548,7 @@ class ConfigWindow(QMainWindow):
     # Auto-update from GitHub
     # ------------------------------------------------------------------
     GITHUB_REPO = "adonizgomez00-glitch/virmetrix"
-    APP_VERSION = "0.3.5"
+    APP_VERSION = "0.4.0"
 
     def _notify(self, title: str, text: str, error: bool = False) -> None:
         if os.environ.get("QT_QPA_PLATFORM") == "offscreen":

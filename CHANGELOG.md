@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-10 — v0.4.0
+
+### Added
+- Módulo D: 20 ejercicios nuevos similares a B (texto/párrafos, tablas, listas, referencias, gráficos, colaboración y documento), con `metadata.json`, `reference.docx` válidos y referencias sin solución preaplicada.
+- Todos los ejercicios D incluidos en `exercises/catalog.json` (la app los carga al iniciar).
+
+### Fixed
+- `d-table-004`: `expected` de `cell_margins` normalizado a formato plano (57 twips).
+- `d-collab-001` / `d-collab-002`: `reference.docx` con el comentario correcto (sin resolver / presente) según la guía de generación.
+- `d-list-001` / `d-list-002` / `d-list-003`: referencia con número y `ilvl` consistentes para la tarea de niveles/reinicio/inicio.
+- Guidelines `EXERCISE_GENERATION_GUIDELINES.md`: aplicables a A, B, C y D; documentada la excepción intencional de `page_margins` (dict).
+- `d-refs-001`, `d-refs-004`, `b-refs-001`, `b-refs-004`, `text-para-011`: referencias sin pasar trivialmente; se mantienen como tarea activa.
+- `portable.py` / `word_com.py`: criterios triviales marcados `not_verifiable`: `alternative_format`, `formatting_marks_visible`, `print_settings`, `format_painter_used`, `image_background_removed`, `revisions_reviewed`, `list_restart`.
+- `main_window.py`: diálogo "Acerca de" muestra `APP_VERSION` (igual a la tag); APP_VERSION 0.4.0.
+
+### Releases
+- Tag `v0.4.0`: workflow `.github/workflows/build-windows.yml` genera el ejecutable y lo adjunta a la release.
+
 ## 2026-10-27 — Corrección del examen objetivo
 
 - Cambiado el objetivo de MO-110 (Microsoft 365 Apps) a MO-100 (Office 2019).

@@ -1061,13 +1061,8 @@ class WordComAdapter:
                 ev = "Modelo 3D insertado." if present else "No se detectó modelo 3D."
             elif typ == "image_background_removed":
                 expected = bool(spec.get("expected", True))
-                present = False
-                try:
-                    present = doc.InlineShapes.Count > 0 or doc.Shapes.Count > 0
-                except Exception:
-                    present = False
-                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
-                ev = "Imagen presente." if present else "No se detectó imagen."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Imagen de fondo eliminable: no verificable desde el archivo."
             elif typ == "object_position":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -1122,14 +1117,8 @@ class WordComAdapter:
                 ev = "Comentario resuelto." if present else "No se detectó comentario resuelto."
             elif typ == "revisions_reviewed":
                 expected = spec.get("expected", True)
-                present = False
-                try:
-                    present = doc.Revisions.Count > 0
-                except Exception:
-                    present = False
-                ok = (not present) == bool(expected)
-                status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
-                ev = "Cambios revisados (sin revisiones)." if not present else "Aun quedan cambios registrados."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Cambios revisados no verificable desde el archivo."
             elif typ == "track_changes_locked":
                 expected = bool(spec.get("expected", True))
                 present = False
@@ -1155,19 +1144,16 @@ class WordComAdapter:
                 # Las marcas de formato son una configuracion de la aplicacion
                 # (vista), no del documento; Word COM no expone de forma fiable
                 # el estado de la ventana del usuario (instancia separada), por
-                # lo que se considera verificado visualmente por el usuario.
-                expected = bool(spec.get("expected", True))
-                present = bool(expected)
-                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                # lo que se considera no automatizable.
+                status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Marcas de formato: verificacion visual/manual (no automatizable)."
             elif typ == "alternative_format":
-                present = True
-                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Formato alternativo generado."
+                expected = spec.get("expected", True)
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Formato alternativo no verificable."
             elif typ == "print_settings":
-                present = True
-                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Configuracion de impresion aplicada."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Configuracion de impresion no verificable desde el archivo."
             elif typ == "remove_personal_info":
                 expected = spec.get("expected", True)
                 present_info = False
@@ -1215,9 +1201,8 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Efecto de texto detectado." if present else "No se detecto efecto de texto."
             elif typ == "format_painter_used":
-                present = True
-                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Pincel de formato aplicado."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Pincel de formato no verificable desde el archivo."
             elif typ == "footnote_props":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -1370,16 +1355,8 @@ class WordComAdapter:
                 ev = f"Niveles de lista: {count} (esperado >= {expected})."
             elif typ == "list_restart":
                 expected = bool(spec.get("expected", True))
-                present = False
-                try:
-                    for p in doc.Paragraphs:
-                        if getattr(p.Range.ListFormat, "ListType", 0) not in (0, None):
-                            present = True
-                            break
-                except Exception:
-                    present = False
-                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
-                ev = "Lista reiniciada." if present else "No se detectó lista."
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Reinicio de lista no verificable desde el archivo."
             elif typ == "list_start_value":
                 expected = int(spec.get("expected", 1))
                 start_val = None

@@ -1892,6 +1892,226 @@
         "word_com"
       ],
       "module": "C"
+    },
+    {
+      "exercise_id": "d-text-para-001",
+      "title": "Salto de página antes del párrafo",
+      "competency": "Evaluación D — Texto y párrafos (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-text-para-002",
+      "title": "Diseño de 2 columnas",
+      "competency": "Evaluación D — Texto y párrafos (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-table-001",
+      "title": "Divide la tabla en dos",
+      "competency": "Evaluación D — Tablas (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-table-002",
+      "title": "Autofit de tabla",
+      "competency": "Evaluación D — Tablas (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-table-003",
+      "title": "Ordenar tabla descendente",
+      "competency": "Evaluación D — Tablas (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-table-004",
+      "title": "Márgenes de celda",
+      "competency": "Evaluación D — Tablas (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-table-005",
+      "title": "Redimensionar tabla",
+      "competency": "Evaluación D — Tablas (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-list-001",
+      "title": "Niveles de lista",
+      "competency": "Evaluación D — Listas (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-list-002",
+      "title": "Reiniciar numeración",
+      "competency": "Evaluación D — Listas (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-list-003",
+      "title": "Inicio de lista",
+      "competency": "Evaluación D — Listas (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-refs-001",
+      "title": "Tabla de contenido personalizada",
+      "competency": "Evaluación D — Referencias (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-graphics-001",
+      "title": "Insertar forma",
+      "competency": "Evaluación D — Gráficos (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-graphics-002",
+      "title": "Insertar SmartArt",
+      "competency": "Evaluación D — Gráficos (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-graphics-003",
+      "title": "Icono 3D",
+      "competency": "Evaluación D — Gráficos (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-graphics-004",
+      "title": "Posición de imagen",
+      "competency": "Evaluación D — Gráficos (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-graphics-005",
+      "title": "Ajuste de texto alrededor",
+      "competency": "Evaluación D — Gráficos (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-collab-001",
+      "title": "Comentario resuelto",
+      "competency": "Evaluación D — Colaboración (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-collab-002",
+      "title": "Eliminar comentarios",
+      "competency": "Evaluación D — Colaboración (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-doc-001",
+      "title": "Hipervínculo interno",
+      "competency": "Evaluación D — Documento (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
+    },
+    {
+      "exercise_id": "d-doc-002",
+      "title": "Formato alternativo (PDF)",
+      "competency": "Evaluación D — Documento (similar a B)",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "D"
     }
   ]
 }

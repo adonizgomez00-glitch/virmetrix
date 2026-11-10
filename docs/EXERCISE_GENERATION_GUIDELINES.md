@@ -1,9 +1,9 @@
 # Guía para generar nuevos ejercicios (Evitar errores conocidos)
 
-**Objetivo:** que los ejercicios nuevos (Evaluación A o B) sean **verificables de verdad**,
+**Objetivo:** que los ejercicios (Evaluación A, B, C y D) sean **verificables de verdad**,
 no triviales, y funcionen tanto en portable como en Word COM en Windows.
 
-Aplica a cualquier ejercicio nuevo o regenerado. Complementa `docs/EVALUATION_B_PLAN.md`.
+Aplica a cualquier ejercicio nuevo, regenerado o auditado. Complementa `docs/EVALUATION_B_PLAN.md`.
 
 ---
 
@@ -138,3 +138,39 @@ Aplica a cualquier ejercicio nuevo o regenerado. Complementa `docs/EVALUATION_B_
   y comparar sin distinguir mayúsculas/espacios.
 - **Texto alternativo (COM):** fallback a `docPr/@descr` en el XML si
   `AlternativeText` está vacío.
+
+---
+
+## 6. Errores detectados en Evaluación C (y cómo evitarlos)
+
+### 6.1 Metadata con formato anidado (C-10, C-31)
+- **Problema:** algunos `criteria_specs` usaban `expected` como objeto anidado
+  (`expected: { property, value }` o `{ row, col, text }`), mientras el evaluador
+  y el resto de ejercicios esperan formato **plano** (`property` + `expected`,
+  o `row`/`col`/`expected`).
+- **Síntoma:** el criterio siempre falla aunque el documento sea correcto, porque
+  `spec.get("property")`/`spec.get("expected")` devuelven `None` o un dict.
+- **Fix:** normalizar la metadata a formato plano y validar que todos los
+  `criteria_specs` usen la misma estructura que el evaluador espera.
+- **Regla:** al generar ejercicios nuevos, copiar la estructura de un ejercicio
+  ya validado (p. ej. `doc-manage-003` o `table-001`) y no inventar anidamientos.
+- **Excepción (no confundir con el error anterior):** `page_margins` usa
+  `expected` como dict `{top,bottom,left,right}` de forma **intencional**
+  (cada clave se valida contra `w:pgMar`); `cell_margins` usa `expected`
+  numérico (twips, p. ej. `57`). Otros criterios (`table_cell_text`, ...)
+  usan claves planas `row`/`col`/`expected`. No rebajar estos casos a plano.
+
+### 6.2 COM lee `None` en sangría/espaciado (C-48, C-49)
+- **Problema:** `ParagraphFormat.LeftIndent` / `SpaceAfter` devuelven `None` en
+  COM aunque el documento tenga el valor, por lo que el criterio falla.
+- **Fix:** añadir respaldo por XML (`w:ind w:left="..."`, `w:spacing w:after="..."`)
+  buscando el valor exacto en twips en el XML del párrafo/documento.
+- **Regla:** para criterios de formato de párrafo, implementar siempre un fallback
+  por XML además de la propiedad COM.
+
+### 6.3 Etiquetas y unidades (UX)
+- **Problema:** las instrucciones mostraban solo twips o usaban pulgadas, mientras
+  Word en español trabaja en cm.
+- **Fix:** mostrar twips + pt + cm en las etiquetas y convertir pulgadas a cm.
+- **Regla:** las instrucciones deben usar la unidad que el usuario ve en Word
+  (cm) y, si aplica, incluir la equivalencia en twips/pt.
