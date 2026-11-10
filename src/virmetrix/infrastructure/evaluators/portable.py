@@ -127,6 +127,12 @@ class PortableDocxEvaluator:
                         endnotes_text = zf.read("word/endnotes.xml").decode("utf-8", errors="ignore")
                     except Exception:
                         pass
+                settings_text = ""
+                if "word/settings.xml" in zf.namelist():
+                    try:
+                        settings_text = zf.read("word/settings.xml").decode("utf-8", errors="ignore")
+                    except Exception:
+                        pass
                 try:
                     has_toc = "TOC" in doc_xml.decode("utf-8", errors="ignore")
                 except Exception:
@@ -228,7 +234,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root, numbering_root)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root, numbering_root, settings_text=settings_text)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -433,7 +439,7 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None, numbering_root=None):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None, numbering_root=None, settings_text=""):
         tables = tables or []
         alt_texts = alt_texts or []
         textbox_texts = textbox_texts or []
@@ -966,7 +972,7 @@ class PortableDocxEvaluator:
                 expected = str(spec.get("expected", "")).lower()
                 present = False
                 try:
-                    xml = (footnotes_text or "") + (etree.tostring(root, encoding="unicode") if root is not None else "")
+                    xml = (footnotes_text or "") + (settings_text or "") + (etree.tostring(root, encoding="unicode") if root is not None else "")
                     if expected in ("roman", "romanos"):
                         present = "roman" in xml.lower() or "lowerRoman" in xml or "upperRoman" in xml
                     else:

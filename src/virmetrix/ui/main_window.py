@@ -27,6 +27,7 @@ from PySide6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QProgressBar,
+    QProgressDialog,
     QPushButton,
     QScrollArea,
     QTextEdit,
@@ -598,17 +599,37 @@ class ConfigWindow(QMainWindow):
                 return {"name": "virmetrix-source.zip", "url": release[key]}
         return None
 
-    def _download_update(self, asset) -> Path:
+    def _download_update(self, asset, progress=None) -> Path:
         base = Path(tempfile.gettempdir()) / "virmetrix_update"
         base.mkdir(parents=True, exist_ok=True)
         dest = base / (asset.get("name") or "virmetrix-update.zip")
         url = asset["url"]
         resp = urllib.request.urlopen(url, timeout=60)
         try:
-            raw = resp.read() if hasattr(resp, "read") else resp
+            total = 0
+            try:
+                total = int(resp.headers.get("Content-Length", "0") or 0)
+            except Exception:
+                total = 0
+            chunk = 8192
+            data = bytearray()
+            if progress is not None and total > 0:
+                progress.setMaximum(total)
+                progress.setValue(0)
+            while True:
+                part = resp.read(chunk)
+                if not part:
+                    break
+                data.extend(part)
+                if progress is not None and total > 0:
+                    progress.setValue(min(len(data), total))
+                    QApplication.processEvents()
+            raw = bytes(data)
             if isinstance(raw, str):
                 raw = raw.encode("utf-8")
             dest.write_bytes(raw if isinstance(raw, (bytes, bytearray)) else bytes(raw))
+            if progress is not None:
+                progress.setValue(progress.maximum())
         finally:
             if hasattr(resp, "close"):
                 try:
@@ -664,22 +685,67 @@ class ConfigWindow(QMainWindow):
         self.btn_update.setEnabled(False)
         previous_text = self.btn_update.text()
         self.btn_update.setText("Updating...")
+        progress = None
         try:
             release = self._fetch_latest_release()
             asset = self._select_update_asset(release)
             if not asset:
-                raise RuntimeError("No se encontró un archivo de actualización en GitHub.")
-            archive = self._download_update(asset)
+                raise RuntimeError("No se encontro un archivo de actualizacion en GitHub.")
+
+            progress = QProgressDialog("Descargando actualizacion...", "Cancelar", 0, 100, self)
+            progress.setWindowTitle("Actualizando VirMetrix")
+            progress.setWindowModality(Qt.WindowModal)
+            progress.setMinimumDuration(0)
+            progress.setValue(0)
+            progress.show()
+            QApplication.processEvents()
+
+            archive = self._download_update(asset, progress=progress)
+            if progress.wasCanceled():
+                raise RuntimeError("Descarga cancelada por el usuario.")
+
+            progress.setLabelText("Extrayendo actualizacion...")
+            progress.setValue(0)
+            progress.setMaximum(0)
+            QApplication.processEvents()
             extracted = self._extract_update(archive)
+
             if getattr(sys, "frozen", False):
-                self._apply_update(extracted)
+                progress.setLabelText("Aplicando actualizacion...")
+                QApplication.processEvents()
+                progress.close()
+                progress = None
+                reply = QMessageBox.question(
+                    self,
+                    "Actualizacion lista",
+                    "La actualizacion se descargo correctamente.\n"
+                    "Deseas aplicarla y reiniciar VirMetrix ahora?",
+                    QMessageBox.Yes | QMessageBox.No,
+                    QMessageBox.Yes,
+                )
+                if reply == QMessageBox.Yes:
+                    self._apply_update(extracted)
+                else:
+                    self._notify(
+                        "Update",
+                        f"Actualizacion extraida en:\n{extracted}\n\n"
+                        "Se aplicara la proxima vez que reinicies la app.",
+                    )
             else:
+                if progress is not None:
+                    progress.close()
+                    progress = None
                 self._notify(
                     "Update",
-                    f"Última versión descargada en:\n{extracted}\n\n"
-                    "Ejecuta la nueva versión desde esa carpeta.",
+                    f"Ultima version descargada en:\n{extracted}\n\n"
+                    "Ejecuta la nueva version desde esa carpeta.",
                 )
         except Exception as exc:
+            if progress is not None:
+                try:
+                    progress.close()
+                except Exception:
+                    pass
             self._notify("Update", f"No se pudo actualizar: {exc}", error=True)
         finally:
             self.btn_update.setEnabled(True)

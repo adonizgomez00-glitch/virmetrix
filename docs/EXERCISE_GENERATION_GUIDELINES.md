@@ -120,3 +120,14 @@ Aplica a cualquier ejercicio nuevo o regenerado. Complementa `docs/EVALUATION_B_
 > `portable(reference) != max` y `portable(correcto) == max`,
 > y en Windows: `COM(reference)` y `COM(correcto)` con los scores esperados.
 > Registrar la evidencia en `QA_RESULTS.md`.
+
+---
+
+## 5. Lecciones adicionales (validación Windows)
+
+- **Orientación de página (COM):** el enum `WdOrientation` es `0 = portrait`,
+  `1 = landscape`. No asumir 1/2.
+- **Actualización de la app:** el botón Update descarga la última release, muestra
+  barra de progreso y pregunta si reiniciar al finalizar.
+- **Resumen del módulo:** en modo examen muestra el último intento; en práctica
+  el mejor. En examen no se puede navegar sin iniciar ni iniciar si está en pausa.
