@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Evaluación C — Texto y párrafos",
-  "instructions": "Aplica sangría izquierda de 360 twips.",
+  "instructions": "Aplica sangría izquierda de 0,635 cm (360 twips, 18 pt).",
   "criteria": [
     "C1"
   ],

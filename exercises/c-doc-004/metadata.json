@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Evaluación C — Gestión de documento",
-  "instructions": "Establece márgenes de 1 pulgada (1440 twips) en todos los lados.",
+  "instructions": "Establece márgenes de 2,54 cm (1440 twips, 72 pt) en todos los lados.",
   "criteria": [
     "C1"
   ],

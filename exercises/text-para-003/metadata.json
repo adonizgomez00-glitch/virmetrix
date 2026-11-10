@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Insertar y dar formato a texto, párrafos y secciones (MO-100)",
-  "instructions": "Aplica una sangría izquierda de 0.5 pulgadas al párrafo.",
+  "instructions": "Aplica una sangría izquierda de 1,27 cm (720 twips, 36 pt) al párrafo.",
   "criteria": [
     "C1"
   ],

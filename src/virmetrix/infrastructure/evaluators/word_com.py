@@ -443,7 +443,16 @@ class WordComAdapter:
                 try:
                     for p in doc.Paragraphs:
                         try:
-                            if p.Range.ListFormat.ListType != 0:
+                            lf = p.Range.ListFormat
+                            if getattr(lf, "ListType", 0) != 0:
+                                count += 1
+                                continue
+                            if getattr(lf, "ListValue", 0) not in (None, 0):
+                                count += 1
+                                continue
+                            style = getattr(p, "Style", None)
+                            name = str(getattr(style, "Name", "") or getattr(style, "NameLocal", "") or "")
+                            if "list" in name.lower():
                                 count += 1
                         except Exception:
                             pass
@@ -552,10 +561,18 @@ class WordComAdapter:
                 expected = spec.get("expected", 1)
                 count = 0
                 try:
-                    xml = doc.Content.XML if hasattr(doc.Content, "XML") else ""
-                    count = str(xml).count("txbxContent")
+                    xml = str(getattr(doc, "WordOpenXML", "") or "")
+                    count = xml.count("<w:txbxContent")
                 except Exception:
                     count = 0
+                # Fallback: contar shapes de tipo cuadro de texto
+                if count == 0:
+                    try:
+                        for shp in doc.Shapes:
+                            if getattr(shp, "Type", None) == 17:
+                                count += 1
+                    except Exception:
+                        pass
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
                 ev = f"Cuadros de texto: {count} (esperado >= {expected})."
             elif typ == "endnote_count":
@@ -619,49 +636,76 @@ class WordComAdapter:
             elif typ == "doc_property":
                 prop = spec.get("property", "")
                 expected = spec.get("expected", "")
-                # Normalizar nombres de propiedad a los canonicos de Word
-                canon = {"title":"Title","subject":"Subject","author":"Author",
-                        "creator":"Author","keywords":"Keywords","category":"Category",
-                        "comments":"Comments","manager":"Manager","company":"Company"}
-                prop_name = canon.get(str(prop).lower(), str(prop))
+                # Nombres canonicos (EN) + equivalentes localizados (ES) + indice
+                # WdBuiltInProperty, porque en Word localizado el Name puede
+                # estar traducido y el acceso por cadena inglesa fallar.
+                canon = {"title": (1, ["Title", "Título", "Titulo"]),
+                        "subject": (2, ["Subject", "Asunto"]),
+                        "author": (3, ["Author", "Autor"]),
+                        "creator": (3, ["Author", "Autor"]),
+                        "keywords": (4, ["Keywords", "Palabras clave"]),
+                        "comments": (5, ["Comments", "Comentarios"]),
+                        "category": (18, ["Category", "Categoría", "Categoria"]),
+                        "manager": (20, ["Manager", "Administrador"]),
+                        "company": (21, ["Company", "Empresa"])}
+                key = str(prop).lower()
+                idx, names = canon.get(key, (None, [str(prop)]))
                 actual = None
-                try:
-                    actual = doc.BuiltInDocumentProperties(prop_name).Value
-                except Exception:
+                # 1) Por indice WdBuiltInProperty (mas robusto)
+                if idx is not None:
                     try:
-                        actual = doc.CustomDocumentProperties(prop_name).Value
+                        actual = doc.BuiltInDocumentProperties(idx).Value
                     except Exception:
+                        actual = None
+                # 2) Por nombre (EN/ES)
+                if actual is None:
+                    for nm in names:
                         try:
-                            actual = doc.CustomDocumentProperties(prop).Value
+                            actual = doc.BuiltInDocumentProperties(nm).Value
+                            break
                         except Exception:
-                            actual = None
+                            continue
+                # 3) Custom properties
+                if actual is None:
+                    for nm in names + [str(prop)]:
+                        try:
+                            actual = doc.CustomDocumentProperties(nm).Value
+                            break
+                        except Exception:
+                            continue
                 # Normalizar comparacion (str, strip, case-insensitive)
                 status = CriterionStatus.PASS if str(actual).strip().lower() == str(expected).strip().lower() else CriterionStatus.FAIL
                 ev = f"Propiedad '{prop}': '{actual}' (esperado '{expected}')."
             elif typ == "page_orientation":
                 expected = spec.get("expected", "portrait").lower()
-                actual = None
+                actual_str = None
                 try:
-                    # Usar la ULTIMA seccion (principal/final) en lugar de
-                    # PageSetup, que apunta a la primera seccion y podria
-                    # falsear el resultado en documentos con saltos de seccion.
                     sections = getattr(doc, "Sections", None)
-                    if sections is not None and sections.Count:
-                        actual = sections(sections.Count).PageSetup.Orientation
-                    else:
-                        actual = doc.PageSetup.Orientation
+                    ps = sections(sections.Count).PageSetup if (sections is not None and sections.Count) else doc.PageSetup
+                    # Prefer physical page dimensions (unambiguous) over the
+                    # Orientation enum, whose numeric value varies by Word version.
+                    try:
+                        if ps.PageWidth and ps.PageHeight:
+                            actual_str = "landscape" if float(ps.PageWidth) > float(ps.PageHeight) else "portrait"
+                    except Exception:
+                        actual_str = None
+                    if actual_str is None:
+                        orient = ps.Orientation
+                        if orient in (0, "wdOrientPortrait", "Portrait"):
+                            actual_str = "portrait"
+                        elif orient in (1, 2, "wdOrientLandscape", "Landscape"):
+                            actual_str = "landscape"
                 except Exception:
                     try:
-                        actual = doc.PageSetup.Orientation
+                        ps = doc.PageSetup
+                        if ps.PageWidth and ps.PageHeight:
+                            actual_str = "landscape" if float(ps.PageWidth) > float(ps.PageHeight) else "portrait"
                     except Exception:
-                        actual = None
-                # WdOrientation: 0 = portrait (wdOrientPortrait), 1 = landscape (wdOrientLandscape)
-                if actual in (0, "wdOrientPortrait", "Portrait"):
-                    actual_str = "portrait"
-                elif actual in (1, "wdOrientLandscape", "Landscape"):
-                    actual_str = "landscape"
-                else:
-                    actual_str = str(actual)
+                        actual_str = None
+                if actual_str is None:
+                    actual_str = "unknown"
+                # Resolve ambiguity for orient==1: if dimensions are available we
+                # already set actual_str; otherwise assume modern mapping (1=landscape).
                 status = CriterionStatus.PASS if actual_str == expected else CriterionStatus.FAIL
                 ev = f"Orientación: {actual_str} (esperado {expected})."
             elif typ == "comment_contains":
@@ -695,6 +739,21 @@ class WordComAdapter:
                     count = doc.Hyperlinks.Count
                 except Exception:
                     count = 0
+                # Incluir hipervinculos en encabezados/pies de pagina
+                try:
+                    for si in range(1, doc.Sections.Count + 1):
+                        sec = doc.Sections(si)
+                        for hi in (1, 2, 3):
+                            try:
+                                count += sec.Headers(hi).Range.Hyperlinks.Count
+                            except Exception:
+                                pass
+                            try:
+                                count += sec.Footers(hi).Range.Hyperlinks.Count
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
                 present = count > 0
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = f"Hipervínculos: {count}."
@@ -702,10 +761,15 @@ class WordComAdapter:
                 expected = spec.get("expected", True)
                 present = False
                 try:
-                    xml = doc.Content.XML if hasattr(doc.Content, "XML") else ""
-                    present = "background" in str(xml).lower()
+                    xml = str(getattr(doc, "WordOpenXML", "") or "")
+                    present = "<w:background" in xml.lower()
                 except Exception:
                     present = False
+                if not present:
+                    try:
+                        present = bool(getattr(doc, "Background", None)) and getattr(doc.Background, "Fill", None) is not None
+                    except Exception:
+                        present = False
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Fondo de página detectado." if present else "No se detectó fondo de página."
             elif typ == "tracked_changes_present":
@@ -738,8 +802,8 @@ class WordComAdapter:
             elif typ == "paragraph_style":
                 expected = spec.get("expected", "")
                 ok = False
+                norm_expected = str(expected).lower().replace(" ", "")
                 try:
-                    norm_expected = str(expected).lower().replace(" ", "")
                     for p in doc.Paragraphs:
                         style = getattr(p, "Style", None)
                         if style is None:
@@ -752,6 +816,31 @@ class WordComAdapter:
                             break
                 except Exception:
                     pass
+                # Fallback locale-independent: inspect the paragraph XML for a
+                # w:pStyle w:val matching the expected style id (e.g. Heading1).
+                if not ok:
+                    try:
+                        import re
+                        for p in doc.Paragraphs:
+                            xml = str(getattr(p.Range, "XML", "") or "")
+                            m = re.search(r'w:pStyle\s+w:val="([^"]+)"', xml)
+                            if m and m.group(1).lower().replace(" ", "") == norm_expected:
+                                ok = True
+                                break
+                    except Exception:
+                        pass
+                if not ok:
+                    try:
+                        xml = str(getattr(doc, "WordOpenXML", "") or "")
+                        if norm_expected and norm_expected in xml.lower().replace(" ", ""):
+                            # ensure it is a pStyle val, not arbitrary text
+                            import re
+                            for m in re.finditer(r'w:pStyle\s+w:val="([^"]+)"', xml):
+                                if m.group(1).lower().replace(" ", "") == norm_expected:
+                                    ok = True
+                                    break
+                    except Exception:
+                        pass
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = f"Estilo '{expected}' {'aplicado' if ok else 'no aplicado'}."
             elif typ == "section_columns":
@@ -789,8 +878,31 @@ class WordComAdapter:
                                 break
                         except Exception:
                             continue
+                # Fallback locale/unit-independent: inspect paragraph/document XML
+                # for an indent of the expected twips (w:left="360").
+                if not ok:
+                    try:
+                        import re
+                        needles = [str(expected)]
+                        for p in doc.Paragraphs:
+                            xml = str(getattr(p.Range, "XML", "") or "")
+                            if ('w:left="' + str(expected) + '"') in xml:
+                                ok = True
+                                break
+                        if not ok:
+                            for attr in ("WordOpenXML",):
+                                xml = str(getattr(doc, attr, "") or "")
+                                if ('w:left="' + str(expected) + '"') in xml:
+                                    ok = True
+                                    break
+                        if not ok:
+                            xml = str(getattr(doc.Content, "XML", "") or "")
+                            if ('w:left="' + str(expected) + '"') in xml:
+                                ok = True
+                    except Exception:
+                        pass
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
-                ev = f"Sangría verificada (esperado {expected} twips; leído {actual_seen})."
+                ev = f"Sangría verificada (esperado {expected} twips / {float(expected)/20:.1f} pt / {float(expected)/1440*2.54:.3f} cm; leído {actual_seen})."
             elif typ == "paragraph_spacing":
                 expected = spec.get("expected", "")
                 ok = False
@@ -811,8 +923,25 @@ class WordComAdapter:
                                 break
                         except Exception:
                             continue
+                if not ok:
+                    try:
+                        for p in doc.Paragraphs:
+                            xml = str(getattr(p.Range, "XML", "") or "")
+                            if ('w:after="' + str(expected) + '"') in xml:
+                                ok = True
+                                break
+                        if not ok:
+                            xml = str(getattr(doc, "WordOpenXML", "") or "")
+                            if ('w:after="' + str(expected) + '"') in xml:
+                                ok = True
+                        if not ok:
+                            xml = str(getattr(doc.Content, "XML", "") or "")
+                            if ('w:after="' + str(expected) + '"') in xml:
+                                ok = True
+                    except Exception:
+                        pass
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
-                ev = f"Espaciado verificado (esperado {expected} twips; leído {actual_seen})."
+                ev = f"Espaciado verificado (esperado {expected} twips / {float(expected)/20:.1f} pt / {float(expected)/1440*2.54:.3f} cm; leído {actual_seen})."
             elif typ == "merged_cell_present":
                 expected = spec.get("expected", True)
                 ok = False
@@ -828,6 +957,13 @@ class WordComAdapter:
                             ok = True
                 except Exception:
                     pass
+                if not ok:
+                    try:
+                        xml = str(getattr(doc, "WordOpenXML", "") or "")
+                        if "gridSpan" in xml or "vMerge" in xml:
+                            ok = True
+                    except Exception:
+                        pass
                 status = CriterionStatus.PASS if ok == bool(expected) else CriterionStatus.FAIL
                 ev = "Celda combinada detectada." if ok else "No se detectó celda combinada."
             elif typ == "repeating_header":

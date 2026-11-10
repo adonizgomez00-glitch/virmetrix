@@ -11,11 +11,9 @@
     {
       "id": "C1",
       "type": "table_cell_text",
-      "expected": {
-        "row": 0,
-        "col": 0,
-        "text": "Producto"
-      }
+      "row": 0,
+      "col": 0,
+      "expected": "Producto"
     }
   ],
   "rules_version": "1.0.0",

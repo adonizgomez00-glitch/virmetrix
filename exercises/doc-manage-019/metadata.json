@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Administrar documentos (MO-100)",
-  "instructions": "Establece todos los márgenes en 0.5 pulgadas (720 twips).",
+  "instructions": "Establece todos los márgenes en 1,27 cm (720 twips, 36 pt).",
   "target_phrase": "Márgenes",
   "expected_text": "Márgenes estrechos.",
   "criteria": [

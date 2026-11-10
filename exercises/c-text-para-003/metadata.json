@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Evaluación C — Texto y párrafos",
-  "instructions": "Aplica espaciado después de párrafo de 240 twips.",
+  "instructions": "Aplica espaciado después de párrafo de 0,423 cm (240 twips, 12 pt).",
   "criteria": [
     "C1"
   ],

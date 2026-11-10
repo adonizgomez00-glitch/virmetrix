@@ -163,9 +163,16 @@ class PortableDocxEvaluator:
                         comments_text = zf.read("word/comments.xml").decode("utf-8", errors="ignore")
                     except Exception:
                         pass
-                # tracked changes count
+                # tracked changes count (incluye inserciones, eliminaciones, movimientos
+                # y cambios de formato/propiedades, para coincidir con Word COM).
                 try:
-                    tracked_change_count = doc_xml.decode("utf-8", errors="ignore").count("<w:ins ") + doc_xml.decode("utf-8", errors="ignore").count("<w:del ")
+                    _raw = doc_xml.decode("utf-8", errors="ignore")
+                    tracked_change_count = (
+                        _raw.count("<w:ins ") + _raw.count("<w:del ")
+                        + _raw.count("<w:moveFrom ") + _raw.count("<w:moveTo ")
+                        + _raw.count("<w:rPrChange") + _raw.count("<w:pPrChange")
+                        + _raw.count("<w:sectPrChange") + _raw.count("<w:tblPrChange")
+                    )
                 except Exception:
                     tracked_change_count = 0
 
@@ -205,14 +212,15 @@ class PortableDocxEvaluator:
                     if sectPr is not None:
                         pgSz = sectPr.find(f"{{{W_NS}}}pgSz")
                         if pgSz is not None:
+                            w = pgSz.get(f"{{{W_NS}}}w")
+                            h = pgSz.get(f"{{{W_NS}}}h")
                             orient = pgSz.get(f"{{{W_NS}}}orient")
-                            if orient:
+                            # Prefer physical dimensions (unambiguous) over the
+                            # orient attribute, which may be stale or omitted.
+                            if w and h:
+                                page_orient = "landscape" if int(w) > int(h) else "portrait"
+                            elif orient:
                                 page_orient = orient
-                            else:
-                                w = pgSz.get(f"{{{W_NS}}}w")
-                                h = pgSz.get(f"{{{W_NS}}}h")
-                                if w and h:
-                                    page_orient = "landscape" if int(w) > int(h) else "portrait"
                 except Exception:
                     pass
         except (zipfile.BadZipFile, etree.XMLSyntaxError, Exception) as e:
@@ -456,7 +464,8 @@ class PortableDocxEvaluator:
         has_merged_cell = False
         has_repeating_header = False
         if root is not None:
-            sectPr = root.find(f".//{{{W_NS}}}sectPr")
+            sectPrs = root.findall(f".//{{{W_NS}}}sectPr")
+            sectPr = sectPrs[-1] if sectPrs else None
             if sectPr is not None:
                 pgMar = sectPr.find(f"{{{W_NS}}}pgMar")
                 if pgMar is not None:
@@ -477,14 +486,17 @@ class PortableDocxEvaluator:
                     paragraph_styles.append(ps.get(f"{{{W_NS}}}val"))
                 else:
                     paragraph_styles.append("Normal")
-                    ind = pPr.find(f"{{{W_NS}}}ind")
-                    if ind is not None and ind.get(f"{{{W_NS}}}left") is not None:
-                        paragraph_indents.append(ind.get(f"{{{W_NS}}}left"))
-                    spacing = pPr.find(f"{{{W_NS}}}spacing")
-                    if spacing is not None and spacing.get(f"{{{W_NS}}}after") is not None:
-                        paragraph_spacings.append(spacing.get(f"{{{W_NS}}}after"))
+                # Collect indent/spacing regardless of whether a paragraph style
+                # is present: Word often keeps w:pStyle (e.g. "Normal") alongside
+                # w:ind/w:spacing, and dropping them caused false negatives.
+                ind = pPr.find(f"{{{W_NS}}}ind")
+                if ind is not None and ind.get(f"{{{W_NS}}}left") is not None:
+                    paragraph_indents.append(ind.get(f"{{{W_NS}}}left"))
+                spacing = pPr.find(f"{{{W_NS}}}spacing")
+                if spacing is not None and spacing.get(f"{{{W_NS}}}after") is not None:
+                    paragraph_spacings.append(spacing.get(f"{{{W_NS}}}after"))
             for tc in root.iter(f"{{{W_NS}}}tc"):
-                if tc.find(f".//{{{W_NS}}}gridSpan") is not None:
+                if tc.find(f".//{{{W_NS}}}gridSpan") is not None or tc.find(f".//{{{W_NS}}}vMerge") is not None:
                     has_merged_cell = True
             for trPr in root.iter(f"{{{W_NS}}}trPr"):
                 if trPr.find(f"{{{W_NS}}}tblHeader") is not None:
@@ -608,9 +620,15 @@ class PortableDocxEvaluator:
                 ev = f"Elementos de lista: {list_items} (esperado {expected})."
             elif typ == "footnote_count":
                 expected = spec.get("expected", 1)
-                count = footnote_ref_count
+                # Contar notas reales (definiciones en footnotes.xml), no
+                # referencias en el texto, para coincidir con Word COM.
+                count = (footnotes_text or "").count("<w:footnote ")
+                count -= (footnotes_text or "").count('w:type="separator"')
+                count -= (footnotes_text or "").count('w:type="continuationSeparator"')
+                if count < 0:
+                    count = 0
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
-                ev = f"Referencias de nota al pie: {count} (esperado >= {expected})."
+                ev = f"Notas al pie: {count} (esperado >= {expected})."
             elif typ == "footnote_contains":
                 expected = spec.get("expected", "")
                 status = CriterionStatus.PASS if expected and expected in (footnotes_text or "") else CriterionStatus.FAIL
@@ -700,6 +718,10 @@ class PortableDocxEvaluator:
             elif typ == "hyperlink_present":
                 expected = spec.get("expected", True)
                 count = len(root.findall(f".//{{{W_NS}}}hyperlink"))
+                for h in (header_texts or []):
+                    count += h.count("<w:hyperlink")
+                for f in (footer_texts or []):
+                    count += f.count("<w:hyperlink")
 
                 present = count > 0
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL

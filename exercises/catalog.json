@@ -311,7 +311,7 @@
     },
     {
       "exercise_id": "doc-manage-007",
-      "title": "Márgenes de 1 pulgada",
+      "title": "Márgenes de 2,54 cm",
       "competency": "Administrar documentos (MO-100)",
       "difficulty": "básico",
       "modes": [
@@ -1422,7 +1422,7 @@
     },
     {
       "exercise_id": "c-doc-004",
-      "title": "Establece márgenes de 1 pulgada (1440 twips) en todos los lados.",
+      "title": "Establece márgenes de 2,54 cm (1440 twips, 72 pt) en todos los lados.",
       "competency": "Evaluación C — Gestión de documento",
       "difficulty": "básico",
       "modes": [
@@ -1862,7 +1862,7 @@
     },
     {
       "exercise_id": "c-text-para-002",
-      "title": "Aplica sangría izquierda de 360 twips.",
+      "title": "Aplica sangría izquierda de 0,635 cm (360 twips, 18 pt).",
       "competency": "Evaluación C — Texto y párrafos",
       "difficulty": "básico",
       "modes": [
@@ -1873,7 +1873,7 @@
     },
     {
       "exercise_id": "c-text-para-003",
-      "title": "Aplica espaciado después de párrafo de 240 twips.",
+      "title": "Aplica espaciado después de párrafo de 0,423 cm (240 twips, 12 pt).",
       "competency": "Evaluación C — Texto y párrafos",
       "difficulty": "básico",
       "modes": [

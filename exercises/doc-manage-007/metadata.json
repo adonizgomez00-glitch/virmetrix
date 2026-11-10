@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Administrar documentos (MO-100)",
-  "instructions": "Configura los cuatro márgenes del documento a 1 pulgada.",
+  "instructions": "Configura los cuatro márgenes del documento a 2,54 cm (1440 twips, 72 pt).",
   "criteria": [
     "C1"
   ],

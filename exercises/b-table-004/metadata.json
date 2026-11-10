@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Evaluación B — Márgenes de celda",
-  "instructions": "Configura los márgenes de celda a 0.1 pulgadas.",
+  "instructions": "Configura los márgenes de celda a 0,254 cm (144 twips, 7,2 pt).",
   "target_phrase": "Tabla",
   "expected_text": "Márgenes configurados.",
   "criteria": [
