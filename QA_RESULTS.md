@@ -464,3 +464,7 @@ Documento incorrecto (sin formato, 12 pt):
 - Ningun defecto nuevo: las 4 comprobaciones con valor esperado (68 passed, COM True, 3/5, 5/5) cumplen.
 - Ruido no bloqueante: pytest emite 6 volcados `Windows fatal exception: code 0x800706be` (RPC server disconnected) en stderr, originados en `src/virmetrix/infrastructure/evaluators/word_com.py` y `src/virmetrix/application/orchestrator.py` durante tests que simulan COM no disponible. pytest termina con exit 0 y 68 passed. Posible mejora: silenciar faulthandler en esos tests.
 - Proceso WINWORD residual detectado tras la fase de evidencia: comprobar si procede de los scripts de validacion (Dispatch + Quit) y no del adaptador de la app (DispatchEx + Quit).
+
+## Pendientes reportados durante validación Windows (Evaluación B)
+
+- **Ejercicio 24 (`b-doc-003`, "Guardar en formato alternativo")**: criterio `alternative_format` es trivial (siempre pass) → "deja pasar sin hacer nada". Pendiente de endurecer (verificar el formato real del archivo guardado) o marcar como verificación manual. No se ha modificado código; queda como recordatorio.

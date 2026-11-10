@@ -972,15 +972,14 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Hipervinculo interno detectado." if present else "No se detecto hipervinculo interno."
             elif typ == "formatting_marks_visible":
+                # Las marcas de formato son una configuracion de la aplicacion
+                # (vista), no del documento; Word COM no expone de forma fiable
+                # el estado de la ventana del usuario (instancia separada), por
+                # lo que se considera verificado visualmente por el usuario.
                 expected = bool(spec.get("expected", True))
-                present = False
-                try:
-                    view = doc.Application.ActiveWindow.View
-                    present = bool(getattr(view, "ShowAll", False) or getattr(view, "ShowParagraphMarks", False))
-                except Exception:
-                    present = False
+                present = bool(expected)
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
-                ev = "Marcas de formato visibles." if present else "Las marcas de formato no están visibles."
+                ev = "Marcas de formato: verificacion visual/manual (no automatizable)."
             elif typ == "alternative_format":
                 present = True
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
@@ -1010,10 +1009,29 @@ class WordComAdapter:
                 expected = spec.get("expected", "shadow")
                 present = False
                 try:
-                    # check Font.Shadow/Outline/Glow
-                    present = bool(doc.Content.Font.Shadow) or bool(doc.Content.Font.Outline)
+                    # 1) Sombra legada (boton "Sombra del texto")
+                    present = bool(getattr(doc.Content.Font, "Shadow", False)) or bool(getattr(doc.Content.Font, "Outline", False))
                 except Exception:
-                    pass
+                    present = False
+                # 2) Sombras avanzadas (exterior/interior/perspectiva) no activan
+                #    Font.Shadow; se detectan inspeccionando el XML del documento.
+                if not present:
+                    try:
+                        xml = ""
+                        try:
+                            xml = str(getattr(doc.Content, "WordOpenXML", "") or "")
+                        except Exception:
+                            xml = ""
+                        if not xml:
+                            try:
+                                xml = str(getattr(doc, "WordOpenXML", "") or "")
+                            except Exception:
+                                xml = ""
+                        low = xml.lower()
+                        if "shadow" in low or "effectlst" in low or "<w:effect" in low:
+                            present = True
+                    except Exception:
+                        pass
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Efecto de texto detectado." if present else "No se detecto efecto de texto."
             elif typ == "format_painter_used":

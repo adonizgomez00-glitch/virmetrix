@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "language": "es",
   "competency": "Evaluación B — Aplicar efectos de texto",
-  "instructions": "Aplica sombra al texto seleccionado.",
+  "instructions": "Aplica sombra exterior al texto seleccionado.",
   "target_phrase": "Texto",
   "expected_text": "Efecto aplicado.",
   "criteria": [
