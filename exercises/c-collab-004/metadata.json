@@ -1,0 +1,19 @@
+{
+  "exercise_id": "c-collab-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Colaboración",
+  "instructions": "Inserta un hipervínculo en el documento.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "hyperlink_present",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

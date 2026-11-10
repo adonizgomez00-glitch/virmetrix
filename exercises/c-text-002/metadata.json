@@ -1,0 +1,21 @@
+{
+  "exercise_id": "c-text-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Formato de texto",
+  "instructions": "Cambia el color del texto 'Informe' a rojo (#FF0000).",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "run_property",
+      "property": "color",
+      "expected": "FF0000",
+      "target": "Informe"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

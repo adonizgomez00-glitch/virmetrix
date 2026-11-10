@@ -1,0 +1,21 @@
+{
+  "exercise_id": "c-text-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Formato de texto",
+  "instructions": "Cambia el tamaño de 'Informe' a 14 pt.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "run_property",
+      "property": "size_pt",
+      "expected": 14.0,
+      "target": "Informe"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

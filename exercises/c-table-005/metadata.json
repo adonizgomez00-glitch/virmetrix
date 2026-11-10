@@ -1,0 +1,19 @@
+{
+  "exercise_id": "c-table-005",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Tablas",
+  "instructions": "Marca la primera fila de la tabla como fila de encabezado repetitiva.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "repeating_header",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

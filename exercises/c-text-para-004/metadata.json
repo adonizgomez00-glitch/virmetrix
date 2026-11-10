@@ -1,0 +1,19 @@
+{
+  "exercise_id": "c-text-para-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Texto y párrafos",
+  "instructions": "Inserta un salto de página.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "page_break_present",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

@@ -1,0 +1,22 @@
+{
+  "exercise_id": "c-doc-006",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Gestión de documento",
+  "instructions": "Establece el título del documento en 'Informe final'.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "doc_property",
+      "expected": {
+        "property": "title",
+        "value": "Informe final"
+      }
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

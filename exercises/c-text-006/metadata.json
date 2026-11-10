@@ -1,0 +1,29 @@
+{
+  "exercise_id": "c-text-006",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Formato de texto",
+  "instructions": "Aplica negrita y color azul (#0000FF) a 'Informe'.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "run_property",
+      "property": "bold",
+      "expected": true,
+      "target": "Informe"
+    },
+    {
+      "id": "C2",
+      "type": "run_property",
+      "property": "color",
+      "expected": "0000FF",
+      "target": "Informe"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

@@ -1,0 +1,23 @@
+{
+  "exercise_id": "c-table-003",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Tablas",
+  "instructions": "En la tabla, la celda (1,1) debe contener 'Producto'.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_cell_text",
+      "expected": {
+        "row": 0,
+        "col": 0,
+        "text": "Producto"
+      }
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

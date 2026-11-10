@@ -1,0 +1,19 @@
+{
+  "exercise_id": "c-refs-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Referencias",
+  "instructions": "Inserta una nota al pie que contenga 'Ejemplo'.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "footnote_contains",
+      "expected": "Ejemplo"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

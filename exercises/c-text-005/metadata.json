@@ -1,0 +1,29 @@
+{
+  "exercise_id": "c-text-005",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Formato de texto",
+  "instructions": "Aplica cursiva y tamaño 12 pt a 'Informe'.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "run_property",
+      "property": "italic",
+      "expected": true,
+      "target": "Informe"
+    },
+    {
+      "id": "C2",
+      "type": "run_property",
+      "property": "size_pt",
+      "expected": 12.0,
+      "target": "Informe"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

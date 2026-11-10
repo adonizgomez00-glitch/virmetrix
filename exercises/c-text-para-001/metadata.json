@@ -1,0 +1,19 @@
+{
+  "exercise_id": "c-text-para-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Texto y párrafos",
+  "instructions": "Aplica estilo 'Heading 2' al párrafo.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "paragraph_style",
+      "expected": "Heading2"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

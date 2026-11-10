@@ -1342,6 +1342,556 @@
         "word_com"
       ],
       "module": "B"
+    },
+    {
+      "exercise_id": "c-collab-001",
+      "title": "Añade 2 comentarios al documento.",
+      "competency": "Evaluación C — Colaboración",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-collab-002",
+      "title": "Añade un comentario que contenga 'Revisar'.",
+      "competency": "Evaluación C — Colaboración",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-collab-003",
+      "title": "Inserta un cambio registrado (tracked change).",
+      "competency": "Evaluación C — Colaboración",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-collab-004",
+      "title": "Inserta un hipervínculo en el documento.",
+      "competency": "Evaluación C — Colaboración",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-doc-001",
+      "title": "Añade un encabezado con el texto 'Informe'.",
+      "competency": "Evaluación C — Gestión de documento",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-doc-002",
+      "title": "Añade un pie de página con el texto 'Página'.",
+      "competency": "Evaluación C — Gestión de documento",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-doc-003",
+      "title": "Cambia la orientación a horizontal (landscape).",
+      "competency": "Evaluación C — Gestión de documento",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-doc-004",
+      "title": "Establece márgenes de 1 pulgada (1440 twips) en todos los lados.",
+      "competency": "Evaluación C — Gestión de documento",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-doc-005",
+      "title": "Configura el documento a 2 columnas.",
+      "competency": "Evaluación C — Gestión de documento",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-doc-006",
+      "title": "Establece el título del documento en 'Informe final'.",
+      "competency": "Evaluación C — Gestión de documento",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-graphics-001",
+      "title": "Inserta 2 formas (shapes) en el documento.",
+      "competency": "Evaluación C — Gráficos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-graphics-002",
+      "title": "Inserta una imagen con texto alternativo 'Logo'.",
+      "competency": "Evaluación C — Gráficos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-graphics-003",
+      "title": "Inserta 2 cuadros de texto.",
+      "competency": "Evaluación C — Gráficos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-graphics-004",
+      "title": "Inserta un cuadro de texto que contenga 'Nota'.",
+      "competency": "Evaluación C — Gráficos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-graphics-005",
+      "title": "Inserta 3 formas (shapes) en el documento.",
+      "competency": "Evaluación C — Gráficos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-graphics-006",
+      "title": "Inserta una forma (drawing) en el documento.",
+      "competency": "Evaluación C — Gráficos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-list-001",
+      "title": "Crea una lista con 5 elementos con viñetas.",
+      "competency": "Evaluación C — Listas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-list-002",
+      "title": "Crea una lista con 3 niveles de indentación.",
+      "competency": "Evaluación C — Listas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-list-003",
+      "title": "La lista numerada debe iniciar en 5.",
+      "competency": "Evaluación C — Listas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-list-004",
+      "title": "Crea una lista con 8 elementos con viñetas.",
+      "competency": "Evaluación C — Listas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-list-005",
+      "title": "Crea una lista con 4 elementos con viñetas.",
+      "competency": "Evaluación C — Listas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-list-006",
+      "title": "La lista numerada debe iniciar en 10.",
+      "competency": "Evaluación C — Listas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-refs-001",
+      "title": "Inserta 2 notas al pie en el documento.",
+      "competency": "Evaluación C — Referencias",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-refs-002",
+      "title": "Inserta una nota al pie que contenga 'Ejemplo'.",
+      "competency": "Evaluación C — Referencias",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-refs-003",
+      "title": "Inserta 2 notas finales en el documento.",
+      "competency": "Evaluación C — Referencias",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-refs-004",
+      "title": "Inserta una tabla de contenidos (TOC).",
+      "competency": "Evaluación C — Referencias",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-refs-005",
+      "title": "Inserta una nota al pie (1).",
+      "competency": "Evaluación C — Referencias",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-refs-006",
+      "title": "Inserta una nota al pie que contenga 'Nota'.",
+      "competency": "Evaluación C — Referencias",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-table-001",
+      "title": "Crea una segunda tabla de 2x2 en el documento.",
+      "competency": "Evaluación C — Tablas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-table-002",
+      "title": "Crea una tabla de 3 filas y 4 columnas.",
+      "competency": "Evaluación C — Tablas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-table-003",
+      "title": "En la tabla, la celda (1,1) debe contener 'Producto'.",
+      "competency": "Evaluación C — Tablas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-table-004",
+      "title": "Combina dos celdas de la tabla (merge).",
+      "competency": "Evaluación C — Tablas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-table-005",
+      "title": "Marca la primera fila de la tabla como fila de encabezado repetitiva.",
+      "competency": "Evaluación C — Tablas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-table-006",
+      "title": "Configura la tabla con ajuste automático (autofit).",
+      "competency": "Evaluación C — Tablas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-table-007",
+      "title": "Ordena la tabla por la primera columna (ascendente).",
+      "competency": "Evaluación C — Tablas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-table-008",
+      "title": "Configura márgenes de celda de 0.1 in.",
+      "competency": "Evaluación C — Tablas",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-001",
+      "title": "Aplica negrita a 'Informe' sin afectar al texto vecino.",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-002",
+      "title": "Cambia el color del texto 'Informe' a rojo (#FF0000).",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-003",
+      "title": "Cambia la fuente de 'Informe' a Arial.",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-004",
+      "title": "Cambia el tamaño de 'Informe' a 14 pt.",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-005",
+      "title": "Aplica cursiva y tamaño 12 pt a 'Informe'.",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-006",
+      "title": "Aplica negrita y color azul (#0000FF) a 'Informe'.",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-007",
+      "title": "Aplica negrita a 'Informe' sin afectar al texto vecino (variante).",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-008",
+      "title": "Cambia la fuente de 'Informe' a Times New Roman.",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-009",
+      "title": "Cambia el tamaño de 'Informe' a 16 pt.",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-010",
+      "title": "Aplica cursiva a 'Informe' sin afectar al texto vecino.",
+      "competency": "Evaluación C — Formato de texto",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-para-001",
+      "title": "Aplica estilo 'Heading 2' al párrafo.",
+      "competency": "Evaluación C — Texto y párrafos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-para-002",
+      "title": "Aplica sangría izquierda de 360 twips.",
+      "competency": "Evaluación C — Texto y párrafos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-para-003",
+      "title": "Aplica espaciado después de párrafo de 240 twips.",
+      "competency": "Evaluación C — Texto y párrafos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
+    },
+    {
+      "exercise_id": "c-text-para-004",
+      "title": "Inserta un salto de página.",
+      "competency": "Evaluación C — Texto y párrafos",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "C"
     }
   ]
 }

@@ -1,0 +1,19 @@
+{
+  "exercise_id": "c-doc-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Gestión de documento",
+  "instructions": "Añade un pie de página con el texto 'Página'.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "footer_contains",
+      "expected": "Página"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

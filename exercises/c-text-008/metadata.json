@@ -1,0 +1,21 @@
+{
+  "exercise_id": "c-text-008",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Formato de texto",
+  "instructions": "Cambia la fuente de 'Informe' a Times New Roman.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "run_property",
+      "property": "font_name",
+      "expected": "Times New Roman",
+      "target": "Informe"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

@@ -1,0 +1,24 @@
+{
+  "exercise_id": "c-doc-004",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Gestión de documento",
+  "instructions": "Establece márgenes de 1 pulgada (1440 twips) en todos los lados.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "page_margins",
+      "expected": {
+        "top": "1440",
+        "bottom": "1440",
+        "left": "1440",
+        "right": "1440"
+      }
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

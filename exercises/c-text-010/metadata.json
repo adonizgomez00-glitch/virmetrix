@@ -1,0 +1,30 @@
+{
+  "exercise_id": "c-text-010",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Formato de texto",
+  "instructions": "Aplica cursiva a 'Informe' sin afectar al texto vecino.",
+  "criteria": [
+    "C1",
+    "C2"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "run_property",
+      "property": "italic",
+      "expected": true,
+      "target": "Informe"
+    },
+    {
+      "id": "C2",
+      "type": "neighbor_not_formatted",
+      "forbidden": {
+        "italic": true
+      },
+      "target": "Informe"
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}

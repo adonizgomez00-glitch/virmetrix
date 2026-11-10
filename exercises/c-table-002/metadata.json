@@ -1,0 +1,20 @@
+{
+  "exercise_id": "c-table-002",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación C — Tablas",
+  "instructions": "Crea una tabla de 3 filas y 4 columnas.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "table_dimensions",
+      "rows": 3,
+      "cols": 4
+    }
+  ],
+  "rules_version": "1.0.0",
+  "module": "C"
+}
