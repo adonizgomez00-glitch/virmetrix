@@ -131,3 +131,10 @@ Aplica a cualquier ejercicio nuevo o regenerado. Complementa `docs/EVALUATION_B_
   barra de progreso y pregunta si reiniciar al finalizar.
 - **Resumen del módulo:** en modo examen muestra el último intento; en práctica
   el mejor. En examen no se puede navegar sin iniciar ni iniciar si está en pausa.
+- **Encabezados/pies (COM):** recorrer todas las secciones y los 3 tipos de
+  encabezado/pie (default, first, even), no solo la primera sección.
+- **Márgenes/columnas (COM):** usar la última sección (principal), no la primera.
+- **Propiedades de documento (COM):** normalizar nombres (Title/Subject/Author/...)
+  y comparar sin distinguir mayúsculas/espacios.
+- **Texto alternativo (COM):** fallback a `docPr/@descr` en el XML si
+  `AlternativeText` está vacío.

@@ -11,10 +11,8 @@
     {
       "id": "C1",
       "type": "doc_property",
-      "expected": {
-        "property": "title",
-        "value": "Informe final"
-      }
+      "property": "Title",
+      "expected": "Informe final"
     }
   ],
   "rules_version": "1.0.0",

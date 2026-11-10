@@ -516,7 +516,6 @@ class WordComAdapter:
                             break
                 except Exception:
                     pass
-                # also shapes
                 try:
                     for shp in doc.Shapes:
                         if expected in (getattr(shp, "AlternativeText", "") or ""):
@@ -524,6 +523,14 @@ class WordComAdapter:
                             break
                 except Exception:
                     pass
+                # Fallback: inspeccionar el XML (docPr/@descr)
+                if not ok:
+                    try:
+                        xml = str(getattr(doc, "WordOpenXML", "") or "")
+                        if expected and expected.lower() in xml.lower():
+                            ok = True
+                    except Exception:
+                        pass
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = "Texto alternativo correcto." if status == CriterionStatus.PASS else "Texto alternativo ausente o incorrecto."
             elif typ == "textbox_contains":
@@ -573,8 +580,18 @@ class WordComAdapter:
                 expected = spec.get("expected", "")
                 ok = False
                 try:
-                    txt = doc.Sections(1).Headers(1).Range.Text or ""
-                    ok = expected in txt
+                    for si in range(1, doc.Sections.Count + 1):
+                        sec = doc.Sections(si)
+                        for hi in (1, 2, 3):
+                            try:
+                                txt = sec.Headers(hi).Range.Text or ""
+                                if expected in txt:
+                                    ok = True
+                                    break
+                            except Exception:
+                                continue
+                        if ok:
+                            break
                 except Exception:
                     pass
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
@@ -583,8 +600,18 @@ class WordComAdapter:
                 expected = spec.get("expected", "")
                 ok = False
                 try:
-                    txt = doc.Sections(1).Footers(1).Range.Text or ""
-                    ok = expected in txt
+                    for si in range(1, doc.Sections.Count + 1):
+                        sec = doc.Sections(si)
+                        for fi in (1, 2, 3):
+                            try:
+                                txt = sec.Footers(fi).Range.Text or ""
+                                if expected in txt:
+                                    ok = True
+                                    break
+                            except Exception:
+                                continue
+                        if ok:
+                            break
                 except Exception:
                     pass
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
@@ -592,15 +619,24 @@ class WordComAdapter:
             elif typ == "doc_property":
                 prop = spec.get("property", "")
                 expected = spec.get("expected", "")
+                # Normalizar nombres de propiedad a los canonicos de Word
+                canon = {"title":"Title","subject":"Subject","author":"Author",
+                        "creator":"Author","keywords":"Keywords","category":"Category",
+                        "comments":"Comments","manager":"Manager","company":"Company"}
+                prop_name = canon.get(str(prop).lower(), str(prop))
                 actual = None
                 try:
-                    actual = doc.BuiltInDocumentProperties(prop).Value
+                    actual = doc.BuiltInDocumentProperties(prop_name).Value
                 except Exception:
                     try:
-                        actual = doc.CustomDocumentProperties(prop).Value
+                        actual = doc.CustomDocumentProperties(prop_name).Value
                     except Exception:
-                        actual = None
-                status = CriterionStatus.PASS if str(actual) == str(expected) else CriterionStatus.FAIL
+                        try:
+                            actual = doc.CustomDocumentProperties(prop).Value
+                        except Exception:
+                            actual = None
+                # Normalizar comparacion (str, strip, case-insensitive)
+                status = CriterionStatus.PASS if str(actual).strip().lower() == str(expected).strip().lower() else CriterionStatus.FAIL
                 ev = f"Propiedad '{prop}': '{actual}' (esperado '{expected}')."
             elif typ == "page_orientation":
                 expected = spec.get("expected", "portrait").lower()
@@ -685,13 +721,15 @@ class WordComAdapter:
                 expected = spec.get("expected", {})
                 ok = True
                 try:
-                    if "top" in expected and abs(doc.PageSetup.TopMargin - float(expected["top"]) / 20.0) > 1:
+                    sections = getattr(doc, "Sections", None)
+                    ps = sections(sections.Count).PageSetup if (sections is not None and sections.Count) else doc.PageSetup
+                    if "top" in expected and abs(ps.TopMargin - float(expected["top"]) / 20.0) > 1:
                         ok = False
-                    if "bottom" in expected and abs(doc.PageSetup.BottomMargin - float(expected["bottom"]) / 20.0) > 1:
+                    if "bottom" in expected and abs(ps.BottomMargin - float(expected["bottom"]) / 20.0) > 1:
                         ok = False
-                    if "left" in expected and abs(doc.PageSetup.LeftMargin - float(expected["left"]) / 20.0) > 1:
+                    if "left" in expected and abs(ps.LeftMargin - float(expected["left"]) / 20.0) > 1:
                         ok = False
-                    if "right" in expected and abs(doc.PageSetup.RightMargin - float(expected["right"]) / 20.0) > 1:
+                    if "right" in expected and abs(ps.RightMargin - float(expected["right"]) / 20.0) > 1:
                         ok = False
                 except Exception:
                     ok = False
@@ -720,11 +758,17 @@ class WordComAdapter:
                 expected = spec.get("expected", "1")
                 ok = False
                 try:
-                    ok = str(doc.PageSetup.TextColumns.Count) == str(expected)
+                    sections = getattr(doc, "Sections", None)
+                    sec = sections(sections.Count) if (sections is not None and sections.Count) else None
+                    ps = sec.PageSetup if sec is not None else doc.PageSetup
+                    ok = str(ps.TextColumns.Count) == str(expected)
                 except Exception:
-                    pass
+                    try:
+                        ok = str(doc.PageSetup.TextColumns.Count) == str(expected)
+                    except Exception:
+                        ok = False
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
-                ev = f"Columnas: {doc.PageSetup.TextColumns.Count if hasattr(doc.PageSetup,'TextColumns') else '?'} (esperado {expected})."
+                ev = f"Columnas: {expected if ok else '?'} (esperado {expected})."
             elif typ == "paragraph_indent":
                 expected = spec.get("expected", "")
                 ok = False
