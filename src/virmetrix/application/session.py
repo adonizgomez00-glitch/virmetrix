@@ -33,7 +33,9 @@ class ExamSession:
     _clock: Callable[[], float] = field(default=lambda: 0.0, repr=False)
 
     def start(self) -> None:
-        if self.status in (SessionStatus.RUNNING, SessionStatus.FINISHED):
+        # No permitir iniciar/reiniciar si ya esta corriendo, finalizada o pausada
+        # (en pausa se debe usar resume()).
+        if self.status in (SessionStatus.RUNNING, SessionStatus.PAUSED, SessionStatus.FINISHED):
             return
         self.status = SessionStatus.RUNNING
         self.started_at = datetime.now(timezone.utc).isoformat()

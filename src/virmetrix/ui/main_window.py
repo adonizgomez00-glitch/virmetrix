@@ -482,6 +482,8 @@ class ConfigWindow(QMainWindow):
             pass
 
     def start_session(self):
+        if self.session.mode == ExamMode.EXAM and self.session.status == SessionStatus.PAUSED:
+            return
         if self.session.status == SessionStatus.FINISHED:
             self.session = ExamSession(
                 mode=self.mode_use_combo.currentData(),
@@ -987,12 +989,18 @@ class PracticeWindow(QMainWindow):
         )
 
     def prev_exercise(self):
+        if self.session.mode == ExamMode.EXAM and self.session.status != SessionStatus.RUNNING:
+            self.result_view.setPlainText("Inicia la sesión para navegar entre ejercicios.")
+            return
         if self.session.prev_exercise():
             self._load_current_exercise()
             self._set_step(1)
             self._auto_new_copy()
 
     def next_exercise(self):
+        if self.session.mode == ExamMode.EXAM and self.session.status != SessionStatus.RUNNING:
+            self.result_view.setPlainText("Inicia la sesión para navegar entre ejercicios.")
+            return
         if self.session.next_exercise():
             self._load_current_exercise()
             self._set_step(1)
@@ -1099,6 +1107,10 @@ class PracticeWindow(QMainWindow):
         self.result_view.setPlainText("Evaluación cancelada.")
 
     def start_session(self):
+        # En modo examen, si esta pausada no se puede iniciar; debe reanudarse.
+        if self.session.mode == ExamMode.EXAM and self.session.status == SessionStatus.PAUSED:
+            self.result_view.setPlainText("La sesión está pausada. Reanuda para continuar.")
+            return
         if self.session.status == SessionStatus.FINISHED:
             self.session = ExamSession(
                 mode=self.config.mode_use_combo.currentData(),
@@ -1271,8 +1283,13 @@ class SummaryWindow(QMainWindow):
             if not attempts:
                 best_by_exercise[eid] = None
                 continue
-            best = max(attempts, key=lambda a: (getattr(a, "score_earned", 0),))
-            best_by_exercise[eid] = best
+            if mode_exam:
+                # En examen se muestra el ULTIMO intento (no el mejor).
+                chosen = attempts[0]  # list_attempts ordena por id DESC
+            else:
+                # En practica se muestra el MEJOR intento.
+                chosen = max(attempts, key=lambda a: (getattr(a, "score_earned", 0),))
+            best_by_exercise[eid] = chosen
             for a in attempts:
                 earned = getattr(a, "score_earned", 0)
                 possible = getattr(a, "score_possible", 0)
