@@ -619,10 +619,10 @@ class WordComAdapter:
                         actual = doc.PageSetup.Orientation
                     except Exception:
                         actual = None
-                # 1 = portrait, 2 = landscape
-                if actual == 1:
+                # WdOrientation: 0 = portrait (wdOrientPortrait), 1 = landscape (wdOrientLandscape)
+                if actual in (0, "wdOrientPortrait", "Portrait"):
                     actual_str = "portrait"
-                elif actual == 2:
+                elif actual in (1, "wdOrientLandscape", "Landscape"):
                     actual_str = "landscape"
                 else:
                     actual_str = str(actual)
