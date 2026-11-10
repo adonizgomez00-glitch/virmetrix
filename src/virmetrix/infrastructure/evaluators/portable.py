@@ -170,6 +170,13 @@ class PortableDocxEvaluator:
                         styles_root = _parse_xml(zf.read("word/styles.xml"))
                     except Exception:
                         styles_root = None
+                # numbering (for list start values)
+                numbering_root = None
+                if "word/numbering.xml" in zf.namelist():
+                    try:
+                        numbering_root = _parse_xml(zf.read("word/numbering.xml"))
+                    except Exception:
+                        numbering_root = None
                 # core properties
                 if "docProps/core.xml" in zf.namelist():
                     try:
@@ -221,7 +228,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root, numbering_root)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -426,7 +433,7 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None, numbering_root=None):
         tables = tables or []
         alt_texts = alt_texts or []
         textbox_texts = textbox_texts or []
@@ -747,6 +754,21 @@ class PortableDocxEvaluator:
                 present = sect_count > 1
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Salto de seccion detectado." if present else "No se detecto salto de seccion."
+            elif typ == "page_break_present" or typ == "page_break":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    if root is not None:
+                        for br in root.iter(f"{{{W_NS}}}br"):
+                            btype = (br.get(f"{{{W_NS}}}type") or "").lower()
+                            if btype == "page" or btype == "":
+                                # Word writes <w:br w:type="page"/> for manual page break.
+                                present = True
+                                break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Salto de página detectado." if present else "No se detectó salto de página."
             elif typ == "section_break":
                 expected = str(spec.get("expected", "nextPage")).lower()
                 present = False
@@ -803,8 +825,45 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Eliminacion de fondo de imagen no verificable en portable."
             elif typ == "object_position":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Posicion de objeto no verificable en portable."
+                expected = str(spec.get("expected", "")).lower()
+                present = False
+                try:
+                    if root is not None:
+                        has_right = False
+                        has_top = False
+                        for posh in root.iter(f"{{{WP_NS}}}positionH"):
+                            al = posh.find(f"{{{WP_NS}}}align")
+                            if al is not None and (al.text or "").strip().lower() == "right":
+                                has_right = True
+                            # posOffset near right edge also counts
+                            off = posh.find(f"{{{WP_NS}}}posOffset")
+                            if off is not None:
+                                try:
+                                    if int(off.text or "0") > 0:
+                                        has_right = True
+                                except Exception:
+                                    pass
+                        for posv in root.iter(f"{{{WP_NS}}}positionV"):
+                            al = posv.find(f"{{{WP_NS}}}align")
+                            if al is not None and (al.text or "").strip().lower() == "top":
+                                has_top = True
+                            off = posv.find(f"{{{WP_NS}}}posOffset")
+                            if off is not None:
+                                try:
+                                    if int(off.text or "0") == 0:
+                                        has_top = True
+                                except Exception:
+                                    pass
+                        if expected in ("top-right", "top_right", "topright"):
+                            present = has_right and has_top
+                        elif expected in ("top-left", "top_left", "topleft"):
+                            present = (not has_right) and has_top
+                        else:
+                            present = has_right and has_top
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Objeto posicionado correctamente." if present else "El objeto no está en la posición esperada."
             elif typ == "text_wrap":
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Ajuste de texto no verificable en portable."
@@ -901,8 +960,33 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Margenes de celda no verificables en portable."
             elif typ == "table_sorted":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Ordenacion de tabla no verificable en portable."
+                expected = str(spec.get("expected", "asc")).lower()
+                present = False
+                try:
+                    if root is not None:
+                        tbls = root.findall(f".//{{{W_NS}}}tbl")
+                        if tbls:
+                            tbl = tbls[0]
+                            rows = tbl.findall(f"{{{W_NS}}}tr")
+                            values = []
+                            for tr in rows:
+                                cells = tr.findall(f"{{{W_NS}}}tc")
+                                if not cells:
+                                    continue
+                                # first cell text
+                                texts = []
+                                for tnode in cells[0].iter(f"{{{W_NS}}}t"):
+                                    texts.append(tnode.text or "")
+                                values.append("".join(texts).strip())
+                            data = values[1:] if len(values) > 1 else values
+                            if expected.startswith("desc"):
+                                present = data == sorted(data, reverse=True)
+                            else:
+                                present = data == sorted(data)
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Tabla ordenada correctamente." if present else "La tabla no está ordenada por la primera columna."
             elif typ == "table_autofit":
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Ajuste de tabla no verificable en portable."
@@ -922,8 +1006,65 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Reinicio de numeracion no verificable en portable."
             elif typ == "list_start_value":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Valor inicial de lista no verificable en portable."
+                expected = int(spec.get("expected", 1))
+                start_val = None
+                try:
+                    num_id = None
+                    if root is not None:
+                        for p in root.iter(f"{{{W_NS}}}p"):
+                            pPr = p.find(f"{{{W_NS}}}pPr")
+                            if pPr is not None:
+                                numPr = pPr.find(f"{{{W_NS}}}numPr")
+                                if numPr is not None:
+                                    nid = numPr.find(f"{{{W_NS}}}numId")
+                                    if nid is not None and nid.get(f"{{{W_NS}}}val"):
+                                        num_id = nid.get(f"{{{W_NS}}}val")
+                                        break
+                    if numbering_root is not None and num_id is not None:
+                        for num in numbering_root.findall(f".//{{{W_NS}}}num"):
+                            if num.get(f"{{{W_NS}}}numId") == num_id:
+                                for lvlOverride in num.findall(f"{{{W_NS}}}lvlOverride"):
+                                    so = lvlOverride.find(f"{{{W_NS}}}startOverride")
+                                    lvl = lvlOverride.find(f"{{{W_NS}}}lvl")
+                                    if so is None and lvl is not None:
+                                        so = lvl.find(f"{{{W_NS}}}startOverride")
+                                    st = None
+                                    if lvl is not None:
+                                        st = lvl.find(f"{{{W_NS}}}start")
+                                    if so is not None:
+                                        start_val = int(so.get(f"{{{W_NS}}}val"))
+                                        break
+                                    if st is not None and start_val is None:
+                                        start_val = int(st.get(f"{{{W_NS}}}val"))
+                                if start_val is None:
+                                    an = num.find(f"{{{W_NS}}}abstractNumId")
+                                    abstract_id = an.get(f"{{{W_NS}}}val") if an is not None else None
+                                    if abstract_id is not None:
+                                        for anode in numbering_root.findall(f".//{{{W_NS}}}abstractNum"):
+                                            if anode.get(f"{{{W_NS}}}abstractNumId") == abstract_id:
+                                                lvl = anode.find(f"{{{W_NS}}}lvl")
+                                                if lvl is not None:
+                                                    st = lvl.find(f"{{{W_NS}}}start")
+                                                    if st is not None:
+                                                        start_val = int(st.get(f"{{{W_NS}}}val"))
+                                                break
+                                break
+                except Exception:
+                    start_val = None
+                # Fallback: if the paragraph has no explicit numPr (inherited
+                # from a style), scan all numbering definitions for an override
+                # with the expected start value.
+                if start_val is None and numbering_root is not None:
+                    try:
+                        for so in numbering_root.iter(f"{{{W_NS}}}startOverride"):
+                            if int(so.get(f"{{{W_NS}}}val")) == expected:
+                                start_val = expected
+                                break
+                    except Exception:
+                        pass
+                present = (start_val == expected)
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = f"Valor inicial de lista: {start_val} (esperado {expected})." if start_val is not None else "No se pudo determinar el valor inicial de la lista."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."

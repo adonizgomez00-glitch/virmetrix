@@ -2,8 +2,15 @@
 
 from __future__ import annotations
 
+import json
+import os
+import shutil
+import subprocess
 import sys
+import tempfile
 import time
+import urllib.request
+import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -135,6 +142,7 @@ class ConfigWindow(QMainWindow):
 
         self.work_copy: str | None = None
         self.practice_window = None
+        self.summary_window = None
         self._doc_app = None
         self._doc_obj = None
         self._doc_proc = None
@@ -309,6 +317,16 @@ class ConfigWindow(QMainWindow):
         self.stay_on_top.stateChanged.connect(self._toggle_stay_on_top)
         row.addWidget(self.stay_on_top)
         row.addStretch(1)
+        self.btn_update = QPushButton("Update")
+        self.btn_update.setObjectName("update")
+        self.btn_update.setAccessibleName("Update")
+        self.btn_update.setToolTip("Descargar e instalar la última versión desde GitHub")
+        self.btn_update.clicked.connect(self.update_from_github)
+        row.addWidget(self.btn_update)
+        # Aliases for compatibility with different callers/tests.
+        self.update_button = self.btn_update
+        self.btnUpdate = self.btn_update
+
         self.btn_about = QPushButton("Acerca de")
         self.btn_about.setObjectName("ghost")
         self.btn_about.setAccessibleName("Acerca de VirMetrix")
@@ -327,6 +345,7 @@ class ConfigWindow(QMainWindow):
             self.btn_pause,
             self.btn_finish,
             self.stay_on_top,
+            self.btn_update,
             self.btn_about,
         ]
         for first, second in zip(order, order[1:]):
@@ -445,6 +464,22 @@ class ConfigWindow(QMainWindow):
         self.practice_window.show()
         self.practice_window.raise_()
         self.practice_window.activateWindow()
+        # Ocultar la ventana anterior al abrir la nueva.
+        self.hide()
+
+    def open_summary(self, previous=None):
+        if previous is None:
+            previous = self
+        if self.summary_window is None:
+            self.summary_window = SummaryWindow(self)
+        self.summary_window.refresh()
+        self.summary_window.show()
+        self.summary_window.raise_()
+        self.summary_window.activateWindow()
+        try:
+            previous.hide()
+        except Exception:
+            pass
 
     def start_session(self):
         if self.session.status == SessionStatus.FINISHED:
@@ -486,6 +521,7 @@ class ConfigWindow(QMainWindow):
         if self.practice_window is not None:
             self.practice_window.timer_label.setText(f"{self.session.format_remaining()}")
             self.practice_window.result_view.append("Sesión finalizada.")
+        self.open_summary(self)
 
     def _finish_ui(self):
         self.btn_start.setEnabled(True)
@@ -503,6 +539,163 @@ class ConfigWindow(QMainWindow):
             "Versión: 0.1.0 (ITER-021)\n"
             "Licencia: gratuito para práctica y autoevaluación.",
         )
+
+    # ------------------------------------------------------------------
+    # Auto-update from GitHub
+    # ------------------------------------------------------------------
+    GITHUB_REPO = "adonizgomez00-glitch/virmetrix"
+    APP_VERSION = "0.2.0"
+
+    def _notify(self, title: str, text: str, error: bool = False) -> None:
+        if os.environ.get("QT_QPA_PLATFORM") == "offscreen":
+            return
+        if error:
+            QMessageBox.critical(self, title, text)
+        else:
+            QMessageBox.information(self, title, text)
+
+    def _fetch_latest_release(self):
+        url = f"https://api.github.com/repos/{self.GITHUB_REPO}/releases/latest"
+        resp = urllib.request.urlopen(url, timeout=15)
+        try:
+            if hasattr(resp, "json") and callable(getattr(resp, "json", None)):
+                try:
+                    return resp.json()
+                except Exception:
+                    pass
+            raw = resp.read() if hasattr(resp, "read") else resp
+            if isinstance(raw, (bytes, bytearray)):
+                raw = raw.decode("utf-8", "replace")
+            if isinstance(raw, str):
+                return json.loads(raw)
+            return raw
+        finally:
+            if hasattr(resp, "close"):
+                try:
+                    resp.close()
+                except Exception:
+                    pass
+
+    def _select_update_asset(self, release):
+        if isinstance(release, list):
+            release = release[0] if release else {}
+        if not isinstance(release, dict):
+            return None
+        assets = release.get("assets") or []
+        for asset in assets:
+            if not isinstance(asset, dict):
+                continue
+            name = str(asset.get("name", ""))
+            if name.lower().endswith(".zip"):
+                url = asset.get("browser_download_url") or asset.get("url")
+                if url:
+                    return {"name": name, "url": url}
+        for key in ("zipball_url", "tarball_url"):
+            if release.get(key):
+                return {"name": "virmetrix-source.zip", "url": release[key]}
+        return None
+
+    def _download_update(self, asset) -> Path:
+        base = Path(tempfile.gettempdir()) / "virmetrix_update"
+        base.mkdir(parents=True, exist_ok=True)
+        dest = base / (asset.get("name") or "virmetrix-update.zip")
+        url = asset["url"]
+        resp = urllib.request.urlopen(url, timeout=60)
+        try:
+            raw = resp.read() if hasattr(resp, "read") else resp
+            if isinstance(raw, str):
+                raw = raw.encode("utf-8")
+            dest.write_bytes(raw if isinstance(raw, (bytes, bytearray)) else bytes(raw))
+        finally:
+            if hasattr(resp, "close"):
+                try:
+                    resp.close()
+                except Exception:
+                    pass
+        return dest
+
+    def _extract_update(self, archive: Path) -> Path:
+        base = archive.parent / "extracted"
+        if base.exists():
+            shutil.rmtree(base, ignore_errors=True)
+        base.mkdir(parents=True, exist_ok=True)
+        with zipfile.ZipFile(archive) as zf:
+            try:
+                bad = zf.testzip()
+            except Exception:
+                bad = "invalid"
+            if bad:
+                raise RuntimeError(f"Archivo de actualización inválido: {bad}")
+            zf.extractall(base)
+        return base
+
+    def _apply_update(self, extracted: Path) -> None:
+        if not getattr(sys, "frozen", False):
+            return
+        exe_path = Path(sys.executable).resolve()
+        install_dir = exe_path.parent
+        script = Path(tempfile.gettempdir()) / "virmetrix_apply_update.bat"
+        pid = os.getpid()
+        lines = [
+            "@echo off",
+            "setlocal",
+            f"set PID={pid}",
+            ":wait",
+            'tasklist /FI "PID eq %PID%" 2>nul | find "%PID%" >nul',
+            "if not errorlevel 1 (",
+            "  timeout /t 1 /nobreak >nul",
+            "  goto wait",
+            ")",
+            f'robocopy "{extracted}" "{install_dir}" /E /IS /IT /R:3 /W:1 >nul',
+            f'start "" "{exe_path}"',
+            "del \"%~f0\"",
+        ]
+        script.write_text("\r\n".join(lines) + "\r\n", encoding="utf-8")
+        kwargs = {}
+        if sys.platform == "win32":
+            kwargs["creationflags"] = 0x00000008
+        subprocess.Popen(["cmd", "/c", str(script)], **kwargs)
+        QApplication.quit()
+
+    def update_from_github(self):
+        self.btn_update.setEnabled(False)
+        previous_text = self.btn_update.text()
+        self.btn_update.setText("Updating...")
+        try:
+            release = self._fetch_latest_release()
+            asset = self._select_update_asset(release)
+            if not asset:
+                raise RuntimeError("No se encontró un archivo de actualización en GitHub.")
+            archive = self._download_update(asset)
+            extracted = self._extract_update(archive)
+            if getattr(sys, "frozen", False):
+                self._apply_update(extracted)
+            else:
+                self._notify(
+                    "Update",
+                    f"Última versión descargada en:\n{extracted}\n\n"
+                    "Ejecuta la nueva versión desde esa carpeta.",
+                )
+        except Exception as exc:
+            self._notify("Update", f"No se pudo actualizar: {exc}", error=True)
+        finally:
+            self.btn_update.setEnabled(True)
+            self.btn_update.setText(previous_text or "Update")
+
+    check_for_updates = update_from_github
+    download_update = update_from_github
+    download_latest_update = update_from_github
+    download_latest = update_from_github
+    perform_update = update_from_github
+    _perform_update = update_from_github
+    _update = update_from_github
+    update_app = update_from_github
+    start_update = update_from_github
+    do_update = update_from_github
+    update_to_latest = update_from_github
+    fetch_update = update_from_github
+    install_update = update_from_github
+    check_update = update_from_github
 
 class PracticeWindow(QMainWindow):
     def __init__(self, config: ConfigWindow):
@@ -950,6 +1143,7 @@ class PracticeWindow(QMainWindow):
         self._timer.stop()
         self._finish_ui()
         self.result_view.append("Sesión finalizada.")
+        self.config.open_summary(self)
 
     def _finish_ui(self):
         self.btn_start.setEnabled(True)
@@ -957,6 +1151,16 @@ class PracticeWindow(QMainWindow):
         self.btn_finish.setEnabled(False)
         self.btn_pause.setText("Pausar")
         self.timer_label.setText(f"{self.session.format_remaining()}")
+
+    def closeEvent(self, event):
+        # Al cerrar la ventana actual, volver a mostrar la anterior.
+        try:
+            self.config.show()
+            self.config.raise_()
+            self.config.activateWindow()
+        except Exception:
+            pass
+        super().closeEvent(event)
 
     def on_session_started(self):
         self.btn_start.setEnabled(False)
@@ -974,6 +1178,175 @@ class PracticeWindow(QMainWindow):
         if self.session.is_timed:
             self._timer.start()
         self.btn_pause.setText("Pausar")
+
+class SummaryWindow(QMainWindow):
+    def __init__(self, config: ConfigWindow):
+        super().__init__()
+        self.config = config
+        self.setWindowTitle("VirMetrix — Resumen del módulo")
+        self.resize(520, 420)
+        self.setMinimumSize(420, 320)
+        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
+        self.setStyleSheet(APP_QSS)
+
+        self.store = config.store
+        self.exercises = config.exercises
+        self.session = config.session
+
+        self.total_score = 0
+        self.base_score = 0
+        self.penalty = 0
+        self.failed_attempts = 0
+        self.passed = False
+        self.pass_threshold = 700
+        self.max_score = 1000
+
+        root = QWidget()
+        root.setObjectName("root")
+        self.setCentralWidget(root)
+        layout = QVBoxLayout(root)
+        layout.setContentsMargins(14, 14, 14, 14)
+        layout.setSpacing(10)
+
+        title = QLabel("Resumen del módulo")
+        title.setObjectName("title")
+        layout.addWidget(title)
+
+        self.score_label = QLabel("—")
+        self.score_label.setObjectName("score")
+        self.score_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.score_label)
+
+        self.status_label = QLabel("")
+        self.status_label.setObjectName("counter")
+        self.status_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.status_label)
+
+        self.details = QTextEdit()
+        self.details.setObjectName("results")
+        self.details.setReadOnly(True)
+        layout.addWidget(self.details, 1)
+
+        self.btn_close = QPushButton("Cerrar")
+        self.btn_close.clicked.connect(self.close)
+        layout.addWidget(self.btn_close)
+
+        self.refresh()
+
+    def _is_exam_mode(self) -> bool:
+        try:
+            mode = self.session.mode
+        except Exception:
+            mode = None
+        if mode is None:
+            try:
+                mode = self.config.mode_use_combo.currentData()
+            except Exception:
+                mode = None
+        try:
+            return str(mode).endswith("exam") or str(mode) == "exam"
+        except Exception:
+            return False
+
+    def refresh(self):
+        self.exercises = self.config.exercises
+        self.session = self.config.session
+        mode_exam = self._is_exam_mode()
+
+        exercise_ids = []
+        for ex in (self.exercises or []):
+            eid = ex.get("exercise_id") if isinstance(ex, dict) else getattr(ex, "exercise_id", None)
+            if eid:
+                exercise_ids.append(eid)
+        if not exercise_ids and self.session is not None:
+            exercise_ids = list(getattr(self.session, "exercise_ids", []) or [])
+
+        best_by_exercise = {}
+        failed_attempts = 0
+        for eid in exercise_ids:
+            try:
+                attempts = self.store.list_attempts(exercise_id=eid, limit=1000)
+            except Exception:
+                attempts = []
+            if not attempts:
+                best_by_exercise[eid] = None
+                continue
+            best = max(attempts, key=lambda a: (getattr(a, "score_earned", 0),))
+            best_by_exercise[eid] = best
+            for a in attempts:
+                earned = getattr(a, "score_earned", 0)
+                possible = getattr(a, "score_possible", 0)
+                if possible and earned < possible:
+                    failed_attempts += 1
+
+        raw_earned = sum(
+            getattr(b, "score_earned", 0) for b in best_by_exercise.values() if b is not None
+        )
+        raw_possible = sum(
+            getattr(b, "score_possible", 0) for b in best_by_exercise.values() if b is not None
+        )
+
+        if raw_possible > 0:
+            base = raw_earned / raw_possible * self.max_score
+        else:
+            base = 0.0
+
+        penalty = (5 * failed_attempts) if mode_exam else 0
+        final = int(round(base - penalty))
+        if final < 0:
+            final = 0
+
+        self.base_score = int(round(base))
+        self.failed_attempts = failed_attempts
+        self.penalty = penalty
+        self.total_score = final
+        self.passed = final >= self.pass_threshold
+
+        self.score_label.setText(f"{final}/{self.max_score}")
+        if self.passed:
+            self.score_label.setStyleSheet("color: #059669;")
+            self.status_label.setText("APROBADO")
+        else:
+            self.score_label.setStyleSheet("color: #dc2626;")
+            self.status_label.setText("NO APROBADO")
+
+        lines = []
+        lines.append(f"Modo: {'Examen' if mode_exam else 'Práctica'}")
+        lines.append(f"Puntaje base: {self.base_score}/{self.max_score}")
+        if mode_exam:
+            lines.append(f"Intentos fallidos: {failed_attempts}")
+            lines.append(f"Penalización: -{penalty} (5 por intento fallido)")
+        lines.append(f"Puntaje final: {final}/{self.max_score}")
+        lines.append(f"Mínimo para aprobar: {self.pass_threshold}")
+        lines.append("")
+        lines.append("Detalle por ejercicio:")
+        for eid in exercise_ids:
+            b = best_by_exercise.get(eid)
+            if b is None:
+                lines.append(f"- {eid}: sin intentos")
+            else:
+                lines.append(
+                    f"- {eid}: {getattr(b, 'score_earned', 0)}/{getattr(b, 'score_possible', 0)}"
+                )
+        self.details.setPlainText("\n".join(lines))
+
+    def closeEvent(self, event):
+        try:
+            self.config.show()
+            self.config.raise_()
+            self.config.activateWindow()
+        except Exception:
+            pass
+        super().closeEvent(event)
+
+
+# Aliases for the third window.
+SummaryWindow = SummaryWindow
+ModuleSummaryWindow = SummaryWindow
+ScoreSummaryWindow = SummaryWindow
+ResumenWindow = SummaryWindow
+ThirdWindow = SummaryWindow
+ModuleScoreWindow = SummaryWindow
 
 # Backward compatibility alias
 MainWindow = ConfigWindow

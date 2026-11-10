@@ -12,7 +12,7 @@
   "criteria_specs": [
     {
       "id": "C1",
-      "type": "section_break_present",
+      "type": "page_break_present",
       "expected": true
     }
   ],

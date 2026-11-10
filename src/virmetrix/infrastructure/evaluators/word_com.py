@@ -816,6 +816,26 @@ class WordComAdapter:
                     present = False
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = f"Salto de seccion '{expected}' detectado." if present else f"No se detecto salto '{expected}'."
+            elif typ == "page_break_present" or typ == "page_break":
+                expected = spec.get("expected", True)
+                present = False
+                try:
+                    text = getattr(doc.Content, "Text", "") or ""
+                    if "\x0c" in text:
+                        present = True
+                    else:
+                        # Fallback: search manual page break character.
+                        import win32com.client  # noqa: F401
+                        rng = doc.Content
+                        find = rng.Find
+                        find.Text = "^m"
+                        find.Forward = True
+                        find.Wrap = 1
+                        present = bool(find.Execute())
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
+                ev = "Salto de página detectado." if present else "No se detectó salto de página."
             elif typ == "shape_count":
                 expected = spec.get("expected", 1)
                 count = 0
@@ -835,8 +855,29 @@ class WordComAdapter:
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Eliminacion de fondo no verificable en COM (pendiente)."
             elif typ == "object_position":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Posicion de objeto no verificable en COM (pendiente)."
+                expected = str(spec.get("expected", "")).lower()
+                present = False
+                try:
+                    page_w = float(doc.PageSetup.PageWidth)
+                    page_h = float(doc.PageSetup.PageHeight)
+                    for sh in doc.Shapes:
+                        cx = float(sh.Left) + float(sh.Width) / 2.0
+                        cy = float(sh.Top) + float(sh.Height) / 2.0
+                        if expected in ("top-right", "top_right", "topright"):
+                            if cx > page_w / 2.0 and cy < page_h / 2.0:
+                                present = True
+                                break
+                        elif expected in ("top-left", "top_left", "topleft"):
+                            if cx < page_w / 2.0 and cy < page_h / 2.0:
+                                present = True
+                                break
+                        else:
+                            present = True
+                            break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Objeto posicionado correctamente." if present else "El objeto no está en la posición esperada."
             elif typ == "text_wrap":
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Ajuste de texto no verificable en COM (pendiente)."
@@ -869,8 +910,15 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Hipervinculo interno detectado." if present else "No se detecto hipervinculo interno."
             elif typ == "formatting_marks_visible":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Marcas de formato no verificables en COM (pendiente)."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    view = doc.Application.ActiveWindow.View
+                    present = bool(getattr(view, "ShowAll", False) or getattr(view, "ShowParagraphMarks", False))
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Marcas de formato visibles." if present else "Las marcas de formato no están visibles."
             elif typ == "alternative_format":
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Formato alternativo no verificable en COM (pendiente)."
@@ -935,8 +983,28 @@ class WordComAdapter:
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Margenes de celda no verificables en COM (pendiente)."
             elif typ == "table_sorted":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Ordenacion de tabla no verificable en COM (pendiente)."
+                expected = str(spec.get("expected", "asc")).lower()
+                present = False
+                try:
+                    if doc.Tables.Count > 0:
+                        t = doc.Tables(1)
+                        values = []
+                        for r in range(1, t.Rows.Count + 1):
+                            try:
+                                txt = t.Cell(r, 1).Range.Text
+                                txt = (txt or "").replace("\r", "").replace("\x07", "").strip()
+                                values.append(txt)
+                            except Exception:
+                                values.append("")
+                        data = values[1:] if len(values) > 1 else values
+                        if expected.startswith("desc"):
+                            present = data == sorted(data, reverse=True)
+                        else:
+                            present = data == sorted(data)
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Tabla ordenada correctamente." if present else "La tabla no está ordenada por la primera columna."
             elif typ == "table_autofit":
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Ajuste de tabla no verificable en COM (pendiente)."
@@ -959,8 +1027,25 @@ class WordComAdapter:
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "Reinicio de numeracion no verificable en COM (pendiente)."
             elif typ == "list_start_value":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Valor inicial de lista no verificable en COM (pendiente)."
+                expected = int(spec.get("expected", 1))
+                start_val = None
+                try:
+                    for p in doc.Paragraphs:
+                        lf = p.Range.ListFormat
+                        if getattr(lf, "ListType", 0) not in (0, None):
+                            try:
+                                start_val = int(lf.ListValue)
+                            except Exception:
+                                try:
+                                    start_val = int(lf.ListTemplate.ListLevels(1).StartAt)
+                                except Exception:
+                                    start_val = None
+                            break
+                except Exception:
+                    start_val = None
+                present = (start_val == expected)
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = f"Valor inicial de lista: {start_val} (esperado {expected})." if start_val is not None else "No se pudo determinar el valor inicial de la lista."
             else:
                 status = CriterionStatus.ERROR
                 ev = f"Tipo de criterio desconocido: {typ}."
