@@ -980,8 +980,19 @@ class WordComAdapter:
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "TOC personalizado no verificable en COM (pendiente)."
             elif typ == "cell_margins":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Margenes de celda no verificables en COM (pendiente)."
+                expected_twips = int(spec.get("expected", 144))
+                expected_pt = expected_twips / 20.0
+                present = False
+                try:
+                    if doc.Tables.Count > 0:
+                        t = doc.Tables(1)
+                        pads = [float(t.TopPadding), float(t.BottomPadding), float(t.LeftPadding), float(t.RightPadding)]
+                        target_pts = (expected_twips / 20.0, 2.834645669)
+                        present = all(any(abs(p - tp) < 0.5 for tp in target_pts) for p in pads)
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Márgenes de celda configurados." if present else "Los márgenes de celda no están configurados."
             elif typ == "table_sorted":
                 expected = str(spec.get("expected", "asc")).lower()
                 present = False

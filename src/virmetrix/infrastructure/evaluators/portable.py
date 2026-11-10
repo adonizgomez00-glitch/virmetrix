@@ -957,8 +957,44 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.NOT_VERIFIABLE
                 ev = "TOC personalizado no verificable en portable."
             elif typ == "cell_margins":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Margenes de celda no verificables en portable."
+                expected = str(spec.get("expected", "144"))
+                present = False
+                try:
+                    if root is not None:
+                        for mar in root.iter(f"{{{W_NS}}}tblCellMar"):
+                            for side in ("top", "left", "bottom", "right"):
+                                el = mar.find(f"{{{W_NS}}}{side}")
+                                if el is not None:
+                                    try:
+                                        v = int(el.get(f"{{{W_NS}}}w"))
+                                        if abs(v - 144) <= 2 or abs(v - 57) <= 2:
+                                            present = True
+                                    except Exception:
+                                        pass
+                                    if present:
+                                        break
+                            if present:
+                                break
+                        # Also check per-cell tcMar
+                        if not present:
+                            for mar in root.iter(f"{{{W_NS}}}tcMar"):
+                                for side in ("top", "left", "bottom", "right"):
+                                    el = mar.find(f"{{{W_NS}}}{side}")
+                                    if el is not None:
+                                        try:
+                                            v = int(el.get(f"{{{W_NS}}}w"))
+                                            if abs(v - 144) <= 2 or abs(v - 57) <= 2:
+                                                present = True
+                                        except Exception:
+                                            pass
+                                    if present:
+                                        break
+                                if present:
+                                    break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Márgenes de celda configurados." if present else "Los márgenes de celda no están configurados."
             elif typ == "table_sorted":
                 expected = str(spec.get("expected", "asc")).lower()
                 present = False
