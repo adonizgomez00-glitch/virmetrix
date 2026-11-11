@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-11 — v0.4.2
+
+### Fixed
+- UI: selector de evaluación incluye el módulo D (faltaba "Evaluación D" y "Todo" no lo sumaba).
+- `d-table-003`: evaluador `table_sorted` ahora ordena por la columna indicada (Precio), no solo por la primera columna; soporte de `column` en el spec (portable y COM).
+- `d-list-001/002/003`: `reference.docx` con `numPr` válido (`w:ilvl w:val` / `w:numId w:val`) para abrir en Word COM.
+- `d-collab-001`: detección de comentario resuelto en comentarios modernos (Office 2024) leyendo `word/commentsExtended.xml` (`w15:done` / `w16cid:done`).
+- `paragraph_style`: acepta alias localizados (Heading2 / Encabezado2 / Ttulo2, etc.) en portable y COM.
+
+### Changed
+- `APP_VERSION` actualizada a 0.4.2.
+
 ## 2026-11-10 — v0.4.0
 
 ### Added

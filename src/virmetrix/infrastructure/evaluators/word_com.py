@@ -803,13 +803,20 @@ class WordComAdapter:
                 expected = spec.get("expected", "")
                 ok = False
                 norm_expected = str(expected).lower().replace(" ", "")
+                aliases = {
+                    "heading1": {"heading1", "encabezado1", "ttulo1", "titulo1", "título1"},
+                    "heading2": {"heading2", "encabezado2", "ttulo2", "titulo2", "título2"},
+                    "heading3": {"heading3", "encabezado3", "ttulo3", "titulo3", "título3"},
+                    "normal": {"normal"},
+                }
+                accepted = aliases.get(norm_expected, {norm_expected})
                 try:
                     for p in doc.Paragraphs:
                         style = getattr(p, "Style", None)
                         if style is None:
                             continue
                         for name in (getattr(style, "Name", None), getattr(style, "NameLocal", None)):
-                            if name and norm_expected in str(name).lower().replace(" ", ""):
+                            if name and str(name).lower().replace(" ", "") in accepted:
                                 ok = True
                                 break
                         if ok:
@@ -1310,10 +1317,44 @@ class WordComAdapter:
                 try:
                     if doc.Tables.Count > 0:
                         t = doc.Tables(1)
+                        ncols = 0
+                        try:
+                            ncols = int(t.Columns.Count)
+                        except Exception:
+                            ncols = 0
+                        headers = []
+                        for c in range(1, max(1, ncols) + 1):
+                            try:
+                                txt = t.Cell(1, c).Range.Text
+                                txt = (txt or "").replace("\r", "").replace("\x07", "").strip()
+                            except Exception:
+                                txt = ""
+                            headers.append(txt)
+                        col_spec = spec.get("column", None)
+                        if isinstance(col_spec, int):
+                            col_idx = max(1, col_spec)
+                        elif isinstance(col_spec, str) and col_spec.strip().isdigit():
+                            col_idx = max(1, int(col_spec.strip()))
+                        elif isinstance(col_spec, str) and col_spec.strip():
+                            needle = col_spec.strip().lower()
+                            col_idx = 1
+                            for i, h in enumerate(headers):
+                                if needle in h.lower() or h.lower() == needle:
+                                    col_idx = i + 1
+                                    break
+                        else:
+                            col_idx = 1
+                            for i, h in enumerate(headers):
+                                hl = h.lower()
+                                if "precio" in hl or "price" in hl:
+                                    col_idx = i + 1
+                                    break
+                        if ncols and col_idx > ncols:
+                            col_idx = 1
                         values = []
                         for r in range(1, t.Rows.Count + 1):
                             try:
-                                txt = t.Cell(r, 1).Range.Text
+                                txt = t.Cell(r, col_idx).Range.Text
                                 txt = (txt or "").replace("\r", "").replace("\x07", "").strip()
                                 values.append(txt)
                             except Exception:
@@ -1326,7 +1367,7 @@ class WordComAdapter:
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Tabla ordenada correctamente." if present else "La tabla no está ordenada por la primera columna."
+                ev = "Tabla ordenada correctamente." if present else "La tabla no está ordenada por la columna indicada."
             elif typ == "table_autofit":
                 expected = bool(spec.get("expected", True))
                 present = False

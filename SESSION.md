@@ -1,3 +1,12 @@
+## Actualización — 2026-11-11 (v0.4.2)
+
+- UI: añadido módulo D al selector de evaluación.
+- `table_sorted`: columna configurable (Precio) en portable y COM.
+- `d-list-001/002/003`: corrección de `numPr` para Word COM.
+- `d-collab-001`: detección de comentario resuelto en comentarios modernos.
+- `paragraph_style`: alias localizados (Heading2/Encabezado2).
+- APP_VERSION 0.4.2. Tag v0.4.2 para build Windows.
+
 
 ## Actualización — 2026-11-10 (v0.4.0 publicada)
 

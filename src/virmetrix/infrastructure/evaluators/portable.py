@@ -79,6 +79,7 @@ class PortableDocxEvaluator:
         core_props: dict = {}
         page_orient = None
         comments_text = ""
+        comments_extended_text = ""
         tracked_change_count = 0
 
         # Security / validation
@@ -163,6 +164,13 @@ class PortableDocxEvaluator:
                         comments_text = zf.read("word/comments.xml").decode("utf-8", errors="ignore")
                     except Exception:
                         pass
+                # modern comments extended (resolved state, etc.)
+                for _ce in ("word/commentsExtended.xml", "word/commentsExtensible.xml"):
+                    if _ce in zf.namelist():
+                        try:
+                            comments_extended_text += zf.read(_ce).decode("utf-8", errors="ignore")
+                        except Exception:
+                            pass
                 # tracked changes count (incluye inserciones, eliminaciones, movimientos
                 # y cambios de formato/propiedades, para coincidir con Word COM).
                 try:
@@ -242,7 +250,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root, numbering_root, settings_text=settings_text)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root, numbering_root, settings_text=settings_text, comments_extended_text=comments_extended_text)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -447,7 +455,7 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None, numbering_root=None, settings_text=""):
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None, numbering_root=None, settings_text="", comments_extended_text=""):
         tables = tables or []
         alt_texts = alt_texts or []
         textbox_texts = textbox_texts or []
@@ -752,8 +760,19 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if ok else CriterionStatus.FAIL
                 ev = f"Márgenes: {page_margins} (esperado {expected})."
             elif typ == "paragraph_style":
-                expected = spec.get("expected", "")
-                status = CriterionStatus.PASS if expected in paragraph_styles else CriterionStatus.FAIL
+                expected = str(spec.get("expected", "")).strip()
+                expected_norm = expected.lower().replace(" ", "")
+                # Built-in style IDs are localized in Word (e.g. "Heading2" vs
+                # "Encabezado2"/"Ttulo2"), so accept common aliases.
+                aliases = {
+                    "heading1": {"heading1", "encabezado1", "ttulo1", "titulo1", "título1"},
+                    "heading2": {"heading2", "encabezado2", "ttulo2", "titulo2", "título2"},
+                    "heading3": {"heading3", "encabezado3", "ttulo3", "titulo3", "título3"},
+                    "normal": {"normal"},
+                }
+                accepted = aliases.get(expected_norm, {expected_norm})
+                normalized_styles = {str(s).lower().replace(" ", "") for s in (paragraph_styles or [])}
+                status = CriterionStatus.PASS if bool(accepted & normalized_styles) else CriterionStatus.FAIL
                 ev = f"Estilo de párrafo '{expected}' {'aplicado' if status == CriterionStatus.PASS else 'no aplicado'}."
             elif typ == "section_columns":
                 expected = spec.get("expected", "1")
@@ -908,7 +927,16 @@ class PortableDocxEvaluator:
                 expected = bool(spec.get("expected", True))
                 present = False
                 try:
-                    present = ('w:done="1"' in (comments_text or "")) or ('done="1"' in (comments_text or ""))
+                    blob = (comments_text or "") + "\n" + (comments_extended_text or "")
+                    low = blob.lower()
+                    present = (
+                        'w:done="1"' in blob
+                        or 'done="1"' in blob
+                        or 'w15:done="1"' in low
+                        or 'w16cid:done="1"' in low
+                        or 'w:done="true"' in low
+                        or "done=\"true\"" in low
+                    )
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
@@ -1067,14 +1095,38 @@ class PortableDocxEvaluator:
                         if tbls:
                             tbl = tbls[0]
                             rows = tbl.findall(f"{{{W_NS}}}tr")
+                            # Determine target column (1-based) from spec or header name.
+                            col_spec = spec.get("column", None)
+                            row_cells = [tr.findall(f"{{{W_NS}}}tc") for tr in rows]
+                            header_texts = []
+                            if row_cells and row_cells[0]:
+                                for tc in row_cells[0]:
+                                    header_texts.append("".join(t.text or "" for t in tc.iter(f"{{{W_NS}}}t")).strip())
+                            if isinstance(col_spec, int):
+                                col_idx = max(0, col_spec - 1)
+                            elif isinstance(col_spec, str) and col_spec.strip().isdigit():
+                                col_idx = max(0, int(col_spec.strip()) - 1)
+                            elif isinstance(col_spec, str) and col_spec.strip():
+                                needle = col_spec.strip().lower()
+                                col_idx = 0
+                                for i, h in enumerate(header_texts):
+                                    if needle in h.lower() or h.lower() == needle:
+                                        col_idx = i
+                                        break
+                            else:
+                                col_idx = 0
+                                for i, h in enumerate(header_texts):
+                                    hl = h.lower()
+                                    if "precio" in hl or "price" in hl:
+                                        col_idx = i
+                                        break
                             values = []
-                            for tr in rows:
-                                cells = tr.findall(f"{{{W_NS}}}tc")
+                            for cells in row_cells:
                                 if not cells:
                                     continue
-                                # first cell text
+                                idx = col_idx if col_idx < len(cells) else 0
                                 texts = []
-                                for tnode in cells[0].iter(f"{{{W_NS}}}t"):
+                                for tnode in cells[idx].iter(f"{{{W_NS}}}t"):
                                     texts.append(tnode.text or "")
                                 values.append("".join(texts).strip())
                             data = values[1:] if len(values) > 1 else values
@@ -1085,7 +1137,7 @@ class PortableDocxEvaluator:
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "Tabla ordenada correctamente." if present else "La tabla no está ordenada por la primera columna."
+                ev = "Tabla ordenada correctamente." if present else "La tabla no está ordenada por la columna indicada."
             elif typ == "table_autofit":
                 expected = bool(spec.get("expected", True))
                 present = False

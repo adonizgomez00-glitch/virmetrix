@@ -11,7 +11,8 @@
     {
       "id": "C1",
       "type": "table_sorted",
-      "expected": "desc"
+      "expected": "desc",
+      "column": "Precio"
     }
   ],
   "rules_version": "1.0.0",
