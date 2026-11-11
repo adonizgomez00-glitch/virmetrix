@@ -105,3 +105,14 @@ La página indica una duración de 50 minutos y ofrece el examen en español, en
 
 ### Fixes recientes
 - Ninguno (0 defectos registrados en ITER-001).
+
+## Actualización v0.4.0 (2026-11-10)
+
+### Patrones nuevos
+- Evaluador portable y COM marcan `not_verifiable` las tareas no automatizables (alternative_format, formatting_marks_visible, print_settings, format_painter_used, image_background_removed, revisions_reviewed, list_restart).
+- `page_margins.expected` usa dict intencional por-clave; `cell_margins` usa numérico plano (57 twips).
+
+### Estado actual
+- v0.4.0 publicada: main en 6d81df2, tag v0.4.0. Release adjunta el .exe vía workflow Build Windows.
+- Checkpoint detallado: `context-checkpoints/2026-11-10-checkpoint.md`.
+- Próxima iteración: validación COM en Windows de los 20 ejercicios D; pendiente text-para-011 (criterio ciego a formato).

@@ -1,4 +1,16 @@
 
+## Actualización — 2026-11-10 (v0.4.0 publicada)
+
+- Evaluación D: 20 ejercicios nuevos similares a B, registrados en `catalog.json` (192 total: A 89, B 33, C 50, D 20).
+- `reference.docx` D: corregidos b-collab-001/002 (comentario base) y d-list-001..003 (`numPr`/`ilvl`); metadata de `d-table-004` con `cell_margins` plano (57 twips).
+- Auditoría A/B/C (192): sin referencias corruptas ni tipos no implementados; 2 issues corregidos (3 refs regeneradas: b-refs-001, b-refs-004, text-para-011; 7 criterios triviales marcados `not_verifiable` igual en portable y COM: formatting_marks_visible, print_settings, format_painter_used, image_background_removed, revisions_reviewed, list_restart; alternative_format ya lo estaba).
+- Guía `EXERCISE_GENERATION_GUIDELINES.md`: ámbito A/B/C/D; documentada la excepción de `page_margins.expected` como dict intencional.
+- `APP_VERSION = 0.4.0` y diálogo "Acerca de" coherente con el tag.
+- Push a origin/main (6d81df2) + tag `v0.4.0`; workflow Build Windows genera el .exe para la release.
+- Tests: 68 pass. Evidencia Windows pendiente: los 20 ejercicios D — validar COM(referencia≠max, correcto=max).
+- Deuda: text-para-011 (`document_text_equals` ignora formato) sigue trivial; requiere rediseño del criterio (formato) o registro como verificación manual.
+- Pendiente: revisar release v0.4.0 en GitHub (exe adjunto por CI).
+
 ## Actualización — 2026-10-29 (ITER-021 validada en Windows)
 
 - Validación real en Windows con Word COM: evaluación sin bloqueo, score 1/2 con colores.
