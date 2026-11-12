@@ -1,5 +1,32 @@
 # Validación en Windows (Word COM)
 
+## Checklist v0.4.2 (ejercicios tocados / con problemas recientes)
+
+Probar en Word COM los siguientes ejercicios y registrar score de referencia y de documento correcto:
+
+1. `d-text-para-001` — texto y párrafos
+2. `d-text-para-002` — texto y párrafos
+3. `d-table-001` — tablas
+4. `d-table-002` — tablas
+5. `d-table-003` — ordenar por “Precio” (debe pasar solo si se ordena por Precio)
+6. `d-table-004` — márgenes de celda
+7. `d-table-005` — ajuste/redimensionado de tabla
+8. `d-list-001` — 3 niveles de lista (apertura COM)
+9. `d-list-002` — reiniciar numeración
+10. `d-list-003` — iniciar lista en 5
+11. `d-refs-001` — TOC personalizada niveles 1-2
+12. `d-graphics-001..005` — gráficos/alt text
+13. `d-collab-001` — resolver comentario (Office 2024 moderno)
+14. `d-collab-002` — revisar cambios
+15. `d-doc-001` — propiedades del documento
+16. `d-doc-002` — guardar/exportar PDF
+17. `c-text-para-001` — estilo “Heading 2” / “Encabezado 2”
+18. `text-para-004` — estilo “Heading 1” / “Encabezado 1”
+
+Evidencia a registrar: score referencia, score documento correcto, captura y observaciones en `QA_RESULTS.md`.
+
+
+
 ## 1. Obtener el código
 
 Opción A — Git (recomendado):

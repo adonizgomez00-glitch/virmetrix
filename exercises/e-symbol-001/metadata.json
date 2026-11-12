@@ -1,0 +1,24 @@
+{
+  "exercise_id": "e-symbol-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación E — Cobertura MO-100 (bullets no cubiertos)",
+  "instructions": "Inserta el carácter especial © en el párrafo.",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "target_occurrences",
+      "target": "©",
+      "expected": 1
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "E"
+}

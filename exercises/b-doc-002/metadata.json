@@ -4,8 +4,8 @@
   "language": "es",
   "competency": "Evaluación B — Mostrar/ocultar símbodos de formato",
   "instructions": "Muestra los símbodos de formato (¶).",
-  "target_phrase": "Símbodos",
-  "expected_text": "Símbodos visibles.",
+  "target_phrase": "Símbolos",
+  "expected_text": "Símbolos visibles.",
   "criteria": [
     "C1"
   ],

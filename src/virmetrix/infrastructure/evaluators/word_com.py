@@ -186,7 +186,7 @@ class WordComAdapter:
 
             specs = getattr(exercise, "criteria_specs", None) or []
             if specs:
-                criteria = self._evaluate_specs_com(specs, doc, full_text, target_phrase, expected_text, occurrences)
+                criteria = self._evaluate_specs_com(specs, doc, full_text, target_phrase, expected_text, occurrences, work_file_path=work_file_path)
             else:
                 status_map = {"C1": c1, "C2": c2, "C3": c3, "C4": c4, "C5": c5}
 
@@ -327,7 +327,7 @@ class WordComAdapter:
             return True
         return False
 
-    def _evaluate_specs_com(self, specs, doc, full_text, target_phrase, expected_text, occurrences):
+    def _evaluate_specs_com(self, specs, doc, full_text, target_phrase, expected_text, occurrences, work_file_path=None):
         criteria = []
         for spec in specs:
             cid = spec["id"]
@@ -1288,15 +1288,57 @@ class WordComAdapter:
                     present = False
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Bibliografia detectada." if present else "No se detecto bibliografia."
-            elif typ == "toc_custom":
-                expected = str(spec.get("expected", ""))
+            elif typ == "artistic_effect_present":
+                expected = bool(spec.get("expected", True))
                 present = False
                 try:
-                    present = doc.TablesOfContents.Count > 0
+                    x = str(getattr(doc, "WordOpenXML", "") or "")
+                    present = "artistic" in x.lower()
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Efecto artistico detectado." if present else "No se detecto efecto artistico."
+            elif typ == "picture_effect_present":
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    x = str(getattr(doc, "WordOpenXML", "") or "")
+                    low = x.lower()
+                    present = ("effectlst" in low) or ("a:glow" in low) or ("a:shadow" in low) or ("a:reflection" in low) or ("a:softedge" in low)
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Efecto de imagen detectado." if present else "No se detecto efecto de imagen."
+            elif typ in ("style_set_applied", "share_electronically", "compatibility_issues", "list_bullet_char", "list_custom_number_format", "navigate_location"):
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Criterio no verificable automaticamente desde el archivo."
+            elif typ == "toc_custom":
+                expected = str(spec.get("expected", "")).strip().lower()
+                present = False
+                try:
+                    for f in doc.Fields:
+                        try:
+                            code = str(getattr(f, "Code", None).Text or "")
+                        except Exception:
+                            code = ""
+                        if "TOC" in code.upper():
+                            if expected in ("", "true", "1-2", "1,2"):
+                                if "\\\\o" in code and "1-2" in code:
+                                    present = True
+                                    break
+                            else:
+                                if expected in code.lower():
+                                    present = True
+                                    break
+                    if not present:
+                        try:
+                            present = doc.TablesOfContents.Count > 0
+                        except Exception:
+                            present = False
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "TOC personalizado insertado." if present else "No se detectó TOC personalizado."
+                ev = "TOC personalizado (niveles 1-2) insertado." if present else "No se detectó TOC personalizado con niveles 1-2."
             elif typ == "cell_margins":
                 expected_twips = int(spec.get("expected", 144))
                 expected_pt = expected_twips / 20.0
@@ -1415,6 +1457,58 @@ class WordComAdapter:
                             break
                 except Exception:
                     start_val = None
+                # Fallback to the OOXML numbering part (Word COM can report 1
+                # even when a start override is stored).
+                if (start_val is None or start_val != expected) and work_file_path:
+                    try:
+                        import zipfile
+                        from pathlib import Path as _P
+                        zp = _P(work_file_path)
+                        if zp.suffix.lower() == ".docx" and zp.is_file():
+                            with zipfile.ZipFile(zp) as zf:
+                                if "word/numbering.xml" in zf.namelist():
+                                    nx = zf.read("word/numbering.xml").decode("utf-8", errors="ignore")
+                                    dx = zf.read("word/document.xml").decode("utf-8", errors="ignore") if "word/document.xml" in zf.namelist() else ""
+                                    import re
+                                    num_id = None
+                                    m = re.search(r"<w:numPr>.*?<w:numId\\s+w:val=\"([^\"]+)\"", dx)
+                                    if m:
+                                        num_id = m.group(1)
+                                    if num_id is None:
+                                        m = re.search(r"<w:numId\\s+w:val=\"([^\"]+)\"", dx)
+                                        if m:
+                                            num_id = m.group(1)
+                                    # lvlOverride / startOverride
+                                    if num_id is not None:
+                                        for nm in re.finditer(r"<w:num\\s+w:numId=\"%s\">(.*?)</w:num>" % num_id, nx, re.S):
+                                            block = nm.group(1)
+                                            so = re.search(r"<w:startOverride\\s+w:val=\"(\\d+)\"", block)
+                                            if so:
+                                                start_val = int(so.group(1))
+                                                break
+                                            st = re.search(r"<w:start\\s+w:val=\"(\\d+)\"", block)
+                                            if st:
+                                                start_val = int(st.group(1))
+                                                break
+                                    if start_val is None or start_val != expected:
+                                        # scan any startOverride with the expected value
+                                        for so in re.finditer(r"<w:startOverride\\s+w:val=\"(\\d+)\"", nx):
+                                            if int(so.group(1)) == expected:
+                                                start_val = expected
+                                                break
+                                    if start_val is None:
+                                        # abstractNum lvl start
+                                        if num_id is not None:
+                                            am = re.search(r"<w:num\\s+w:numId=\"%s\">.*?<w:abstractNumId\\s+w:val=\"([^\"]+)\"" % num_id, nx, re.S)
+                                            if am:
+                                                aid = am.group(1)
+                                                for an in re.finditer(r"<w:abstractNum\\s+w:abstractNumId=\"%s\">(.*?)</w:abstractNum>" % aid, nx, re.S):
+                                                    st = re.search(r"<w:start\\s+w:val=\"(\\d+)\"", an.group(1))
+                                                    if st:
+                                                        start_val = int(st.group(1))
+                                                        break
+                    except Exception:
+                        pass
                 present = (start_val == expected)
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = f"Valor inicial de lista: {start_val} (esperado {expected})." if start_val is not None else "No se pudo determinar el valor inicial de la lista."

@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-11 — v0.4.2 (corrección tipográfica)
+
+- `b-doc-002`: corregido "Símbodos" → "Símbolos" en metadata y catálogo.
+
 ## 2026-11-11 — v0.4.2
 
 ### Fixed

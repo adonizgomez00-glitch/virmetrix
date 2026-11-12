@@ -1037,16 +1037,53 @@ class PortableDocxEvaluator:
                     pass
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Bibliografia detectada." if present else "No se detecto bibliografia."
-            elif typ == "toc_custom":
-                expected = str(spec.get("expected", ""))
+            elif typ == "artistic_effect_present":
+                expected = bool(spec.get("expected", True))
                 present = False
                 try:
                     xml = etree.tostring(root, encoding="unicode") if root is not None else ""
-                    present = "TOC" in xml or "sdt" in xml
+                    present = "artistic" in xml.lower()
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Efecto artistico detectado." if present else "No se detecto efecto artistico."
+            elif typ == "picture_effect_present":
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    xml = etree.tostring(root, encoding="unicode") if root is not None else ""
+                    low = xml.lower()
+                    present = ("effectlst" in low) or ("a:glow" in low) or ("a:shadow" in low) or ("a:reflection" in low) or ("a:softedge" in low)
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Efecto de imagen detectado." if present else "No se detecto efecto de imagen."
+            elif typ in ("style_set_applied", "share_electronically", "compatibility_issues", "list_bullet_char", "list_custom_number_format", "navigate_location"):
+                status = CriterionStatus.NOT_VERIFIABLE
+                ev = "Criterio no verificable automaticamente desde el archivo."
+            elif typ == "toc_custom":
+                expected = str(spec.get("expected", "")).strip().lower()
+                present = False
+                try:
+                    xml = etree.tostring(root, encoding="unicode") if root is not None else ""
+                    # A custom TOC for levels 1-2 stores a field code like:
+                    # TOC \\o "1-2" \\h \\z \\u
+                    import re
+                    # Collect TOC field codes (may be split across w:instrText).
+                    field_codes = re.findall(r'<w:instrText[^>]*>(.*?)</w:instrText>', xml, re.S | re.I)
+                    joined = " ".join(field_codes)
+                    if "TOC" in joined.upper():
+                        if expected in ("", "true", "1-2", "1,2"):
+                            present = ('\\\\o' in joined and '1-2' in joined)
+                        else:
+                            present = (expected in joined)
+                    # Fallback: any TOC field present.
+                    if not present and "TOC" in xml.upper():
+                        present = ('1-2' in xml)
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
-                ev = "TOC personalizado insertado." if present else "No se detectó TOC personalizado."
+                ev = "TOC personalizado (niveles 1-2) insertado." if present else "No se detectó TOC personalizado con niveles 1-2."
             elif typ == "cell_margins":
                 expected = str(spec.get("expected", "144"))
                 present = False

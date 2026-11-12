@@ -1,0 +1,23 @@
+{
+  "exercise_id": "e-list-custom-001",
+  "version": "1.0.0",
+  "language": "es",
+  "competency": "Evaluación E — Cobertura MO-100 (bullets no cubiertos)",
+  "instructions": "Define un formato de numeración personalizado (1., 2., 3.).",
+  "criteria": [
+    "C1"
+  ],
+  "criteria_specs": [
+    {
+      "id": "C1",
+      "type": "list_custom_number_format",
+      "expected": true
+    }
+  ],
+  "rules_version": "1.0.0",
+  "modes": [
+    "docx_portable",
+    "word_com"
+  ],
+  "module": "E"
+}

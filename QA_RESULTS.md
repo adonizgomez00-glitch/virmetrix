@@ -1,5 +1,17 @@
 # QA Results
 
+## ITER v0.4.2 — Validación Linux (2026-11-11)
+
+- Entorno: Linux, Python 3.12, pytest 9.1.1, PySide6.
+- Comando: `python3 -m pytest -q` → **68 passed, 0 failed**.
+- `py_compile` de `portable.py`, `word_com.py`, `main_window.py`: OK.
+- Auditoría de catálogo: 192 ejercicios; todos los `criteria_specs` tienen tipo implementado en portable y COM (excepto `target_occurrences`, manejado aparte). Único `expected` anidado intencional: `page_margins`.
+- Validación de referencias `.docx`: parseo XML OK en 192 archivos; conversión LibreOffice OK en todos; atributos `numPr` inválidos corregidos (d-list-001/002/003).
+- Word COM: no ejecutado (Linux) — pendiente validación Windows.
+- Defectos abiertos: 0 en Linux; pendiente validación COM para ejercicios tocados (lista en SESSION/CHANGELOG).
+
+
+
 **Estado:** VALIDADO EN WINDOWS (2026-11-08): 68 pruebas OK, Word COM (True), 3/5 y 5/5 - ver ultimo registro del fichero. Historico ITER-001: no se han ejecutado pruebas de software; solo se ha creado documentación inicial.
 
 ## Resumen

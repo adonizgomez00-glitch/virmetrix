@@ -234,7 +234,8 @@ class ConfigWindow(QMainWindow):
         self.module_combo.addItem("Evaluación B", "B")
         self.module_combo.addItem("Evaluación C", "C")
         self.module_combo.addItem("Evaluación D", "D")
-        self.module_combo.addItem("Todo (A + B + C + D)", "all")
+        self.module_combo.addItem("Evaluación E", "E")
+        self.module_combo.addItem("Todo (A + B + C + D + E)", "all")
         self.module_combo.setAccessibleName("Módulo de evaluación")
         self.module_combo.currentIndexChanged.connect(self._on_module_changed)
         row_mod.addWidget(self.module_combo, 1)
@@ -549,7 +550,7 @@ class ConfigWindow(QMainWindow):
     # Auto-update from GitHub
     # ------------------------------------------------------------------
     GITHUB_REPO = "adonizgomez00-glitch/virmetrix"
-    APP_VERSION = "0.4.2"
+    APP_VERSION = "0.4.3"
 
     def _notify(self, title: str, text: str, error: bool = False) -> None:
         if os.environ.get("QT_QPA_PLATFORM") == "offscreen":

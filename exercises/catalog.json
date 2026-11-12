@@ -2112,6 +2112,138 @@
         "word_com"
       ],
       "module": "D"
+    },
+    {
+      "exercise_id": "e-style-set-001",
+      "title": "Conjunto de estilos",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-share-001",
+      "title": "Compartir documento",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-compat-001",
+      "title": "Compatibilidad",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-symbol-001",
+      "title": "Insertar carácter especial",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-table-split-001",
+      "title": "Dividir tabla",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-list-bullet-001",
+      "title": "Cambiar viñeta",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-list-custom-001",
+      "title": "Numeración personalizada",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-screenshot-001",
+      "title": "Captura de pantalla",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-artistic-001",
+      "title": "Efecto artístico",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-picture-style-001",
+      "title": "Estilo de imagen",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-shape-text-001",
+      "title": "Texto en forma",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
+    },
+    {
+      "exercise_id": "e-navigate-001",
+      "title": "Navegar a ubicación/objeto",
+      "competency": "Evaluación E — Cobertura MO-100",
+      "difficulty": "básico",
+      "modes": [
+        "docx_portable",
+        "word_com"
+      ],
+      "module": "E"
     }
   ]
 }

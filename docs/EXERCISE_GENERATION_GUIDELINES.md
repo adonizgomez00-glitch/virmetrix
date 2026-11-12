@@ -174,3 +174,87 @@ Aplica a cualquier ejercicio nuevo, regenerado o auditado. Complementa `docs/EVA
 - **Fix:** mostrar twips + pt + cm en las etiquetas y convertir pulgadas a cm.
 - **Regla:** las instrucciones deben usar la unidad que el usuario ve en Word
   (cm) y, si aplica, incluir la equivalencia en twips/pt.
+
+---
+
+## 7. Lecciones detectadas en la actualización v0.4.2
+
+### 7.1 UI: registrar el módulo nuevo en el selector
+- **Problema:** al añadir la Evaluación D se generaron los 20 ejercicios y se
+  incluyeron en `catalog.json`, pero el `module_combo` de `ConfigWindow` seguía
+  mostrando solo A, B, C y "Todo (A + B + C)". Por tanto el módulo D no era
+  seleccionable aunque los datos existieran.
+- **Fix:** añadir `addItem("Evaluación D", "D")` y actualizar la etiqueta de
+  "Todo" a `Todo (A + B + C + D)`.
+- **Regla:** cada vez que se añada un módulo nuevo, actualizar en el mismo commit:
+  1. `module_combo` (ítems + etiqueta de "Todo").
+  2. `APP_VERSION` y, si aplica, el tag `v*` para regenerar el `.exe`.
+  3. `CHANGELOG.md` y `SESSION.md`.
+
+### 7.2 Criterio `table_sorted`: no asumir la primera columna
+- **Problema:** `table_sorted` siempre leía la primera columna. El ejercicio
+  `d-table-003` pedía ordenar por la columna "Precio" (segunda columna), por lo
+  que ordenar por precio fallaba mientras ordenar por "Producto" pasaba.
+- **Fix:** soportar `column` en el spec (nombre de encabezado o índice 1-based)
+  y, si no se indica, detectar automáticamente una columna cuyo encabezado contenga
+  "Precio"/"Price"; aplicado en `portable.py` y `word_com.py`.
+- **Regla:** todo criterio que opere sobre una tabla debe declarar explícitamente
+  la columna afectada (o documentar que es la primera). No asumir la columna 1
+  por defecto cuando la instrucción mencione otra.
+
+### 7.3 `reference.docx` con `numPr` inválido (listas)
+- **Problema:** los ejercicios `d-list-001/002/003` generaron `numPr` con
+  atributos incorrectos (`w:ilvl w:w=`, `w:numPr w:w=`) en lugar de
+  `w:ilvl w:val=` / `w:numId w:val=`. El XML era sintácticamente válido pero
+  Word COM fallaba al abrir el documento.
+- **Fix:** corregir los atributos a `w:val` y usar `w:numId`. Validar abriendo
+  con LibreOffice/Word además de parsear XML.
+- **Regla:** tras generar un `.docx`, abrirlo con LibreOffice (`soffice --headless
+  --convert-to pdf`) y, en Windows, con Word. El parseo XML solo no basta.
+
+### 7.4 Comentarios resueltos en Office moderno
+- **Problema:** en Office 2024 los comentarios modernos guardan el estado
+  "resuelto" en `word/commentsExtended.xml` (`w15:done` / `w16cid:done`), no en
+  `word/comments.xml` (`w:done="1"`). El evaluador portable solo leía
+  `comments.xml`, por lo que no detectaba el comentario resuelto.
+- **Fix:** leer también `commentsExtended.xml` (y `commentsExtensible.xml`) y
+  buscar los marcadores de resuelto en ambos.
+- **Regla:** para criterios de colaboración, inspeccionar todas las partes
+  relacionadas (comments.xml, commentsExtended.xml, commentsIds.xml) y no asumir
+  que el estado está en la parte principal.
+
+### 7.5 Estilos localizados (Heading 2 vs Encabezado 2)
+- **Problema:** Word traduce los nombres/IDs de estilos integrados según el idioma
+  de la interfaz (p. ej. "Heading2" vs "Encabezado2"/"Ttulo2"). El criterio
+  `paragraph_style` comparaba el ID exacto, por lo que un usuario en español que
+  aplicaba "Encabezado 2" no pasaba aunque el estilo fuera correcto.
+- **Fix:** aceptar alias localizados en `portable.py` y `word_com.py` (usando
+  `Name` y `NameLocal` en COM, y un conjunto de alias en portable).
+- **Regla:** para criterios basados en estilos integrados, nunca comparar un único
+  nombre canónico; incluir los alias de los idiomas soportados (al menos español
+  e inglés) y normalizar (minúsculas, sin espacios).
+
+---
+
+## 8. Evaluación E (cobertura de bullets no cubiertos de MO-100)
+
+### 8.1 Alcance
+- La Evaluación E agrupa los bullets del MO-100 que no tenían ejercicio previo
+  (style sets, compartir, compatibilidad, caracteres especiales, split de tablas, viñetas
+  personalizadas, capturas, efectos artísticos/estilos de imagen, texto en formas).
+- Cada bullet se cubre con un ejercicio dedicado del módulo `E`.
+
+### 8.2 Criterios nuevos
+- `style_set_applied`, `share_electronically`, `compatibility_issues`,
+  `list_bullet_char`, `list_custom_number_format`: marcados `not_verifiable`
+  (configuración/acción de app, no verificable desde el archivo).
+- `artistic_effect_present`, `picture_effect_present`: detección por OOXML/WordOpenXML.
+- Bullets verificables con criterios existentes: `target_occurrences`,
+  `table_count`, `drawing_count`, `textbox_contains`.
+
+### 8.3 Reglas
+- Mantener la referencia como punto de partida sin solución aplicada.
+- Marcar `not_verifiable` en portable y COM de forma consistente.
+- Actualizar el selector de módulo (`module_combo`) con "Evaluación E" y "Todo
+  (A + B + C + D + E)".
+- Actualizar `APP_VERSION` y tag `v*` al publicar.
