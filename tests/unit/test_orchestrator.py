@@ -32,4 +32,4 @@ def test_evaluate_portable(tmp_path):
     # reference is unformatted -> C2/C3 likely not_verifiable/fail, but runs
     res = o.evaluate("docx_portable", work, ex)
     assert res.evaluator == "docx_portable"
-    assert res.score_possible == 5
+    assert res.score_possible == 3

@@ -81,6 +81,8 @@ class PortableDocxEvaluator:
         comments_text = ""
         comments_extended_text = ""
         tracked_change_count = 0
+        custom_props_text = ""
+
 
         # Security / validation
         if not path.is_file():
@@ -209,6 +211,13 @@ class PortableDocxEvaluator:
                                 core_props[tag] = el.text.strip()
                     except Exception:
                         pass
+                # custom properties (used by Word add-in to record actions)
+                custom_props_text = ""
+                if "docProps/custom.xml" in zf.namelist():
+                    try:
+                        custom_props_text = zf.read("docProps/custom.xml").decode("utf-8", errors="ignore")
+                    except Exception:
+                        custom_props_text = ""
                 # page orientation
                 # Usar el ULTIMO sectPr del documento (seccion principal/final),
                 # no el primero: los saltos de seccion intermedios aparecen antes
@@ -250,7 +259,7 @@ class PortableDocxEvaluator:
         list_items = self._count_list_items(root)
         specs = getattr(exercise, "criteria_specs", None) or []
         if specs:
-            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root, numbering_root, settings_text=settings_text, comments_extended_text=comments_extended_text)
+            criteria = self._evaluate_specs(specs, full_text, runs, idx, target_phrase, expected_text, tables, list_items, footnotes_text, endnotes_text, has_toc, footnote_ref_count, drawing_count, alt_texts, textbox_texts, header_texts, footer_texts, core_props, page_orient, comments_text, tracked_change_count, root, numbering_root, settings_text=settings_text, comments_extended_text=comments_extended_text, custom_props_text=custom_props_text)
         else:
             # Legacy hardcoded criteria (backward compatibility)
             occurrences = []
@@ -291,9 +300,9 @@ class PortableDocxEvaluator:
                 CriterionResult("C5", c5_status, c5_evidence),
             ]
 
-        # Scoring: sum pass
+        # Scoring: sum pass; not_verifiable criteria are not part of the score
         earned = sum(1 for c in criteria if c.status == CriterionStatus.PASS)
-        possible = len(criteria)
+        possible = sum(1 for c in criteria if c.status != CriterionStatus.NOT_VERIFIABLE)
 
         return EvaluationResult(
             exercise_id=exercise.exercise_id,
@@ -455,7 +464,27 @@ class PortableDocxEvaluator:
             search_from = i + 1
         return res
 
-    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None, numbering_root=None, settings_text="", comments_extended_text=""):
+    def _custom_prop(self, custom_props_text: str, name: str, expected) -> bool:
+        import re
+        prop_name = f"Virmetrix_{name}"
+        m = re.search(r'<property[^>]*name="' + re.escape(prop_name) + r'"[^>]*>.*?</property>', custom_props_text or "", re.S | re.I)
+        if not m:
+            m = re.search(r'<property[^>]*name="' + re.escape(name) + r'"[^>]*>.*?</property>', custom_props_text or "", re.S | re.I)
+        if not m:
+            return False
+        block = m.group(0)
+        vm = re.search(r'<vt:[^>]*>(.*?)</vt:', block, re.S)
+        if vm:
+            val = vm.group(1).strip()
+        else:
+            vm2 = re.search(r'>([^<]+)</property>', block)
+            val = vm2.group(1).strip() if vm2 else ""
+        exp = str(expected).strip().lower()
+        if exp in ("true", "1", "yes"):
+            return val.lower() in ("true", "1", "yes")
+        return val.lower() == exp
+
+    def _evaluate_specs(self, specs, full_text, runs, idx, target_phrase, expected_text, tables=None, list_items=0, footnotes_text="", endnotes_text="", has_toc=False, footnote_ref_count=0, drawing_count=0, alt_texts=None, textbox_texts=None, header_texts=None, footer_texts=None, core_props=None, page_orient=None, comments_text="", tracked_change_count=0, root=None, numbering_root=None, settings_text="", comments_extended_text="", custom_props_text=""):
         tables = tables or []
         alt_texts = alt_texts or []
         textbox_texts = textbox_texts or []
@@ -868,8 +897,10 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Modelo 3D detectado." if present else "No se detecto modelo 3D."
             elif typ == "image_background_removed":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Imagen de fondo eliminable: no verificable desde el OOXML."
+                expected = spec.get("expected", True)
+                present = self._custom_prop(custom_props_text, "image_background_removed", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Fondo de imagen quitado (registrado por complemento)." if present else "No se registró la acción de quitar fondo."
             elif typ == "object_position":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -942,8 +973,10 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
                 ev = "Comentario resuelto." if present else "No se detectó comentario resuelto."
             elif typ == "revisions_reviewed":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Cambios revisados no verificable desde el OOXML."
+                expected = bool(spec.get("expected", True))
+                present = (tracked_change_count == 0)
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Cambios revisados (sin cambios pendientes)." if present else "Aún hay cambios registrados sin revisar."
             elif typ == "track_changes_locked":
                 expected = bool(spec.get("expected", True))
                 present = False
@@ -967,15 +1000,20 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Hipervinculo interno detectado." if present else "No se detecto hipervinculo interno."
             elif typ == "formatting_marks_visible":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Marcas de formato no verificables desde el archivo."
-            elif typ == "alternative_format":
                 expected = spec.get("expected", True)
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Formato alternativo no verificable."
+                present = self._custom_prop(custom_props_text, "formatting_marks_visible", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Marcas de formato mostradas (registrado por complemento)." if present else "No se registró la acción."
+            elif typ == "alternative_format":
+                expected = spec.get("expected", "pdf")
+                present = self._custom_prop(custom_props_text, "alternative_format", expected)
+                status = CriterionStatus.PASS if (present == (str(expected).lower() not in ("false",""))) else CriterionStatus.FAIL
+                ev = "Formato alternativo guardado (registrado por complemento)." if present else "No se registró el formato alternativo."
             elif typ == "print_settings":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Configuracion de impresion no verificable desde el archivo."
+                expected = spec.get("expected", "2up")
+                present = self._custom_prop(custom_props_text, "print_settings", expected)
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Configuración de impresión registrada (complemento)." if present else "No se registró la configuración de impresión."
             elif typ == "remove_personal_info":
                 expected = spec.get("expected", True)
                 present_info = False
@@ -1002,8 +1040,10 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Efecto de texto detectado." if present else "No se detecto efecto de texto."
             elif typ == "format_painter_used":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Pincel de formato no verificable desde el archivo."
+                expected = spec.get("expected", True)
+                present = self._custom_prop(custom_props_text, "format_painter_used", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Pincel de formato usado (registrado por complemento)." if present else "No se registró el pincel de formato."
             elif typ == "footnote_props":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -1058,9 +1098,68 @@ class PortableDocxEvaluator:
                     present = False
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
                 ev = "Efecto de imagen detectado." if present else "No se detecto efecto de imagen."
-            elif typ in ("style_set_applied", "share_electronically", "compatibility_issues", "list_bullet_char", "list_custom_number_format", "navigate_location"):
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Criterio no verificable automaticamente desde el archivo."
+            elif typ == "style_set_applied":
+                expected = spec.get("expected", True)
+                present = self._custom_prop(custom_props_text, "style_set_applied", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Conjunto de estilos aplicado (registrado por complemento)." if present else "No se registró la acción."
+            elif typ == "share_electronically":
+                expected = spec.get("expected", True)
+                present = self._custom_prop(custom_props_text, "share_electronically", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Documento compartido (registrado por complemento)." if present else "No se registró la acción."
+            elif typ == "compatibility_issues":
+                expected = spec.get("expected", True)
+                present = self._custom_prop(custom_props_text, "compatibility_issues", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Compatibilidad revisada (registrado por complemento)." if present else "No se registró la acción."
+            elif typ == "navigate_location":
+                expected = spec.get("expected", True)
+                present = self._custom_prop(custom_props_text, "navigate_location", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Navegación registrada (complemento)." if present else "No se registró la acción."
+            elif typ == "list_bullet_char":
+                expected = str(spec.get("expected", "")).strip()
+                present = False
+                try:
+                    if numbering_root is not None:
+                        for lt in numbering_root.iter(f"{{{W_NS}}}lvlText"):
+                            if (lt.get(f"{{{W_NS}}}val") or "").strip() == expected:
+                                present = True
+                                break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Viñeta personalizada detectada." if present else "No se detectó la viñeta esperada."
+            elif typ == "list_custom_number_format":
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    if numbering_root is not None:
+                        for nf in numbering_root.iter(f"{{{W_NS}}}numFmt"):
+                            val = (nf.get(f"{{{W_NS}}}val") or "").lower()
+                            if val and val != "bullet":
+                                present = True
+                                break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Formato de numeración personalizado detectado." if present else "No se detectó formato de numeración personalizado."
+            elif typ == "revisions_reviewed":
+                expected = bool(spec.get("expected", True))
+                present = (tracked_change_count == 0)
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Cambios revisados (sin cambios pendientes)." if present else "Aún hay cambios registrados sin revisar."
+            elif typ == "list_restart":
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    if numbering_root is not None:
+                        present = any(True for _ in numbering_root.iter(f"{{{W_NS}}}startOverride"))
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Numeración reiniciada." if present else "No se detectó reinicio de numeración."
             elif typ == "toc_custom":
                 expected = str(spec.get("expected", "")).strip().lower()
                 present = False
@@ -1199,8 +1298,15 @@ class PortableDocxEvaluator:
                 status = CriterionStatus.PASS if count >= expected else CriterionStatus.FAIL
                 ev = f"Niveles de lista: {count} (esperado >= {expected})."
             elif typ == "list_restart":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Reinicio de lista no verificable desde el OOXML."
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    if numbering_root is not None:
+                        present = any(True for _ in numbering_root.iter(f"{{{W_NS}}}startOverride"))
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Numeración reiniciada." if present else "No se detectó reinicio de numeración."
             elif typ == "list_start_value":
                 expected = int(spec.get("expected", 1))
                 start_val = None

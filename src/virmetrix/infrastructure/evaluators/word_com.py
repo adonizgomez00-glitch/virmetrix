@@ -208,13 +208,14 @@ class WordComAdapter:
                     criteria.append(CriterionResult(cid, st, ev))
 
             earned = sum(1 for c in criteria if c.status == CriterionStatus.PASS)
+            possible = sum(1 for c in criteria if c.status != CriterionStatus.NOT_VERIFIABLE)
             return EvaluationResult(
                 exercise_id=exercise.exercise_id,
                 evaluator="word_com",
                 status="completed",
                 criteria=criteria,
                 score_earned=earned,
-                score_possible=len(criteria),
+                score_possible=possible,
                 rules_version=exercise.rules_version,
             )
         except Exception as e:
@@ -326,6 +327,31 @@ class WordComAdapter:
         if all(v is None or v == expected for v in vals) and any(v is not None and v == expected for v in vals):
             return True
         return False
+
+    def _custom_prop_com(self, doc, name: str, expected) -> bool:
+        prop_name = f"Virmetrix_{name}"
+        val = None
+        try:
+            props = getattr(doc, "CustomDocumentProperties", None)
+            if props is not None:
+                try:
+                    p = props(prop_name)
+                    val = getattr(p, "Value", None)
+                except Exception:
+                    try:
+                        p = props(name)
+                        val = getattr(p, "Value", None)
+                    except Exception:
+                        val = None
+        except Exception:
+            val = None
+        if val is None:
+            return False
+        exp = str(expected).strip().lower()
+        v = str(val).strip().lower()
+        if exp in ("true", "1", "yes"):
+            return v in ("true", "1", "yes")
+        return v == exp
 
     def _evaluate_specs_com(self, specs, doc, full_text, target_phrase, expected_text, occurrences, work_file_path=None):
         criteria = []
@@ -1067,9 +1093,10 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
                 ev = "Modelo 3D insertado." if present else "No se detectó modelo 3D."
             elif typ == "image_background_removed":
-                expected = bool(spec.get("expected", True))
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Imagen de fondo eliminable: no verificable desde el archivo."
+                expected = spec.get("expected", True)
+                present = self._custom_prop_com(doc, "image_background_removed", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Fondo de imagen quitado (registrado por complemento)." if present else "No se registró la acción de quitar fondo."
             elif typ == "object_position":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -1123,9 +1150,13 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
                 ev = "Comentario resuelto." if present else "No se detectó comentario resuelto."
             elif typ == "revisions_reviewed":
-                expected = spec.get("expected", True)
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Cambios revisados no verificable desde el archivo."
+                expected = bool(spec.get("expected", True))
+                try:
+                    present = (int(getattr(doc, "Revisions", None).Count or 0) == 0)
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Cambios revisados (sin cambios pendientes)." if present else "Aún hay cambios registrados sin revisar."
             elif typ == "track_changes_locked":
                 expected = bool(spec.get("expected", True))
                 present = False
@@ -1148,19 +1179,20 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present == bool(expected) else CriterionStatus.FAIL
                 ev = "Hipervinculo interno detectado." if present else "No se detecto hipervinculo interno."
             elif typ == "formatting_marks_visible":
-                # Las marcas de formato son una configuracion de la aplicacion
-                # (vista), no del documento; Word COM no expone de forma fiable
-                # el estado de la ventana del usuario (instancia separada), por
-                # lo que se considera no automatizable.
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Marcas de formato: verificacion visual/manual (no automatizable)."
-            elif typ == "alternative_format":
                 expected = spec.get("expected", True)
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Formato alternativo no verificable."
+                present = self._custom_prop_com(doc, "formatting_marks_visible", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Marcas de formato mostradas (registrado por complemento)." if present else "No se registró la acción."
+            elif typ == "alternative_format":
+                expected = spec.get("expected", "pdf")
+                present = self._custom_prop_com(doc, "alternative_format", expected)
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Formato alternativo guardado (registrado por complemento)." if present else "No se registró el formato alternativo."
             elif typ == "print_settings":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Configuracion de impresion no verificable desde el archivo."
+                expected = spec.get("expected", "2up")
+                present = self._custom_prop_com(doc, "print_settings", expected)
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Configuración de impresión registrada (complemento)." if present else "No se registró la configuración de impresión."
             elif typ == "remove_personal_info":
                 expected = spec.get("expected", True)
                 present_info = False
@@ -1208,8 +1240,10 @@ class WordComAdapter:
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL
                 ev = "Efecto de texto detectado." if present else "No se detecto efecto de texto."
             elif typ == "format_painter_used":
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Pincel de formato no verificable desde el archivo."
+                expected = spec.get("expected", True)
+                present = self._custom_prop_com(doc, "format_painter_used", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Pincel de formato usado (registrado por complemento)." if present else "No se registró el pincel de formato."
             elif typ == "footnote_props":
                 expected = str(spec.get("expected", "")).lower()
                 present = False
@@ -1309,9 +1343,74 @@ class WordComAdapter:
                     present = False
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
                 ev = "Efecto de imagen detectado." if present else "No se detecto efecto de imagen."
-            elif typ in ("style_set_applied", "share_electronically", "compatibility_issues", "list_bullet_char", "list_custom_number_format", "navigate_location"):
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Criterio no verificable automaticamente desde el archivo."
+            elif typ == "style_set_applied":
+                expected = spec.get("expected", True)
+                present = self._custom_prop_com(doc, "style_set_applied", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Conjunto de estilos aplicado (registrado por complemento)." if present else "No se registró la acción."
+            elif typ == "share_electronically":
+                expected = spec.get("expected", True)
+                present = self._custom_prop_com(doc, "share_electronically", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Documento compartido (registrado por complemento)." if present else "No se registró la acción."
+            elif typ == "compatibility_issues":
+                expected = spec.get("expected", True)
+                present = self._custom_prop_com(doc, "compatibility_issues", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Compatibilidad revisada (registrado por complemento)." if present else "No se registró la acción."
+            elif typ == "navigate_location":
+                expected = spec.get("expected", True)
+                present = self._custom_prop_com(doc, "navigate_location", expected)
+                status = CriterionStatus.PASS if (present == bool(expected)) else CriterionStatus.FAIL
+                ev = "Navegación registrada (complemento)." if present else "No se registró la acción."
+            elif typ == "list_bullet_char":
+                expected = str(spec.get("expected", "")).strip()
+                present = False
+                try:
+                    import zipfile
+                    from pathlib import Path as _P
+                    zp = _P(work_file_path) if work_file_path else None
+                    if zp is not None and zp.suffix.lower() == ".docx" and zp.is_file():
+                        with zipfile.ZipFile(zp) as zf:
+                            if "word/numbering.xml" in zf.namelist():
+                                nx = zf.read("word/numbering.xml").decode("utf-8", errors="ignore")
+                                import re
+                                for m in re.finditer(r'<w:lvlText\s+w:val="([^"]*)"', nx):
+                                    if m.group(1).strip() == expected:
+                                        present = True
+                                        break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if present else CriterionStatus.FAIL
+                ev = "Viñeta personalizada detectada." if present else "No se detectó la viñeta esperada."
+            elif typ == "list_custom_number_format":
+                expected = bool(spec.get("expected", True))
+                present = False
+                try:
+                    import zipfile
+                    from pathlib import Path as _P
+                    zp = _P(work_file_path) if work_file_path else None
+                    if zp is not None and zp.suffix.lower() == ".docx" and zp.is_file():
+                        with zipfile.ZipFile(zp) as zf:
+                            if "word/numbering.xml" in zf.namelist():
+                                nx = zf.read("word/numbering.xml").decode("utf-8", errors="ignore")
+                                import re
+                                for m in re.finditer(r'<w:numFmt\s+w:val="([^"]*)"', nx):
+                                    if m.group(1).lower() not in ("", "bullet"):
+                                        present = True
+                                        break
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Formato de numeración personalizado detectado." if present else "No se detectó formato de numeración personalizado."
+            elif typ == "revisions_reviewed":
+                expected = bool(spec.get("expected", True))
+                try:
+                    present = (int(getattr(doc, "Revisions", None).Count or 0) == 0)
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Cambios revisados (sin cambios pendientes)." if present else "Aún hay cambios registrados sin revisar."
             elif typ == "toc_custom":
                 expected = str(spec.get("expected", "")).strip().lower()
                 present = False
@@ -1438,8 +1537,21 @@ class WordComAdapter:
                 ev = f"Niveles de lista: {count} (esperado >= {expected})."
             elif typ == "list_restart":
                 expected = bool(spec.get("expected", True))
-                status = CriterionStatus.NOT_VERIFIABLE
-                ev = "Reinicio de lista no verificable desde el archivo."
+                present = False
+                try:
+                    import zipfile
+                    from pathlib import Path as _P
+                    zp = _P(work_file_path) if work_file_path else None
+                    if zp is not None and zp.suffix.lower() == ".docx" and zp.is_file():
+                        with zipfile.ZipFile(zp) as zf:
+                            if "word/numbering.xml" in zf.namelist():
+                                nx = zf.read("word/numbering.xml").decode("utf-8", errors="ignore")
+                                import re
+                                present = "<w:startOverride" in nx
+                except Exception:
+                    present = False
+                status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
+                ev = "Numeración reiniciada." if present else "No se detectó reinicio de numeración."
             elif typ == "list_start_value":
                 expected = int(spec.get("expected", 1))
                 start_val = None

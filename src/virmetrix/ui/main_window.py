@@ -550,7 +550,7 @@ class ConfigWindow(QMainWindow):
     # Auto-update from GitHub
     # ------------------------------------------------------------------
     GITHUB_REPO = "adonizgomez00-glitch/virmetrix"
-    APP_VERSION = "0.4.3"
+    APP_VERSION = "0.4.4"
 
     def _notify(self, title: str, text: str, error: bool = False) -> None:
         if os.environ.get("QT_QPA_PLATFORM") == "offscreen":
@@ -1115,6 +1115,10 @@ class PracticeWindow(QMainWindow):
 
     def _show_score(self, earned: int, possible: int) -> None:
         self.score_label.setVisible(True)
+        if possible <= 0:
+            self.score_label.setText("N/A")
+            self.score_caption.setText("verificación manual")
+            return
         self.score_label.setText(f"{earned}/{possible}")
         ratio = (earned / possible) if possible else 0.0
         if ratio >= 1.0:
