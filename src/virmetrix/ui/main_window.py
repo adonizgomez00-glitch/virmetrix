@@ -47,7 +47,7 @@ from virmetrix.ui.worker import EvaluationWorker
 # ejercicios. Path(__file__).resolve().parents[3] en congelado apunta un
 # nivel mas arriba (dist\VirMetrix) y el reference.docx no se encontraba.
 ROOT = resource_root()
-EXAM_DURATION_SECONDS = 300
+EXAM_DURATION_SECONDS = 10800
 
 APP_QSS = """
 QWidget#root { background: #eef2f7; }
@@ -585,7 +585,7 @@ class ConfigWindow(QMainWindow):
     # Auto-update from GitHub
     # ------------------------------------------------------------------
     GITHUB_REPO = "adonizgomez00-glitch/virmetrix"
-    APP_VERSION = "0.4.9"
+    APP_VERSION = "0.4.10"
 
     def _notify(self, title: str, text: str, error: bool = False) -> None:
         if os.environ.get("QT_QPA_PLATFORM") == "offscreen":
@@ -1168,13 +1168,16 @@ class PracticeWindow(QMainWindow):
     def _render_result(self, result) -> str:
         def esc(text: str) -> str:
             return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-        palette = {"pass": ("#059669", "✔"), "fail": ("#dc2626", "✖"), "not_verifiable": ("#64748b", "•"), "error": ("#b45309", "!")}
+        palette = {"pass": ("#059669", "✔"), "fail": ("#dc2626", "✖"), "not_verifiable": ("#d97706", "•"), "error": ("#b45309", "!")}
         parts = [f'<div style="color:#334155;font-weight:600;">Evaluador: {esc(result.evaluator)}</div>']
         if result.error_message:
             parts.append(f'<div style="color:#b45309;margin-top:4px;">Error: {esc(result.error_message)}</div>')
         for c in result.criteria:
             color, icon = palette.get(c.status.value, ("#64748b", "•"))
-            parts.append(f'<div style="margin-top:4px;color:{color};">{icon} <b>{esc(c.criterion_id)}</b> · {esc(c.status.value)}<span style="color:#64748b;"> — {esc(c.evidence)}</span></div>')
+            ev = c.evidence
+            if c.status.value == "not_verifiable":
+                ev = (ev + " (requiere revisión manual)").strip()
+            parts.append(f'<div style="margin-top:4px;color:{color};">{icon} <b>{esc(c.criterion_id)}</b> · {esc(c.status.value)}<span style="color:#64748b;"> — {esc(ev)}</span></div>')
         parts.append(f'<div style="margin-top:8px;color:#94a3b8;font-size:10px;">Historial guardado · intentos totales: {self.store.count()}</div>')
         return "".join(parts)
 
@@ -1189,7 +1192,10 @@ class PracticeWindow(QMainWindow):
         self.progress.setVisible(False)
         self.btn_cancel.setVisible(False)
         self.result_view.setHtml(self._render_result(result))
-        self._show_score(result.score_earned, result.score_possible)
+        nv = sum(1 for c in result.criteria if c.status.value == "not_verifiable")
+        earned = result.score_earned + nv
+        possible = result.score_possible + nv
+        self._show_score(earned, possible)
         self._set_step(3)
         self.btn_eval.setEnabled(True)
 
