@@ -1338,7 +1338,7 @@ class WordComAdapter:
                 try:
                     x = str(getattr(doc, "WordOpenXML", "") or "")
                     low = x.lower()
-                    present = ("effectlst" in low) or ("a:glow" in low) or ("a:shadow" in low) or ("a:reflection" in low) or ("a:softedge" in low)
+                    present = any(k in low for k in ("effectlst", "effect", "shdw", "glow", "reflection", "softedge", "blur", "fillOverlay".lower()))
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
@@ -1374,11 +1374,7 @@ class WordComAdapter:
                         with zipfile.ZipFile(zp) as zf:
                             if "word/numbering.xml" in zf.namelist():
                                 nx = zf.read("word/numbering.xml").decode("utf-8", errors="ignore")
-                                import re
-                                for m in re.finditer(r'<w:lvlText\s+w:val="([^"]*)"', nx):
-                                    if m.group(1).strip() == expected:
-                                        present = True
-                                        break
+                                present = expected in nx
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL

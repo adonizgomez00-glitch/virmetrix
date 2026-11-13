@@ -144,8 +144,13 @@ class PortableDocxEvaluator:
                     drawing_count = len(root.findall(f".//{{{W_NS}}}drawing"))
                     for dp in root.iter(f"{{{WP_NS}}}docPr"):
                         alt_texts.append(dp.get("descr") or "")
-                    for tb in root.iter(f"{{{W_NS}}}txbxContent"):
-                        textbox_texts.append("".join(t.text or "" for t in tb.iter(f"{{{W_NS}}}t")))
+                    # Collect text from text boxes and shape text bodies (w:txbxContent
+                    # and DrawingML a:txBody), so rectangles with text also count.
+                    for tb in root.iter():
+                        local = tb.tag.split("}")[-1]
+                        if local in ("txbxContent", "txBody"):
+                            txt = "".join((t.text or "") for t in tb.iter() if t.tag.split("}")[-1] == "t")
+                            textbox_texts.append(txt)
                 except Exception:
                     pass
                 # headers/footers
@@ -1093,7 +1098,7 @@ class PortableDocxEvaluator:
                 try:
                     xml = etree.tostring(root, encoding="unicode") if root is not None else ""
                     low = xml.lower()
-                    present = ("effectlst" in low) or ("a:glow" in low) or ("a:shadow" in low) or ("a:reflection" in low) or ("a:softedge" in low)
+                    present = any(k in low for k in ("effectlst", "effect", "shdw", "glow", "reflection", "softedge", "blur", "fillOverlay".lower()))
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if (present == expected) else CriterionStatus.FAIL
@@ -1127,6 +1132,23 @@ class PortableDocxEvaluator:
                             if (lt.get(f"{{{W_NS}}}val") or "").strip() == expected:
                                 present = True
                                 break
+                        if not present:
+                            # Fallback: search the whole numbering.xml for the char.
+                            try:
+                                raw = etree.tostring(numbering_root, encoding="unicode")
+                                if expected and expected in raw:
+                                    present = True
+                            except Exception:
+                                pass
+                        # Also check any attribute values.
+                        if not present:
+                            for el in numbering_root.iter():
+                                for v in el.attrib.values():
+                                    if (v or "").strip() == expected:
+                                        present = True
+                                        break
+                                if present:
+                                    break
                 except Exception:
                     present = False
                 status = CriterionStatus.PASS if present else CriterionStatus.FAIL

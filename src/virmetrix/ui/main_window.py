@@ -147,6 +147,7 @@ class ConfigWindow(QMainWindow):
         self._doc_app = None
         self._doc_obj = None
         self._doc_proc = None
+        self._addin_proc = None
         self._started_at: str | None = None
         self._start_perf: float | None = None
 
@@ -418,6 +419,17 @@ class ConfigWindow(QMainWindow):
                 except Exception:
                     pass
             self._doc_proc = None
+        if self._addin_proc is not None:
+            try:
+                if self._addin_proc.poll() is None:
+                    self._addin_proc.terminate()
+                    self._addin_proc.wait(3)
+            except Exception:
+                try:
+                    self._addin_proc.kill()
+                except Exception:
+                    pass
+            self._addin_proc = None
 
     def open_document(self, path=None):
         if path is None:
@@ -433,6 +445,20 @@ class ConfigWindow(QMainWindow):
                 import win32com.client
 
                 pythoncom.CoInitialize()
+                # Lanzar el servidor del complemento web en segundo plano
+                if self._addin_proc is None or self._addin_proc.poll() is not None:
+                    try:
+                        import subprocess, sys
+                        from pathlib import Path
+                        script = ROOT / "scripts" / "serve_addin.py"
+                        if script.is_file():
+                            self._addin_proc = subprocess.Popen(
+                                [sys.executable, str(script)],
+                                stdout=subprocess.DEVNULL,
+                                stderr=subprocess.DEVNULL,
+                            )
+                    except Exception:
+                        self._addin_proc = None
                 if self._doc_app is None:
                     self._doc_app = win32com.client.Dispatch("Word.Application")
                     self._doc_app.Visible = True
@@ -550,7 +576,7 @@ class ConfigWindow(QMainWindow):
     # Auto-update from GitHub
     # ------------------------------------------------------------------
     GITHUB_REPO = "adonizgomez00-glitch/virmetrix"
-    APP_VERSION = "0.4.5"
+    APP_VERSION = "0.4.6"
 
     def _notify(self, title: str, text: str, error: bool = False) -> None:
         if os.environ.get("QT_QPA_PLATFORM") == "offscreen":
