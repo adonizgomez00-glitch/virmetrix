@@ -11,7 +11,7 @@ a = Analysis(
     ["main.py"],
     pathex=["src"],
     binaries=[],
-    datas=[("exercises", "exercises"), ("virmetrix.ico", ".")],
+    datas=[("exercises", "exercises"), ("virmetrix.ico", "."), ("addin/VirmetrixWordWebAddIn", "addin/VirmetrixWordWebAddIn")],
     hiddenimports=collect_submodules("PySide6") + ["lxml", "docx"],
     hookspath=[],
     hooksconfig={},

@@ -445,27 +445,36 @@ class ConfigWindow(QMainWindow):
                 import win32com.client
 
                 pythoncom.CoInitialize()
-                # Lanzar el servidor del complemento web en segundo plano
-                if self._addin_proc is None or self._addin_proc.poll() is not None:
+                # Lanzar servidor del complemento web en un hilo (funciona en dev y en .exe)
+                if not getattr(self, "_addin_server_started", False):
                     try:
-                        import subprocess, sys
+                        import http.server, socketserver, threading
                         from pathlib import Path
-                        script = ROOT / "scripts" / "serve_addin.py"
-                        if script.is_file():
-                            self._addin_proc = subprocess.Popen(
-                                [sys.executable, str(script)],
-                                stdout=subprocess.DEVNULL,
-                                stderr=subprocess.DEVNULL,
-                            )
+                        base = Path(getattr(sys, "_MEIPASS", ROOT)) / "addin" / "VirmetrixWordWebAddIn"
+                        if not base.is_dir():
+                            base = ROOT / "addin" / "VirmetrixWordWebAddIn"
+                        if base.is_dir():
+                            handler = lambda *a, **k: http.server.SimpleHTTPRequestHandler(*a, directory=str(base), **k)
+                            httpd = socketserver.TCPServer(("localhost", 3000), handler)
+                            httpd.allow_reuse_address = True
+                            threading.Thread(target=httpd.serve_forever, daemon=True).start()
+                            self._addin_server_started = True
+                            self._addin_httpd = httpd
                     except Exception:
-                        self._addin_proc = None
+                        self._addin_server_started = True
                 if self._doc_app is None:
                     self._doc_app = win32com.client.Dispatch("Word.Application")
                     self._doc_app.Visible = True
                 self._doc_obj = self._doc_app.Documents.Open(path)
                 return
             except Exception:
-                pass
+                # Fallback: abrir con la app predeterminada (Word)
+                try:
+                    import os
+                    os.startfile(str(path))
+                    return
+                except Exception:
+                    pass
         # Linux/macOS: lanzar instancia aislada de LibreOffice para poder cerrarla después
         if sys.platform != "win32":
             try:
@@ -576,7 +585,7 @@ class ConfigWindow(QMainWindow):
     # Auto-update from GitHub
     # ------------------------------------------------------------------
     GITHUB_REPO = "adonizgomez00-glitch/virmetrix"
-    APP_VERSION = "0.4.7"
+    APP_VERSION = "0.4.8"
 
     def _notify(self, title: str, text: str, error: bool = False) -> None:
         if os.environ.get("QT_QPA_PLATFORM") == "offscreen":
