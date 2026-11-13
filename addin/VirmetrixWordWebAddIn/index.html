@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>button{display:block;margin:6px 0;width:100%;}</style>
+</head>
+<body>
+  <h3>Virmetrix</h3>
+  <button onclick="record('style_set_applied')">Conjunto de estilos</button>
+  <button onclick="record('share_electronically')">Compartir</button>
+  <button onclick="record('compatibility_issues')">Compatibilidad</button>
+  <button onclick="record('navigate_location')">Navegar</button>
+  <button onclick="record('image_background_removed')">Quitar fondo</button>
+  <button onclick="record('formatting_marks_visible')">Marcas de formato</button>
+  <button onclick="record('alternative_format','pdf')">Formato alternativo</button>
+  <button onclick="record('print_settings','2up')">Impresión</button>
+  <button onclick="record('format_painter_used')">Pincel de formato</button>
+  <script>
+    Office.onReady(() => {});
+    async function record(action, value='true') {
+      await Word.run(async (context) => {
+        const props = context.document.properties.customProperties;
+        const item = props.getItemOrNullObject('Virmetrix_' + action);
+        await context.sync();
+        if (item.isNullObject) {
+          props.add('Virmetrix_' + action, value);
+        } else {
+          item.value = value;
+        }
+        await context.sync();
+        await context.document.save();
+        alert('Registrado: ' + action);
+      });
+    }
+  </script>
+</body>
+</html>
